@@ -1,0 +1,27 @@
+import { metadata as searchingMetadata } from '../components/visualizers/searching';
+import { metadata as sortingMetadata } from '../components/visualizers/sorting';
+import { metadata as treesMetadata } from '../components/visualizers/trees';
+
+export const ALGORITHMS = {
+  searching: searchingMetadata,
+  sorting: sortingMetadata,
+  trees: treesMetadata,
+};
+
+export const getAlgorithmsByCategory = (categoryId) => {
+  return ALGORITHMS[categoryId]?.algorithms || [];
+};
+
+export const getAlgorithmById = (algorithmId) => {
+  for (const category of Object.values(ALGORITHMS)) {
+    const algorithm = category.algorithms.find((a) => a.id === algorithmId);
+    if (algorithm) {
+      return { ...algorithm, categoryId: category.id };
+    }
+  }
+  return null;
+};
+
+export const getCategoryById = (categoryId) => {
+  return ALGORITHMS[categoryId] || null;
+};
