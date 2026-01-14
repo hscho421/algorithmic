@@ -1,11 +1,13 @@
 import { metadata as searchingMetadata } from '../components/visualizers/searching';
 import { metadata as sortingMetadata } from '../components/visualizers/sorting';
 import { metadata as treesMetadata } from '../components/visualizers/trees';
+import { metadata as graphsMetadata } from '../components/visualizers/graphs';
 
 export const ALGORITHMS = {
   searching: searchingMetadata,
   sorting: sortingMetadata,
   trees: treesMetadata,
+  graphs: graphsMetadata,
 };
 
 export const getAlgorithmsByCategory = (categoryId) => {

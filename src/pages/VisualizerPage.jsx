@@ -4,13 +4,16 @@ import { CATEGORIES } from '../constants';
 import { BinarySearchVisualizer } from '../components/visualizers/searching';
 import { MergeSortVisualizer, QuickSortVisualizer } from '../components/visualizers/sorting';
 import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
-
+import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer } from '../components/visualizers/graphs';
 const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
   'merge-sort': MergeSortVisualizer,
   'quick-sort': QuickSortVisualizer,
   'bst': BSTVisualizer,
   'tree-traversals': TraversalVisualizer,
+  'bfs': BFSVisualizer,
+  'dfs': DFSVisualizer,
+  'dijkstra': DijkstraVisualizer,
 };
 
 export default function VisualizerPage() {
