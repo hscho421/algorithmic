@@ -4,7 +4,7 @@ import { CATEGORIES } from '../constants';
 import { BinarySearchVisualizer } from '../components/visualizers/searching';
 import { MergeSortVisualizer, QuickSortVisualizer } from '../components/visualizers/sorting';
 import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
-import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer } from '../components/visualizers/graphs';
+import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer, UnionFindVisualizer } from '../components/visualizers/graphs';
 
 const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
@@ -16,6 +16,7 @@ const VISUALIZER_COMPONENTS = {
   'dfs': DFSVisualizer,
   'dijkstra': DijkstraVisualizer,
   'topological-sort': TopologicalSortVisualizer,
+  'union-find': UnionFindVisualizer,
 };
 
 export default function VisualizerPage() {
