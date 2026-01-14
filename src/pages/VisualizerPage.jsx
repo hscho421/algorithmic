@@ -4,7 +4,8 @@ import { CATEGORIES } from '../constants';
 import { BinarySearchVisualizer } from '../components/visualizers/searching';
 import { MergeSortVisualizer, QuickSortVisualizer } from '../components/visualizers/sorting';
 import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
-import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer } from '../components/visualizers/graphs';
+import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer } from '../components/visualizers/graphs';
+
 const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
   'merge-sort': MergeSortVisualizer,
@@ -14,6 +15,7 @@ const VISUALIZER_COMPONENTS = {
   'bfs': BFSVisualizer,
   'dfs': DFSVisualizer,
   'dijkstra': DijkstraVisualizer,
+  'topological-sort': TopologicalSortVisualizer,
 };
 
 export default function VisualizerPage() {
@@ -27,7 +29,7 @@ export default function VisualizerPage() {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold text-zinc-400">Visualizer not found</h1>
-        <Link to="/" className="text-blue-400 hover:underline mt-4 inline-block">
+        <Link to="/" className="text-blue-500 hover:underline mt-4 inline-block">
           Go home
         </Link>
       </div>
@@ -37,19 +39,19 @@ export default function VisualizerPage() {
   return (
     <div className="space-y-6">
       <div>
-        <div className="flex items-center gap-2 text-sm text-zinc-400">
-          <Link to="/" className="hover:text-white transition-colors">
+        <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <Link to="/" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
             Home
           </Link>
           <span>/</span>
-          <Link to={`/category/${algorithm.categoryId}`} className="hover:text-white transition-colors">
+          <Link to={`/category/${algorithm.categoryId}`} className="hover:text-zinc-900 dark:hover:text-white transition-colors">
             {category?.name}
           </Link>
           <span>/</span>
-          <span className="text-zinc-300">{algorithm.name}</span>
+          <span className="text-zinc-700 dark:text-zinc-300">{algorithm.name}</span>
         </div>
-        <h1 className="text-3xl font-bold text-white mt-2">{algorithm.name}</h1>
-        <p className="text-zinc-400 mt-1">{algorithm.description}</p>
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mt-2">{algorithm.name}</h1>
+        <p className="text-zinc-600 dark:text-zinc-400 mt-1">{algorithm.description}</p>
       </div>
 
       <VisualizerComponent />

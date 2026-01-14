@@ -4,7 +4,7 @@ import { Card, Select, GraphEditor } from '../../shared/ui';
 import { ControlPanel } from '../../shared/controls';
 import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { GraphDisplay } from '../../shared/visualization';
-import { createGraph, WEIGHTED_GRAPHS } from '../../../lib/dataStructures/Graph';
+import { createGraph, DAG_GRAPHS } from '../../../lib/dataStructures/Graph';
 import { calculatePositions } from '../../../lib/utils/graphLayout';
 import {
   template,
@@ -13,17 +13,16 @@ import {
   executeStep,
   getExplanation,
   getResult,
-} from '../../../lib/algorithms/graphs/dijkstra';
+} from '../../../lib/algorithms/graphs/topologicalSort';
 
-export default function DijkstraVisualizer() {
+export default function TopologicalSortVisualizer() {
   const [mode, setMode] = useState('preset');
-  const [selectedPreset, setSelectedPreset] = useState('simple');
-  const [startNode, setStartNode] = useState('A');
+  const [selectedPreset, setSelectedPreset] = useState('simpleDAG');
   const [currentGraph, setCurrentGraph] = useState(null);
   const [positions, setPositions] = useState({});
 
-  const [customVertices, setCustomVertices] = useState(['A', 'B', 'C', 'D']);
-  const [customEdges, setCustomEdges] = useState([['A', 'B', 4], ['A', 'C', 2], ['B', 'D', 3], ['C', 'D', 1]]);
+  const [customVertices, setCustomVertices] = useState(['A', 'B', 'C', 'D', 'E']);
+  const [customEdges, setCustomEdges] = useState([['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D'], ['D', 'E']]);
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(
     initialState,
@@ -35,65 +34,44 @@ export default function DijkstraVisualizer() {
   // Build graph when configuration changes
   useEffect(() => {
     stop();
-    let graph, pos, newStartNode = startNode;
+    let graph, pos;
 
     if (mode === 'preset') {
-      const preset = WEIGHTED_GRAPHS[selectedPreset];
-      graph = createGraph(preset.vertices, preset.edges);
+      const preset = DAG_GRAPHS[selectedPreset];
+      graph = createGraph(preset.vertices, preset.edges, true);
       pos = preset.positions;
-      if (!preset.vertices.includes(startNode)) {
-        newStartNode = preset.vertices[0];
-      }
     } else {
-      graph = createGraph(customVertices, customEdges);
+      graph = createGraph(customVertices, customEdges, true);
       pos = calculatePositions(customVertices);
-      if (!customVertices.includes(startNode) && customVertices.length > 0) {
-        newStartNode = customVertices[0];
-      }
     }
 
     setCurrentGraph(graph);
     setPositions(pos);
-    if (newStartNode !== startNode) {
-      setStartNode(newStartNode);
-    }
-
-    reset({ graph, startNode: newStartNode, positions: pos });
+    reset({ graph, positions: pos });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, selectedPreset, customVertices, customEdges]);
-
-  // Reset when start node changes
-  useEffect(() => {
-    if (currentGraph) {
-      stop();
-      reset({ graph: currentGraph, startNode, positions });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startNode]);
 
   const handleReset = useCallback(() => {
     stop();
     if (currentGraph) {
-      reset({ graph: currentGraph, startNode, positions });
+      reset({ graph: currentGraph, positions });
     }
-  }, [currentGraph, startNode, positions, reset, stop]);
+  }, [currentGraph, positions, reset, stop]);
 
   const handleBack = useCallback(() => {
     stop();
     back();
   }, [back, stop]);
 
-  const presetOptions = Object.entries(WEIGHTED_GRAPHS).map(([key, preset]) => ({
+  const presetOptions = Object.entries(DAG_GRAPHS).map(([key, preset]) => ({
     value: key,
     label: preset.name,
   }));
 
-  const nodeOptions = currentGraph?.vertices.map((v) => ({ value: v, label: v })) || [];
-
   const variables = state
     ? [
-        { name: 'visited', value: state.visited?.length || 0, desc: 'finalized nodes' },
-        { name: 'pq size', value: state.priorityQueue?.length || 0, desc: 'priority queue' },
+        { name: 'processed', value: state.result?.length || 0, desc: 'nodes ordered' },
+        { name: 'queue', value: state.queue?.length || 0, desc: 'ready to process' },
       ]
     : [];
 
@@ -136,30 +114,31 @@ export default function DijkstraVisualizer() {
               </div>
 
               {mode === 'preset' ? (
-                <Select
-                  label="Select Graph"
-                  value={selectedPreset}
-                  onChange={(e) => setSelectedPreset(e.target.value)}
-                  options={presetOptions}
-                />
+                <>
+                  <Select
+                    label="Select DAG"
+                    value={selectedPreset}
+                    onChange={(e) => setSelectedPreset(e.target.value)}
+                    options={presetOptions}
+                  />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Directed Acyclic Graph (DAG) — edges have direction, no cycles allowed.
+                  </p>
+                </>
               ) : (
-                <GraphEditor
-                  vertices={customVertices}
-                  edges={customEdges}
-                  onVerticesChange={setCustomVertices}
-                  onEdgesChange={setCustomEdges}
-                  directed={false}
-                  weighted={true}
-                />
-              )}
-
-              {nodeOptions.length > 0 && (
-                <Select
-                  label="Start Node"
-                  value={startNode}
-                  onChange={(e) => setStartNode(e.target.value)}
-                  options={nodeOptions}
-                />
+                <>
+                  <GraphEditor
+                    vertices={customVertices}
+                    edges={customEdges}
+                    onVerticesChange={setCustomVertices}
+                    onEdgesChange={setCustomEdges}
+                    directed={true}
+                    weighted={false}
+                  />
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    Note: If you create a cycle, the algorithm will detect it!
+                  </p>
+                </>
               )}
             </div>
           </Card>
@@ -180,17 +159,19 @@ export default function DijkstraVisualizer() {
             <StatePanel variables={variables} additionalInfo={additionalInfo} />
           )}
 
-          {state?.distances && (
-            <Card title="Distances">
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(state.distances).map(([node, dist]) => (
+          {state?.inDegree && (
+            <Card title="In-Degrees">
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(state.inDegree).map(([node, deg]) => (
                   <div
                     key={node}
-                    className="bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2 border border-zinc-200 dark:border-zinc-700/50 flex justify-between items-center"
+                    className={`bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2 border border-zinc-200 dark:border-zinc-700/50 flex justify-between items-center
+                      ${deg === 0 ? 'ring-1 ring-emerald-500' : ''}
+                    `}
                   >
-                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{node}</span>
-                    <span className={`font-mono text-sm ${dist === Infinity ? 'text-zinc-500' : 'text-emerald-500'}`}>
-                      {dist === Infinity ? '∞' : dist}
+                    <span className="font-mono text-zinc-700 dark:text-zinc-300 text-sm">{node}</span>
+                    <span className={`font-mono text-sm ${deg === 0 ? 'text-emerald-500' : 'text-zinc-500'}`}>
+                      {deg}
                     </span>
                   </div>
                 ))}
@@ -210,9 +191,9 @@ export default function DijkstraVisualizer() {
                   highlightedNodes={state.highlightedNodes}
                   highlightedEdges={state.highlightedEdges}
                   current={state.current}
-                  distances={state.distances}
-                  showWeights={true}
-                  pathEdges={state.pathEdges || []}
+                  queue={state.queue}
+                  directed={true}
+                  inDegree={state.inDegree}
                 />
               )}
             </div>
@@ -242,18 +223,18 @@ export default function DijkstraVisualizer() {
               {state && (
                 <ExplanationPanel
                   explanation={getExplanation(state)}
-                  status={state.done ? 'success' : 'running'}
+                  status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
                 />
               )}
 
               <ComplexityPanel complexity={complexity} />
 
-              <Card title="Dijkstra Key Points">
+              <Card title="Topological Sort Key Points">
                 <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <p><span className="text-zinc-900 dark:text-white font-medium">Greedy:</span> Always processes nearest unvisited node</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">Priority Queue:</span> Efficiently finds minimum distance</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">Relaxation:</span> Updates distance if shorter path found</p>
-                  <p><span className="text-rose-600 dark:text-rose-400 font-medium">Limitation:</span> No negative edge weights</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">In-degree:</span> Number of incoming edges</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">Sources:</span> Nodes with in-degree 0 (no dependencies)</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">Use cases:</span> Build systems, task scheduling, course prerequisites</p>
+                  <p><span className="text-rose-600 dark:text-rose-400 font-medium">Cycle:</span> If cycle exists, no valid ordering possible</p>
                 </div>
               </Card>
             </div>

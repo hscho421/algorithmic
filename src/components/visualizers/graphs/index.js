@@ -1,6 +1,7 @@
 export { default as BFSVisualizer } from './BFSVisualizer';
 export { default as DFSVisualizer } from './DFSVisualizer';
 export { default as DijkstraVisualizer } from './DijkstraVisualizer';
+export { default as TopologicalSortVisualizer } from './TopologicalSortVisualizer';
 
 export const metadata = {
   id: 'graphs',
@@ -24,6 +25,12 @@ export const metadata = {
       name: "Dijkstra's Algorithm",
       description: 'Shortest path in weighted graphs',
       component: 'DijkstraVisualizer',
+    },
+    {
+      id: 'topological-sort',
+      name: 'Topological Sort',
+      description: 'Order vertices in a directed acyclic graph',
+      component: 'TopologicalSortVisualizer',
     },
   ],
 };

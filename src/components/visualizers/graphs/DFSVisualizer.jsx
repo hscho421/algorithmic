@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Select } from '../../shared/ui';
+import { Card, Select, GraphEditor } from '../../shared/ui';
 import { ControlPanel } from '../../shared/controls';
 import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { GraphDisplay } from '../../shared/visualization';
 import { createGraph, PRESET_GRAPHS } from '../../../lib/dataStructures/Graph';
+import { calculatePositions } from '../../../lib/utils/graphLayout';
 import {
   template,
   complexity,
@@ -15,10 +16,14 @@ import {
 } from '../../../lib/algorithms/graphs/dfs';
 
 export default function DFSVisualizer() {
+  const [mode, setMode] = useState('preset');
   const [selectedPreset, setSelectedPreset] = useState('simple');
   const [startNode, setStartNode] = useState('A');
   const [currentGraph, setCurrentGraph] = useState(null);
   const [positions, setPositions] = useState({});
+
+  const [customVertices, setCustomVertices] = useState(['A', 'B', 'C', 'D']);
+  const [customEdges, setCustomEdges] = useState([['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D']]);
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(
     initialState,
@@ -27,16 +32,44 @@ export default function DFSVisualizer() {
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
 
-  const handleBuildGraph = useCallback(() => {
+  // Build graph when configuration changes
+  useEffect(() => {
     stop();
-    const preset = PRESET_GRAPHS[selectedPreset];
-    const graph = createGraph(preset.vertices, preset.edges);
-    setCurrentGraph(graph);
-    setPositions(preset.positions);
-    if (!preset.vertices.includes(startNode)) {
-      setStartNode(preset.vertices[0]);
+    let graph, pos, newStartNode = startNode;
+
+    if (mode === 'preset') {
+      const preset = PRESET_GRAPHS[selectedPreset];
+      graph = createGraph(preset.vertices, preset.edges);
+      pos = preset.positions;
+      if (!preset.vertices.includes(startNode)) {
+        newStartNode = preset.vertices[0];
+      }
+    } else {
+      graph = createGraph(customVertices, customEdges);
+      pos = calculatePositions(customVertices);
+      if (!customVertices.includes(startNode) && customVertices.length > 0) {
+        newStartNode = customVertices[0];
+      }
     }
-  }, [selectedPreset, startNode, stop]);
+
+    setCurrentGraph(graph);
+    setPositions(pos);
+    if (newStartNode !== startNode) {
+      setStartNode(newStartNode);
+    }
+
+    reset({ graph, startNode: newStartNode, positions: pos });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, selectedPreset, customVertices, customEdges]);
+
+  // Reset when start node changes
+  useEffect(() => {
+    if (currentGraph) {
+      stop();
+      reset({ graph: currentGraph, startNode, positions });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startNode]);
 
   const handleReset = useCallback(() => {
     stop();
@@ -44,23 +77,6 @@ export default function DFSVisualizer() {
       reset({ graph: currentGraph, startNode, positions });
     }
   }, [currentGraph, startNode, positions, reset, stop]);
-
-  useEffect(() => {
-    handleBuildGraph();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (currentGraph !== null) {
-      handleReset();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentGraph, startNode]);
-
-  useEffect(() => {
-    handleBuildGraph();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPreset]);
 
   const handleBack = useCallback(() => {
     stop();
@@ -96,19 +112,55 @@ export default function DFSVisualizer() {
         <div className="space-y-4">
           <Card title="Graph Configuration">
             <div className="space-y-4">
-              <Select
-                label="Select Graph"
-                value={selectedPreset}
-                onChange={(e) => setSelectedPreset(e.target.value)}
-                options={presetOptions}
-              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMode('preset')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    mode === 'preset'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  }`}
+                >
+                  Preset
+                </button>
+                <button
+                  onClick={() => setMode('custom')}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    mode === 'custom'
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                  }`}
+                >
+                  Custom
+                </button>
+              </div>
 
-              <Select
-                label="Start Node"
-                value={startNode}
-                onChange={(e) => setStartNode(e.target.value)}
-                options={nodeOptions}
-              />
+              {mode === 'preset' ? (
+                <Select
+                  label="Select Graph"
+                  value={selectedPreset}
+                  onChange={(e) => setSelectedPreset(e.target.value)}
+                  options={presetOptions}
+                />
+              ) : (
+                <GraphEditor
+                  vertices={customVertices}
+                  edges={customEdges}
+                  onVerticesChange={setCustomVertices}
+                  onEdgesChange={setCustomEdges}
+                  directed={false}
+                  weighted={false}
+                />
+              )}
+
+              {nodeOptions.length > 0 && (
+                <Select
+                  label="Start Node"
+                  value={startNode}
+                  onChange={(e) => setStartNode(e.target.value)}
+                  options={nodeOptions}
+                />
+              )}
             </div>
           </Card>
 
@@ -177,10 +229,10 @@ export default function DFSVisualizer() {
               <ComplexityPanel complexity={complexity} />
 
               <Card title="DFS Key Points">
-                <div className="space-y-2 text-sm text-zinc-400">
-                  <p><span className="text-white font-medium">Stack:</span> LIFO — last in, first out</p>
-                  <p><span className="text-white font-medium">Deep-first:</span> Explores one branch fully before backtracking</p>
-                  <p><span className="text-white font-medium">Use cases:</span> Cycle detection, topological sort, pathfinding</p>
+                <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+                  <p><span className="text-zinc-900 dark:text-white font-medium">Stack:</span> LIFO — last in, first out</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">Deep-first:</span> Explores one branch fully before backtracking</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">Use cases:</span> Cycle detection, topological sort, pathfinding</p>
                 </div>
               </Card>
             </div>
