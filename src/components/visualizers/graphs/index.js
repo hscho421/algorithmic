@@ -2,6 +2,7 @@ export { default as BFSVisualizer } from './BFSVisualizer';
 export { default as DFSVisualizer } from './DFSVisualizer';
 export { default as DijkstraVisualizer } from './DijkstraVisualizer';
 export { default as TopologicalSortVisualizer } from './TopologicalSortVisualizer';
+export { default as UnionFindVisualizer } from './UnionFindVisualizer';
 
 export const metadata = {
   id: 'graphs',
@@ -31,6 +32,12 @@ export const metadata = {
       name: 'Topological Sort',
       description: 'Order vertices in a directed acyclic graph',
       component: 'TopologicalSortVisualizer',
+    },
+    {
+      id: 'union-find',
+      name: 'Union Find',
+      description: 'Disjoint set union with path compression',
+      component: 'UnionFindVisualizer',
     },
   ],
 };
