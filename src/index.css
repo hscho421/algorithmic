@@ -39,3 +39,67 @@
 .duration-400 {
   transition-duration: 400ms;
 }
+
+@keyframes heapSwapPulse {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.06);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes heapSwapNode {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes heapSwapSlide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(var(--swap-offset)) scale(1.03);
+  }
+}
+
+.heap-swap {
+  animation: heapSwapPulse 0.4s ease-in-out;
+}
+
+.heap-swap-slide {
+  animation: heapSwapSlide 0.45s ease-in-out forwards;
+  will-change: transform;
+}
+
+.heap-swap-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heapSwapNode 0.4s ease-in-out;
+}
+
+@keyframes heapSwapSlideNode {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(var(--swap-x), var(--swap-y)) scale(1.03);
+  }
+}
+
+.heap-swap-slide-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heapSwapSlideNode 0.45s ease-in-out forwards;
+  will-change: transform;
+}

@@ -1,4 +1,4 @@
-export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, queue }) {
+export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, queue, animationKey }) {
   if (!tree || tree.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-zinc-500 italic">
@@ -39,6 +39,15 @@ export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, q
   };
 
   const positions = calculatePositions(rootNode.id);
+  const swapNodes = positions.filter((node) => getNodeHighlight(node.id) === 'swapping');
+  const swapDeltas = {};
+  if (swapNodes.length === 2) {
+    const [first, second] = swapNodes;
+    swapDeltas[first.id] = { dx: second.x - first.x, dy: second.y - first.y };
+    swapDeltas[second.id] = { dx: first.x - second.x, dy: first.y - second.y };
+  }
+  const swapActive = swapNodes.length === 2;
+  const [firstSwap, secondSwap] = swapActive ? swapNodes : [];
   const maxDepth = Math.max(...positions.map((p) => p.depth));
   const svgHeight = (maxDepth + 1) * 60 + 30;
 
@@ -53,6 +62,8 @@ export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, q
       case 'inserting':
       case 'inserted':
         return 'fill-blue-500 stroke-blue-300';
+      case 'swapping':
+        return 'fill-rose-500 stroke-rose-300';
       case 'queued':
         return 'fill-purple-500 stroke-purple-300';
       default:
@@ -68,6 +79,7 @@ export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, q
       case 'visited':
       case 'inserting':
       case 'inserted':
+      case 'swapping':
       case 'queued':
         return 'fill-white';
       default:
@@ -119,6 +131,8 @@ export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, q
             const isActive = node.id === activeNode;
             const nodeColors = getNodeColors(highlightType);
             const textColor = getTextColor(highlightType);
+            const swapDelta = swapDeltas[node.id];
+            const isSwapNode = swapActive && swapDelta;
 
             return (
               <g key={`node-${node.id}`}>
@@ -126,7 +140,7 @@ export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, q
                   cx={node.x}
                   cy={node.y}
                   r={isActive ? 9 : 8}
-                  className={`${nodeColors} transition-all duration-300`}
+                  className={`${nodeColors} transition-all duration-300 ${isSwapNode ? 'opacity-30' : ''}`}
                   strokeWidth={isActive ? 1.5 : 1}
                 />
                 <text
@@ -134,13 +148,52 @@ export default function TreeDisplay({ tree, highlightedNodes = [], activeNode, q
                   y={node.y}
                   textAnchor="middle"
                   dominantBaseline="central"
-                  className={`${textColor} text-[6px] font-mono font-bold`}
+                  className={`${textColor} text-[6px] font-mono font-bold ${isSwapNode ? 'opacity-0' : ''}`}
                 >
                   {node.value}
                 </text>
               </g>
             );
           })}
+
+          {swapActive && (
+            <g key={`swap-anim-${animationKey ?? 'static'}`} pointerEvents="none">
+              {[firstSwap, secondSwap].map((node, idx) => {
+                const target = idx === 0 ? secondSwap : firstSwap;
+                const dx = target.x - node.x;
+                const dy = target.y - node.y;
+                return (
+                  <g key={`swap-float-${node.id}`}>
+                    <animateTransform
+                      attributeName="transform"
+                      type="translate"
+                      dur="0.45s"
+                      begin="0s"
+                      from="0 0"
+                      to={`${dx} ${dy}`}
+                      fill="freeze"
+                    />
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r={8}
+                      className="fill-rose-500 stroke-rose-300"
+                      strokeWidth="1.2"
+                    />
+                    <text
+                      x={node.x}
+                      y={node.y}
+                      textAnchor="middle"
+                      dominantBaseline="central"
+                      className="fill-white text-[6px] font-mono font-bold"
+                    >
+                      {node.value}
+                    </text>
+                  </g>
+                );
+              })}
+            </g>
+          )}
         </svg>
       </div>
 

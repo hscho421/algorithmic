@@ -4,6 +4,7 @@ import { CATEGORIES } from '../constants';
 import { BinarySearchVisualizer } from '../components/visualizers/searching';
 import { MergeSortVisualizer, QuickSortVisualizer } from '../components/visualizers/sorting';
 import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
+import { MinHeapVisualizer } from '../components/visualizers/heaps';
 import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer, UnionFindVisualizer } from '../components/visualizers/graphs';
 
 const VISUALIZER_COMPONENTS = {
@@ -12,6 +13,7 @@ const VISUALIZER_COMPONENTS = {
   'quick-sort': QuickSortVisualizer,
   'bst': BSTVisualizer,
   'tree-traversals': TraversalVisualizer,
+  'min-heap': MinHeapVisualizer,
   'bfs': BFSVisualizer,
   'dfs': DFSVisualizer,
   'dijkstra': DijkstraVisualizer,
