@@ -21,3 +21,21 @@
   --text-muted: #71717a;
   --border-color: #27272a;
 }
+/* Add at end of file */
+@keyframes bounce-once {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-bounce-once {
+  animation: bounce-once 0.3s ease-out;
+}
+
+/* Smooth pointer sliding */
+.duration-400 {
+  transition-duration: 400ms;
+}
