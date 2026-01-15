@@ -7,6 +7,7 @@ import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/tr
 import { MinHeapVisualizer } from '../components/visualizers/heaps';
 import { TrieVisualizer } from '../components/visualizers/strings';
 import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer, UnionFindVisualizer } from '../components/visualizers/graphs';
+import { FibonacciVisualizer, CoinChangeVisualizer, LCSVisualizer, KnapsackVisualizer } from '../components/visualizers/dynamic-programming';
 
 const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
@@ -23,6 +24,10 @@ const VISUALIZER_COMPONENTS = {
   'dijkstra': DijkstraVisualizer,
   'topological-sort': TopologicalSortVisualizer,
   'union-find': UnionFindVisualizer,
+  'fibonacci': FibonacciVisualizer,
+  'coin-change': CoinChangeVisualizer,
+  'lcs': LCSVisualizer,
+  'knapsack': KnapsackVisualizer,
 };
 
 export default function VisualizerPage() {

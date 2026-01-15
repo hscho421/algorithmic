@@ -4,6 +4,7 @@ import { metadata as treesMetadata } from '../components/visualizers/trees';
 import { metadata as heapsMetadata } from '../components/visualizers/heaps';
 import { metadata as stringsMetadata } from '../components/visualizers/strings';
 import { metadata as graphsMetadata } from '../components/visualizers/graphs';
+import { metadata as dpMetadata } from '../components/visualizers/dynamic-programming';
 
 export const ALGORITHMS = {
   searching: searchingMetadata,
@@ -12,6 +13,7 @@ export const ALGORITHMS = {
   heaps: heapsMetadata,
   strings: stringsMetadata,
   graphs: graphsMetadata,
+  'dynamic-programming': dpMetadata,
 };
 
 export const getAlgorithmsByCategory = (categoryId) => {
