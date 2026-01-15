@@ -85,8 +85,9 @@ export default function TopologicalSortVisualizer() {
   const result = state ? getResult(state) : null;
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="max-w-7xl mx-auto px-6">
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="space-y-4">
           <Card title="Graph Configuration">
             <div className="space-y-4">
@@ -241,6 +242,7 @@ export default function TopologicalSortVisualizer() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

@@ -1,6 +1,66 @@
 import { useEffect, useState } from 'react';
 import { TEMPLATES } from '../../../lib/algorithms/searching/binarySearch';
 
+// Helper component for pointer indicators
+function PointerIndicator({ label, value, color, suffix }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-5 h-5 rounded ${color} flex items-center justify-center shadow-sm`}>
+        <span className="text-white text-xs font-bold">{label}</span>
+      </div>
+      <span className="text-zinc-600 dark:text-zinc-400 font-mono text-sm">= {value}</span>
+      {suffix && <span className="text-zinc-400 dark:text-zinc-500 text-xs">{suffix}</span>}
+    </div>
+  );
+}
+
+// Helper component for comparison badges
+function ComparisonBadge({ comparison, m, array, target, r }) {
+  const getComparisonStyle = () => {
+    if (['less', 'less_or_equal', 'ascending', 'min_right'].includes(comparison)) {
+      return 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800';
+    }
+    if (['greater', 'greater_or_equal'].includes(comparison)) {
+      return 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800';
+    }
+    if (comparison === 'equal') {
+      return 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800';
+    }
+    if (['descending', 'min_left'].includes(comparison)) {
+      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+    }
+    if (comparison?.includes('sorted')) {
+      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800';
+    }
+    return 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700';
+  };
+
+  const getComparisonText = () => {
+    const messages = {
+      less: `a[${m}] = ${array[m]} < ${target} → go RIGHT`,
+      less_or_equal: `a[${m}] = ${array[m]} ≤ ${target} → go RIGHT`,
+      greater: `a[${m}] = ${array[m]} > ${target} → go LEFT`,
+      greater_or_equal: `a[${m}] = ${array[m]} ≥ ${target} → go LEFT (keep M)`,
+      equal: `a[${m}] = ${array[m]} = ${target} ✓ Found!`,
+      ascending: `a[${m}] < a[${m + 1}] → peak is RIGHT`,
+      descending: `a[${m}] ≥ a[${m + 1}] → peak is HERE or LEFT`,
+      min_right: `a[${m}] > a[${r}] → min is in RIGHT half`,
+      min_left: `a[${m}] ≤ a[${r}] → min is HERE or LEFT`,
+      left_sorted_go_left: 'Left sorted, target in range → go LEFT',
+      left_sorted_go_right: 'Left sorted, target out of range → go RIGHT',
+      right_sorted_go_right: 'Right sorted, target in range → go RIGHT',
+      right_sorted_go_left: 'Right sorted, target out of range → go LEFT',
+    };
+    return messages[comparison] || comparison;
+  };
+
+  return (
+    <div className={`px-4 py-2 rounded-lg text-sm font-medium border ${getComparisonStyle()}`}>
+      {getComparisonText()}
+    </div>
+  );
+}
+
 export default function ArrayVisualization({ state }) {
   const { array, l, r, m, templateKey, done, target, comparison, result, iteration } = state;
   const template = TEMPLATES[templateKey];
@@ -92,24 +152,21 @@ export default function ArrayVisualization({ state }) {
   const pointersWithOffsets = getPointerGroups();
 
   return (
-    <div className="space-y-6">
-      {/* Interval type explanation */}
+    <div className="space-y-8 w-full">
+      {/* Interval type badge */}
       <div className="flex justify-center">
         <div className={`
-          inline-flex items-center gap-3 px-4 py-2 rounded-lg text-sm
-          ${template.halfOpen 
-            ? 'bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400' 
-            : 'bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400'
+          inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-lg text-sm font-medium
+          ${template.halfOpen
+            ? 'bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400'
+            : 'bg-blue-500/10 border border-blue-500/30 text-blue-700 dark:text-blue-400'
           }
         `}>
-          <span className="font-mono font-bold">
+          <span className="font-mono font-bold text-base">
             {template.halfOpen ? '[L, R)' : '[L, R]'}
           </span>
-          <span className="text-zinc-600 dark:text-zinc-400">
-            {template.halfOpen 
-              ? 'Half-open: R is excluded from search range' 
-              : 'Closed: Both L and R are included in search range'
-            }
+          <span className="text-zinc-600 dark:text-zinc-400 text-xs">
+            {template.halfOpen ? 'R excluded' : 'L and R included'}
           </span>
         </div>
       </div>
@@ -220,82 +277,33 @@ export default function ArrayVisualization({ state }) {
         </div>
       </div>
 
-      {/* Comparison indicator - moved below array */}
+      {/* Comparison indicator */}
       {m !== null && comparison && !done && (
-        <div className="flex justify-center">
-          <div
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium
-              ${comparison === 'less' || comparison === 'less_or_equal' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800' : ''}
-              ${comparison === 'greater' || comparison === 'greater_or_equal' ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800' : ''}
-              ${comparison === 'equal' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : ''}
-              ${comparison === 'ascending' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800' : ''}
-              ${comparison === 'descending' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : ''}
-              ${comparison === 'min_right' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800' : ''}
-              ${comparison === 'min_left' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800' : ''}
-              ${comparison?.includes('sorted') ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800' : ''}
-            `}
-          >
-            {comparison === 'less' && `a[${m}] = ${array[m]} < ${target} → go RIGHT`}
-            {comparison === 'less_or_equal' && `a[${m}] = ${array[m]} ≤ ${target} → go RIGHT`}
-            {comparison === 'greater' && `a[${m}] = ${array[m]} > ${target} → go LEFT`}
-            {comparison === 'greater_or_equal' && `a[${m}] = ${array[m]} ≥ ${target} → go LEFT (keep M)`}
-            {comparison === 'equal' && `a[${m}] = ${array[m]} = ${target} ✓ Found!`}
-            {comparison === 'ascending' && `a[${m}] < a[${m + 1}] → peak is RIGHT`}
-            {comparison === 'descending' && `a[${m}] ≥ a[${m + 1}] → peak is HERE or LEFT`}
-            {comparison === 'min_right' && `a[${m}] > a[${r}] → min is in RIGHT half`}
-            {comparison === 'min_left' && `a[${m}] ≤ a[${r}] → min is HERE or LEFT`}
-            {comparison === 'left_sorted_go_left' && `Left sorted, target in range → go LEFT`}
-            {comparison === 'left_sorted_go_right' && `Left sorted, target out of range → go RIGHT`}
-            {comparison === 'right_sorted_go_right' && `Right sorted, target in range → go RIGHT`}
-            {comparison === 'right_sorted_go_left' && `Right sorted, target out of range → go LEFT`}
-          </div>
+        <div className="flex justify-center px-4">
+          <ComparisonBadge comparison={comparison} m={m} array={array} target={target} r={r} />
         </div>
       )}
 
-      {/* Pointer status bar */}
-      <div className="flex items-center justify-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-blue-500 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">L</span>
-          </div>
-          <span className="text-zinc-600 dark:text-zinc-400 font-mono">= {l}</span>
+      {/* Pointer status and search range */}
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex items-center justify-center gap-6 text-sm">
+          <PointerIndicator label="L" value={l} color="bg-blue-500" />
+          <PointerIndicator label="M" value={m ?? '—'} color={m !== null ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'} />
+          <PointerIndicator
+            label="R"
+            value={r}
+            color="bg-red-500"
+            suffix={template.halfOpen ? '(excluded)' : undefined}
+          />
         </div>
-        
-        <div className="flex items-center gap-2">
-          <div className={`w-4 h-4 rounded flex items-center justify-center ${m !== null ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-700'}`}>
-            <span className="text-white text-xs font-bold">M</span>
+
+        {!done && (
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+            Range: {template.halfOpen ? `[${l}, ${r})` : `[${l}, ${r}]`} = {' '}
+            {template.halfOpen ? r - l : r - l + 1} element{(template.halfOpen ? r - l : r - l + 1) !== 1 ? 's' : ''}
           </div>
-          <span className="text-zinc-600 dark:text-zinc-400 font-mono">= {m ?? '—'}</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded bg-red-500 flex items-center justify-center">
-            <span className="text-white text-xs font-bold">R</span>
-          </div>
-          <span className="text-zinc-600 dark:text-zinc-400 font-mono">= {r}</span>
-          {template.halfOpen && (
-            <span className="text-zinc-400 dark:text-zinc-500 text-xs">(excluded)</span>
-          )}
-        </div>
+        )}
       </div>
-
-      {/* Search range indicator */}
-      {!done && (
-        <div className="flex justify-center">
-          <div className="text-sm text-zinc-500 dark:text-zinc-400">
-            Searching indices{' '}
-            <span className="font-mono font-medium text-zinc-700 dark:text-zinc-300">
-              {template.halfOpen ? `[${l}, ${r})` : `[${l}, ${r}]`}
-            </span>
-            {' '}→{' '}
-            <span className="font-mono">
-              {template.halfOpen ? r - l : r - l + 1}
-            </span>
-            {' '}element{(template.halfOpen ? r - l : r - l + 1) !== 1 ? 's' : ''}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

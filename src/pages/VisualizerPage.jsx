@@ -45,7 +45,7 @@ export default function VisualizerPage() {
 
   return (
     <div className="space-y-6 font-body">
-      <div>
+      <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           <Link to="/" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
             Home
