@@ -40,7 +40,7 @@ export default function VisualizerPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-body">
       <div>
         <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
           <Link to="/" className="hover:text-zinc-900 dark:hover:text-white transition-colors">
@@ -53,7 +53,7 @@ export default function VisualizerPage() {
           <span>/</span>
           <span className="text-zinc-700 dark:text-zinc-300">{algorithm.name}</span>
         </div>
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white mt-2">{algorithm.name}</h1>
+        <h1 className="text-3xl font-display text-zinc-900 dark:text-white mt-2">{algorithm.name}</h1>
         <p className="text-zinc-600 dark:text-zinc-400 mt-1">{algorithm.description}</p>
       </div>
 

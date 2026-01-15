@@ -116,7 +116,7 @@ export default function QuickSortVisualizer() {
 
         <div className="lg:col-span-2 space-y-6">
           <Card title="Array Visualization">
-            <div className="min-h-[300px]">
+            <div className="min-h-[240px] flex items-start justify-center pt-4">
               {state && <QuickSortVisualization state={state} />}
             </div>
           </Card>
@@ -153,9 +153,9 @@ export default function QuickSortVisualizer() {
 
               <Card title="How Quick Sort Works">
                 <div className="space-y-2 text-sm text-zinc-400">
-                  <p><span className="text-white font-medium">1. Pick pivot:</span> Choose last element as pivot</p>
-                  <p><span className="text-white font-medium">2. Partition:</span> Move smaller elements left, larger right</p>
-                  <p><span className="text-white font-medium">3. Recurse:</span> Sort left and right partitions</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">1. Pick pivot:</span> Choose last element as pivot</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">2. Partition:</span> Move smaller elements left, larger right</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">3. Recurse:</span> Sort left and right partitions</p>
                 </div>
               </Card>
             </div>
@@ -215,10 +215,10 @@ function QuickSortVisualization({ state }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-center overflow-x-auto pb-2">
-        <div className="flex items-end gap-1 h-48 px-4">
+        <div className="flex items-end gap-1 h-60 px-4 pt-3">
           {array.map((value, idx) => {
             const minHeight = 16;
-            const maxHeight = 160;
+            const maxHeight = 140;
             const height = minHeight + (value / maxVal) * (maxHeight - minHeight);
             const barColor = getBarColor(idx);
             const borderStyle = getBorderStyle(idx);

@@ -176,7 +176,7 @@ export default function ArrayVisualization({ state }) {
                       ${isResultCell
                         ? 'bg-emerald-500 border-2 border-emerald-400 text-white scale-110 shadow-lg shadow-emerald-500/30'
                         : inRange
-                          ? 'bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white shadow-lg shadow-zinc-900/20 dark:shadow-zinc-900/50'
+                          ? 'bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white shadow-lg shadow-zinc-900/20 dark:shadow-[0_6px_16px_rgba(0,0,0,0.55)]'
                           : 'bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600'
                       }
                       ${isMiddle && !done ? 'ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950' : ''}

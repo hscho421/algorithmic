@@ -51,11 +51,11 @@ export default function SortingArrayVisualization({ state }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center overflow-x-auto pb-2">
-        <div className="flex items-end gap-1 h-48 px-4">
+      <div className="flex justify-center overflow-x-auto pb-1">
+        <div className="flex items-end gap-1 h-40 px-4 pt-3">
           {array.map((value, idx) => {
-            const minHeight = 16;
-            const maxHeight = 160;
+            const minHeight = 12;
+            const maxHeight = 130;
             const height = minHeight + (value / maxVal) * (maxHeight - minHeight);
             const barColor = getBarColor(idx);
             const borderStyle = getBorderStyle(idx);
@@ -66,8 +66,8 @@ export default function SortingArrayVisualization({ state }) {
                   className={`w-10 rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
                   style={{ height: `${height}px` }}
                 />
-                <div className="mt-1 text-xs font-mono text-zinc-400">{value}</div>
-                <div className="text-xs font-mono text-zinc-600">[{idx}]</div>
+                <div className="mt-0.5 text-xs font-mono text-zinc-400 leading-none">{value}</div>
+                <div className="text-xs font-mono text-zinc-600 leading-none">[{idx}]</div>
               </div>
             );
           })}
@@ -112,7 +112,7 @@ export default function SortingArrayVisualization({ state }) {
         </div>
       )}
 
-      <div className="flex items-center justify-center gap-4 text-xs">
+      <div className="flex items-center justify-center gap-4 text-xs mt-1">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-blue-500"></div>
           <span className="text-zinc-400">Left half</span>

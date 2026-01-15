@@ -111,7 +111,7 @@ export default function MergeSortVisualizer() {
 
         <div className="lg:col-span-2 space-y-6">
           <Card title="Array Visualization">
-            <div className="min-h-[300px]">
+            <div className="min-h-[240px] flex items-start justify-center pt-2">
               {state && <SortingArrayVisualization state={state} />}
             </div>
           </Card>
@@ -148,9 +148,9 @@ export default function MergeSortVisualizer() {
 
               <Card title="How Merge Sort Works">
                 <div className="space-y-2 text-sm text-zinc-400">
-                  <p><span className="text-white font-medium">1. Divide:</span> Split array into two halves</p>
-                  <p><span className="text-white font-medium">2. Conquer:</span> Recursively sort each half</p>
-                  <p><span className="text-white font-medium">3. Merge:</span> Combine sorted halves into one sorted array</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">1. Divide:</span> Split array into two halves</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">2. Conquer:</span> Recursively sort each half</p>
+                  <p><span className="text-zinc-900 dark:text-white font-medium">3. Merge:</span> Combine sorted halves into one sorted array</p>
                 </div>
               </Card>
             </div>
