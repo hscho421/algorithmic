@@ -32,11 +32,22 @@ export default function Header({ onToggleSidebar }) {
 
   return (
     <header className="bg-white/70 dark:bg-zinc-900/70 border-b border-zinc-200/60 dark:border-zinc-800/60 backdrop-blur relative z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-shell">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-teal-500 via-emerald-500 to-amber-400 rounded-2xl shadow-md shadow-emerald-500/30" />
-            <span className="text-xl font-semibold text-zinc-900 dark:text-white font-display">DSA Visualizer</span>
+            <span className="w-10 h-10 rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-500 via-teal-500 to-amber-400 shadow-md shadow-emerald-500/30 inline-flex items-center justify-center">
+              <svg viewBox="0 0 256 256" className="w-full h-full" aria-hidden="true" fill="none" preserveAspectRatio="xMidYMid meet">
+                <g stroke="#FFFFFF" strokeWidth="10" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M128 86 V118" />
+                  <path d="M128 118 H92 V152" />
+                  <path d="M128 118 H164 V152" />
+                </g>
+                <circle cx="128" cy="72" r="18" fill="#40A8A8" stroke="#FFFFFF" strokeWidth="8" />
+                <rect x="72" y="152" width="40" height="40" rx="10" fill="#40A8A8" stroke="#FFFFFF" strokeWidth="8" />
+                <rect x="144" y="152" width="40" height="40" rx="10" fill="#40A8A8" stroke="#FFFFFF" strokeWidth="8" />
+              </svg>
+            </span>
+            <span className="text-xl font-semibold text-zinc-900 dark:text-white font-display">Algorithmic</span>
           </Link>
 
           <nav className="flex items-center gap-3">

@@ -44,25 +44,40 @@ export default function HomePage() {
           <div className="text-sm text-zinc-400 dark:text-zinc-500">9 categories and growing</div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {CATEGORIES.map((category, idx) => (
             <Link
               key={category.id}
               to={category.path}
-              className="group relative overflow-hidden rounded-2xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white/70 dark:bg-zinc-900/60 p-6 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 dark:hover:shadow-black/40"
+              className="group relative overflow-hidden rounded-[28px] border border-zinc-200/70 dark:border-zinc-800/70 bg-white/70 dark:bg-zinc-900/60 p-7 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 dark:hover:shadow-black/40"
               style={{ animationDelay: `${idx * 60}ms` }}
             >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 via-amber-300 to-rose-400 opacity-80" />
-              <div className="text-xs uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Category</div>
-              <h3 className="text-xl font-semibold text-zinc-900 dark:text-white mt-3 group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
-                {category.name}
-              </h3>
-              <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-sm">
-                Explore {category.name.toLowerCase()} algorithms
-              </p>
-              <div className="mt-5 flex items-center gap-2 text-sm text-zinc-400 dark:text-zinc-500">
-                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-                Ready to visualize
+              <div className="absolute inset-x-0 top-0 h-1.5 bg-zinc-200/80 dark:bg-zinc-800/80 transition-colors group-hover:bg-emerald-400" />
+              <div className="flex items-center justify-between">
+                <div className="text-xs uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-500">Category</div>
+                <div className="inline-flex items-center gap-1 rounded-full border border-zinc-200/70 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/60 px-2 py-0.5 text-[11px] text-zinc-500 dark:text-zinc-400">
+                  View
+                </div>
+              </div>
+              <div className="mt-5 flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-lg font-semibold flex items-center justify-center shadow-md">
+                  {category.name.slice(0, 1)}
+                </div>
+                <div>
+                  <h3 className="text-2xl font-display text-zinc-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                    Explore {category.name.toLowerCase()} visualizations
+                  </p>
+                </div>
+              </div>
+              <div className="mt-6 flex items-center justify-between text-sm text-zinc-400 dark:text-zinc-500">
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+                  Curated walkthroughs
+                </span>
+                <span className="text-zinc-400 dark:text-zinc-500">Open →</span>
               </div>
             </Link>
           ))}

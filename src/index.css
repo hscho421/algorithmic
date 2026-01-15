@@ -48,6 +48,12 @@ html.dark, html.dark body {
     linear-gradient(140deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
 }
 
+.page-shell {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
 .font-display {
   font-family: 'Fraunces', 'Times New Roman', serif;
 }
