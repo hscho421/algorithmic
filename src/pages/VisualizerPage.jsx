@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { getAlgorithmById } from '../data/algorithms';
 import { CATEGORIES } from '../constants';
-import { BinarySearchVisualizer } from '../components/visualizers/searching';
+import { BinarySearchVisualizer, SlidingWindowVisualizer } from '../components/visualizers/searching';
 import { MergeSortVisualizer, QuickSortVisualizer, HeapSortVisualizer } from '../components/visualizers/sorting';
 import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
 import { MinHeapVisualizer } from '../components/visualizers/heaps';
@@ -10,6 +10,7 @@ import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisual
 
 const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
+  'sliding-window': SlidingWindowVisualizer,
   'merge-sort': MergeSortVisualizer,
   'quick-sort': QuickSortVisualizer,
   'heap-sort': HeapSortVisualizer,
