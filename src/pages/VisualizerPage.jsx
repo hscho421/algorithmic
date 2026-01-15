@@ -2,18 +2,21 @@ import { useParams, Link } from 'react-router-dom';
 import { getAlgorithmById } from '../data/algorithms';
 import { CATEGORIES } from '../constants';
 import { BinarySearchVisualizer } from '../components/visualizers/searching';
-import { MergeSortVisualizer, QuickSortVisualizer } from '../components/visualizers/sorting';
+import { MergeSortVisualizer, QuickSortVisualizer, HeapSortVisualizer } from '../components/visualizers/sorting';
 import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
 import { MinHeapVisualizer } from '../components/visualizers/heaps';
+import { TrieVisualizer } from '../components/visualizers/strings';
 import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer, UnionFindVisualizer } from '../components/visualizers/graphs';
 
 const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
   'merge-sort': MergeSortVisualizer,
   'quick-sort': QuickSortVisualizer,
+  'heap-sort': HeapSortVisualizer,
   'bst': BSTVisualizer,
   'tree-traversals': TraversalVisualizer,
   'min-heap': MinHeapVisualizer,
+  'trie': TrieVisualizer,
   'bfs': BFSVisualizer,
   'dfs': DFSVisualizer,
   'dijkstra': DijkstraVisualizer,

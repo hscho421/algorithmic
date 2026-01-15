@@ -6,6 +6,8 @@ import VisualizerPage from './pages/VisualizerPage';
 import NotFoundPage from './pages/NotFoundPage';
 import RoadmapPage from './pages/RoadmapPage';
 import PricingPage from './pages/PricingPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 export default function App() {
   return (
     <BrowserRouter>
@@ -16,6 +18,8 @@ export default function App() {
           <Route path="/visualize/:algorithmId" element={<VisualizerPage />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

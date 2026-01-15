@@ -2,6 +2,7 @@ import { metadata as searchingMetadata } from '../components/visualizers/searchi
 import { metadata as sortingMetadata } from '../components/visualizers/sorting';
 import { metadata as treesMetadata } from '../components/visualizers/trees';
 import { metadata as heapsMetadata } from '../components/visualizers/heaps';
+import { metadata as stringsMetadata } from '../components/visualizers/strings';
 import { metadata as graphsMetadata } from '../components/visualizers/graphs';
 
 export const ALGORITHMS = {
@@ -9,6 +10,7 @@ export const ALGORITHMS = {
   sorting: sortingMetadata,
   trees: treesMetadata,
   heaps: heapsMetadata,
+  strings: stringsMetadata,
   graphs: graphsMetadata,
 };
 

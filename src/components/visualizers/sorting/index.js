@@ -1,5 +1,6 @@
 export { default as MergeSortVisualizer } from './MergeSortVisualizer';
 export { default as QuickSortVisualizer } from './QuickSortVisualizer';
+export { default as HeapSortVisualizer } from './HeapSortVisualizer';
 export { default as SortingArrayVisualization } from './SortingArrayVisualization';
 
 export const metadata = {
@@ -18,6 +19,12 @@ export const metadata = {
       name: 'Quick Sort',
       description: 'In-place partitioning with O(n log n) average complexity',
       component: 'QuickSortVisualizer',
+    },
+    {
+      id: 'heap-sort',
+      name: 'Heap Sort',
+      description: 'Max-heap based sorting with O(n log n) complexity',
+      component: 'HeapSortVisualizer',
     },
   ],
 };

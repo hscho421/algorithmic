@@ -30,6 +30,9 @@ export default function SortingArrayVisualization({ state }) {
     const rangeType = getRangeType(idx);
 
     if (highlightType === 'sorted') return 'bg-emerald-500';
+    if (highlightType === 'swapping' || highlightType === 'swapped') return 'bg-rose-500';
+    if (highlightType === 'comparing') return 'bg-amber-400';
+    if (highlightType === 'active') return 'bg-blue-500';
     if (highlightType === 'writing' || highlightType === 'placed') return 'bg-amber-400';
     if (highlightType === 'pivot') return 'bg-purple-500';
 
