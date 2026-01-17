@@ -8,6 +8,10 @@ import RoadmapPage from './pages/RoadmapPage';
 import PricingPage from './pages/PricingPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import AccountPage from './pages/AccountPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 export default function App() {
   return (
     <BrowserRouter>
@@ -18,6 +22,16 @@ export default function App() {
           <Route path="/visualize/:algorithmId" element={<VisualizerPage />} />
           <Route path="/roadmap" element={<RoadmapPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route
+            path="/account"
+            element={
+              <ProtectedRoute>
+                <AccountPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={<NotFoundPage />} />

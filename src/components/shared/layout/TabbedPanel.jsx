@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getPanelPreference, savePanelPreference } from '../../../utils/layoutPersistence';
+import useUserPreferences from '../../../context/useUserPreferences';
 
 export default function TabbedPanel({
   panelId = 'bottom-panel',
@@ -9,6 +9,7 @@ export default function TabbedPanel({
   isCollapsible = true,
   className = '',
 }) {
+  const { getPanelPreference, setPanelPreference } = useUserPreferences();
   const [activeTab, setActiveTab] = useState(() =>
     getPanelPreference(panelId, 'activeTab', defaultTab || tabs[0]?.id)
   );
@@ -19,17 +20,17 @@ export default function TabbedPanel({
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    savePanelPreference(panelId, 'activeTab', tabId);
+    setPanelPreference(panelId, 'activeTab', tabId);
     if (isCollapsed) {
       setIsCollapsed(false);
-      savePanelPreference(panelId, 'collapsed', false);
+      setPanelPreference(panelId, 'collapsed', false);
     }
   };
 
   const toggleCollapse = () => {
     const newValue = !isCollapsed;
     setIsCollapsed(newValue);
-    savePanelPreference(panelId, 'collapsed', newValue);
+    setPanelPreference(panelId, 'collapsed', newValue);
   };
 
   const activeTabData = tabs.find((tab) => tab.id === activeTab) || tabs[0];

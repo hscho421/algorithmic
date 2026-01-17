@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getPanelPreference, savePanelPreference } from '../utils/layoutPersistence';
+import { useState, useCallback } from 'react';
+import useUserPreferences from '../context/useUserPreferences';
 
 export default function useFloatingPanel(panelId, defaultCollapsed = false) {
+  const { getPanelPreference, setPanelPreference } = useUserPreferences();
   const [isCollapsed, setIsCollapsed] = useState(() =>
     getPanelPreference(panelId, 'collapsed', defaultCollapsed)
   );
@@ -17,34 +18,34 @@ export default function useFloatingPanel(panelId, defaultCollapsed = false) {
   const toggleCollapse = useCallback(() => {
     setIsCollapsed((prev) => {
       const newValue = !prev;
-      savePanelPreference(panelId, 'collapsed', newValue);
+      setPanelPreference(panelId, 'collapsed', newValue);
       if (newValue) {
         setIsMinimized(false);
-        savePanelPreference(panelId, 'minimized', false);
+        setPanelPreference(panelId, 'minimized', false);
       }
       return newValue;
     });
-  }, [panelId]);
+  }, [panelId, setPanelPreference]);
 
   const toggleMinimize = useCallback(() => {
     setIsMinimized((prev) => {
       const newValue = !prev;
-      savePanelPreference(panelId, 'minimized', newValue);
+      setPanelPreference(panelId, 'minimized', newValue);
       return newValue;
     });
-  }, [panelId]);
+  }, [panelId, setPanelPreference]);
 
   const updateWidth = useCallback((newWidth) => {
     setWidth(newWidth);
-    savePanelPreference(panelId, 'width', newWidth);
-  }, [panelId]);
+    setPanelPreference(panelId, 'width', newWidth);
+  }, [panelId, setPanelPreference]);
 
   const expand = useCallback(() => {
     setIsCollapsed(false);
     setIsMinimized(false);
-    savePanelPreference(panelId, 'collapsed', false);
-    savePanelPreference(panelId, 'minimized', false);
-  }, [panelId]);
+    setPanelPreference(panelId, 'collapsed', false);
+    setPanelPreference(panelId, 'minimized', false);
+  }, [panelId, setPanelPreference]);
 
   return {
     isCollapsed,

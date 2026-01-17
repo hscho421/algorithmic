@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useThemeContext } from '../../context/useThemeContext';
+import useAuthContext from '../../context/useAuthContext';
 import { ALGORITHMS } from '../../data/algorithms';
 
 export default function Header({ onToggleSidebar }) {
   const { theme, toggleTheme } = useThemeContext();
+  const { isAuthenticated, user, signOut } = useAuthContext();
   const [query, setQuery] = useState('');
 
   const allAlgorithms = useMemo(() => {
@@ -116,7 +118,36 @@ export default function Header({ onToggleSidebar }) {
                 </svg>
               )}
             </button>
-            
+            {isAuthenticated ? (
+              <div className="hidden sm:flex items-center gap-2 rounded-full border border-zinc-200/70 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/70 px-3 py-1.5 text-sm text-zinc-600 dark:text-zinc-300">
+                <Link to="/account" className="font-semibold text-zinc-900 dark:text-white">
+                  {user?.email || 'Account'}
+                </Link>
+                <span className="text-zinc-300 dark:text-zinc-600">•</span>
+                <button
+                  type="button"
+                  onClick={signOut}
+                  className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link
+                  to="/login"
+                  className="px-3 py-1.5 rounded-full border border-zinc-200/70 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/70 text-sm text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/signup"
+                  className="px-3 py-1.5 rounded-full bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 transition-colors"
+                >
+                  Create account
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       </div>

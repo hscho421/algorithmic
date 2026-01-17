@@ -3,7 +3,7 @@ import ControlPanel from '../controls/ControlPanel';
 import StatePanel from '../panels/StatePanel';
 import CodePanel from '../panels/CodePanel';
 import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
-import { getPanelPreference, savePanelPreference } from '../../../utils/layoutPersistence';
+import useUserPreferences from '../../../context/useUserPreferences';
 
 const GAP_PX = 16;
 const DEFAULT_COLS = [25, 50, 25];
@@ -25,9 +25,15 @@ export default function VisualizerLayout({
   const [showHelp, setShowHelp] = useState(false);
   const gridRef = useRef(null);
   const dragRef = useRef(null);
+  const { visualizerColumns, setVisualizerColumns, getPanelPreference, setPanelPreference } = useUserPreferences();
 
   const [containerWidth, setContainerWidth] = useState(0);
-  const [colPercents, setColPercents] = useState(DEFAULT_COLS);
+  const [colPercents, setColPercents] = useState(() => {
+    if (Array.isArray(visualizerColumns) && visualizerColumns.length === 3) {
+      return visualizerColumns;
+    }
+    return DEFAULT_COLS;
+  });
   const colPercentsRef = useRef(colPercents);
   const [isLg, setIsLg] = useState(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return true;
@@ -61,6 +67,12 @@ export default function VisualizerLayout({
   useEffect(() => {
     colPercentsRef.current = colPercents;
   }, [colPercents]);
+
+  useEffect(() => {
+    if (!dragRef.current && Array.isArray(visualizerColumns) && visualizerColumns.length === 3) {
+      setColPercents(visualizerColumns);
+    }
+  }, [visualizerColumns]);
 
   const effectiveCols = isLg ? colPercents : DEFAULT_COLS;
   const availableWidth = Math.max(0, containerWidth - GAP_PX * 2);
@@ -147,8 +159,11 @@ export default function VisualizerLayout({
     const rightDelta = Math.abs((availableWidth * right) / 100 - defaultRightPx);
     if (leftDelta <= SNAP_PX && centerDelta <= SNAP_PX && rightDelta <= SNAP_PX) {
       setColPercents(DEFAULT_COLS);
+      setVisualizerColumns(DEFAULT_COLS);
+      return;
     }
-  }, [availableWidth, defaultCenterPx, defaultLeftPx, defaultRightPx]);
+    setVisualizerColumns([left, center, right]);
+  }, [availableWidth, defaultCenterPx, defaultLeftPx, defaultRightPx, setVisualizerColumns]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -196,8 +211,8 @@ export default function VisualizerLayout({
 
   const setRightTab = useCallback((tabId) => {
     setActiveRightTab(tabId);
-    savePanelPreference('visualizer-right', 'activeTab', tabId);
-  }, []);
+    setPanelPreference('visualizer-right', 'activeTab', tabId);
+  }, [setPanelPreference]);
 
   const currentRightTab = rightTabs.some((tab) => tab.id === activeRightTab)
     ? activeRightTab
