@@ -5,6 +5,8 @@ import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/pa
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   TEMPLATES,
   complexity,
@@ -25,6 +27,11 @@ export default function FibonacciVisualizer() {
   } = useSavedInputs('fibonacci');
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = { n, stepIndex: state?.stepIndex ?? 0 };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'fibonacci',
+    progressPayload,
+  );
 
   const handleReset = useCallback(() => {
     stop();
@@ -47,6 +54,11 @@ export default function FibonacciVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setN(payload.n ?? '7');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setN(payload.n ?? '7');
   };
 
@@ -147,6 +159,12 @@ export default function FibonacciVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </div>
       }

@@ -6,6 +6,8 @@ import { TreeDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   template,
   complexity,
@@ -39,6 +41,11 @@ export default function BSTVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = { treeInput, valueInput, operation, stepIndex: state?.stepIndex ?? 0 };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'bst',
+    progressPayload,
+  );
 
   const handleBuildTree = useCallback(() => {
     stop();
@@ -80,6 +87,13 @@ export default function BSTVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setTreeInput(payload.treeInput ?? '');
+    setValueInput(payload.valueInput ?? '');
+    setOperation(payload.operation ?? 'insert');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setTreeInput(payload.treeInput ?? '');
     setValueInput(payload.valueInput ?? '');
     setOperation(payload.operation ?? 'insert');
@@ -197,6 +211,12 @@ export default function BSTVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </div>
       }

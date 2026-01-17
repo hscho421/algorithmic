@@ -6,6 +6,8 @@ import TrieDisplay from '../../shared/visualization/TrieDisplay';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   template,
   complexity,
@@ -71,6 +73,11 @@ export default function TrieVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = { wordsInput, wordInput, operation, stepIndex: state?.stepIndex ?? 0 };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'trie',
+    progressPayload,
+  );
 
   const handleBuildTrie = useCallback(() => {
     stop();
@@ -116,6 +123,13 @@ export default function TrieVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setWordsInput(payload.wordsInput ?? '');
+    setWordInput(payload.wordInput ?? '');
+    setOperation(payload.operation ?? 'insert');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setWordsInput(payload.wordsInput ?? '');
     setWordInput(payload.wordInput ?? '');
     setOperation(payload.operation ?? 'insert');
@@ -275,6 +289,12 @@ export default function TrieVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </div>
       }

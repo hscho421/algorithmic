@@ -5,6 +5,8 @@ import { ExplanationPanel, ComplexityPanel, ResultBanner } from '../../shared/pa
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   TEMPLATES,
   initialState,
@@ -94,6 +96,18 @@ export default function BinarySearchVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = {
+    arrayInput,
+    targetInput,
+    templateKey,
+    autoSort,
+    dedupe,
+    stepIndex: state?.stepIndex ?? 0,
+  };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'binary-search',
+    progressPayload,
+  );
 
   const handleReset = useCallback(() => {
     stop();
@@ -156,6 +170,16 @@ export default function BinarySearchVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    skipTemplatePresetRef.current = true;
+    setTemplateKey(payload.templateKey ?? 'lower_bound');
+    setArrayInput(payload.arrayInput ?? '');
+    setTargetInput(payload.targetInput ?? '');
+    setAutoSort(Boolean(payload.autoSort));
+    setDedupe(Boolean(payload.dedupe));
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     skipTemplatePresetRef.current = true;
     setTemplateKey(payload.templateKey ?? 'lower_bound');
     setArrayInput(payload.arrayInput ?? '');
@@ -318,6 +342,12 @@ export default function BinarySearchVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </>
       }

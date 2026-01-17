@@ -5,6 +5,8 @@ import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   TEMPLATES,
   complexity,
@@ -46,6 +48,18 @@ export default function SlidingWindowVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = {
+    mode,
+    arrayInput,
+    windowSize,
+    target,
+    textInput,
+    stepIndex: state?.stepIndex ?? 0,
+  };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'sliding-window',
+    progressPayload,
+  );
 
   const handleReset = useCallback(() => {
     stop();
@@ -90,6 +104,15 @@ export default function SlidingWindowVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setMode(payload.mode ?? 'fixed_max_sum');
+    setArrayInput(payload.arrayInput ?? '');
+    setWindowSize(payload.windowSize ?? '3');
+    setTarget(payload.target ?? '8');
+    setTextInput(payload.textInput ?? '');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setMode(payload.mode ?? 'fixed_max_sum');
     setArrayInput(payload.arrayInput ?? '');
     setWindowSize(payload.windowSize ?? '3');
@@ -211,6 +234,12 @@ export default function SlidingWindowVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </>
       }

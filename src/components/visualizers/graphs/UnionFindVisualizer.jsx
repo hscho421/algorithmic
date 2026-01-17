@@ -6,6 +6,8 @@ import { UnionFindDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   template,
   complexity,
@@ -41,6 +43,17 @@ export default function UnionFindVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = {
+    mode,
+    selectedPreset,
+    customElements,
+    customOperations,
+    stepIndex: state?.stepIndex ?? 0,
+  };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'union-find',
+    progressPayload,
+  );
 
   // Build when configuration changes
   useEffect(() => {
@@ -92,6 +105,20 @@ export default function UnionFindVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setMode(payload.mode ?? 'preset');
+    setSelectedPreset(payload.selectedPreset ?? 'simple');
+    setCustomElements(payload.customElements ?? ['A', 'B', 'C', 'D', 'E']);
+    setCustomOperations(
+      payload.customOperations ?? [
+        { type: OPERATION_TYPES.UNION, x: 'A', y: 'B' },
+        { type: OPERATION_TYPES.UNION, x: 'C', y: 'D' },
+        { type: OPERATION_TYPES.CONNECTED, x: 'A', y: 'C' },
+      ],
+    );
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setMode(payload.mode ?? 'preset');
     setSelectedPreset(payload.selectedPreset ?? 'simple');
     setCustomElements(payload.customElements ?? ['A', 'B', 'C', 'D', 'E']);
@@ -309,6 +336,12 @@ export default function UnionFindVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </div>
       }

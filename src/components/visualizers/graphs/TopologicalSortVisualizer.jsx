@@ -6,6 +6,8 @@ import { GraphDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import { createGraph, DAG_GRAPHS } from '../../../lib/dataStructures/Graph';
 import { calculatePositions } from '../../../lib/utils/graphLayout';
 import {
@@ -38,6 +40,17 @@ export default function TopologicalSortVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = {
+    mode,
+    selectedPreset,
+    customVertices,
+    customEdges,
+    stepIndex: state?.stepIndex ?? 0,
+  };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'topological-sort',
+    progressPayload,
+  );
 
   // Build graph when configuration changes
   useEffect(() => {
@@ -82,6 +95,14 @@ export default function TopologicalSortVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setMode(payload.mode ?? 'preset');
+    setSelectedPreset(payload.selectedPreset ?? 'simpleDAG');
+    setCustomVertices(payload.customVertices ?? ['A', 'B', 'C', 'D', 'E']);
+    setCustomEdges(payload.customEdges ?? [['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D'], ['D', 'E']]);
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setMode(payload.mode ?? 'preset');
     setSelectedPreset(payload.selectedPreset ?? 'simpleDAG');
     setCustomVertices(payload.customVertices ?? ['A', 'B', 'C', 'D', 'E']);
@@ -244,6 +265,12 @@ export default function TopologicalSortVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </div>
       }

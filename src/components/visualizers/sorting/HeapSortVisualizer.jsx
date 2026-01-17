@@ -5,6 +5,8 @@ import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   template,
   complexity,
@@ -35,6 +37,11 @@ export default function HeapSortVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = { arrayInput, stepIndex: state?.stepIndex ?? 0 };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'heap-sort',
+    progressPayload,
+  );
 
   const handleReset = useCallback(() => {
     stop();
@@ -72,6 +79,11 @@ export default function HeapSortVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setArrayInput(payload.arrayInput ?? '');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setArrayInput(payload.arrayInput ?? '');
   };
 
@@ -117,6 +129,12 @@ export default function HeapSortVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </>
       }

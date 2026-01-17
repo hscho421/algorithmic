@@ -6,6 +6,8 @@ import { TreeDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   template,
   complexity,
@@ -106,6 +108,18 @@ export default function MinHeapVisualizer() {
   );
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = {
+    heapInput,
+    valueInput,
+    operation,
+    heapType,
+    indexInput,
+    stepIndex: state?.stepIndex ?? 0,
+  };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'min-heap',
+    progressPayload,
+  );
 
   const handleBuildHeap = useCallback(() => {
     stop();
@@ -141,6 +155,15 @@ export default function MinHeapVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setHeapInput(payload.heapInput ?? '');
+    setValueInput(payload.valueInput ?? '');
+    setOperation(payload.operation ?? 'insert');
+    setHeapType(payload.heapType ?? 'min');
+    setIndexInput(payload.indexInput ?? '0');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setHeapInput(payload.heapInput ?? '');
     setValueInput(payload.valueInput ?? '');
     setOperation(payload.operation ?? 'insert');
@@ -353,15 +376,21 @@ export default function MinHeapVisualizer() {
             />
           </div>
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-        </div>
-      }
+        <SavedInputsPanel
+          items={savedInputs}
+          isLoading={savedLoading}
+          onSave={handleSaveInput}
+          onLoad={handleLoadInput}
+          onDelete={(item) => deleteInput(item.id)}
+        />
+        <ProgressPanel
+          progress={progress}
+          isLoading={progressLoading}
+          onResume={handleResume}
+          onClear={clearProgress}
+        />
+      </div>
+    }
       controlProps={{
         onStep: step,
         onBack: handleBack,

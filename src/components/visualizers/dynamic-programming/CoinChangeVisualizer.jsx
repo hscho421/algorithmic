@@ -5,6 +5,8 @@ import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/pa
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
+import useProgress from '../../../hooks/useProgress';
+import ProgressPanel from '../../shared/controls/ProgressPanel';
 import {
   TEMPLATES,
   complexity,
@@ -28,6 +30,11 @@ export default function CoinChangeVisualizer() {
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
+  const progressPayload = { coinsInput, amount, mode, stepIndex: state?.stepIndex ?? 0 };
+  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+    'coin-change',
+    progressPayload,
+  );
 
   const parseCoins = useCallback((input) => {
     return input
@@ -59,6 +66,13 @@ export default function CoinChangeVisualizer() {
 
   const handleLoadInput = (item) => {
     const payload = item.input_json || {};
+    setCoinsInput(payload.coinsInput ?? '1, 2, 5');
+    setAmount(payload.amount ?? '11');
+    setMode(payload.mode ?? 'min_coins');
+  };
+
+  const handleResume = () => {
+    const payload = progress?.last_state_json || {};
     setCoinsInput(payload.coinsInput ?? '1, 2, 5');
     setAmount(payload.amount ?? '11');
     setMode(payload.mode ?? 'min_coins');
@@ -203,6 +217,12 @@ export default function CoinChangeVisualizer() {
             onSave={handleSaveInput}
             onLoad={handleLoadInput}
             onDelete={(item) => deleteInput(item.id)}
+          />
+          <ProgressPanel
+            progress={progress}
+            isLoading={progressLoading}
+            onResume={handleResume}
+            onClear={clearProgress}
           />
         </div>
       }
