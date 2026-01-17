@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const { signIn } = useAuthContext();
+  const { signIn, signInWithGoogle } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,6 +24,14 @@ export default function LoginPage() {
     navigate(nextPath);
   };
 
+  const handleGoogleSignIn = async () => {
+    setErrorMessage('');
+    const { error } = await signInWithGoogle();
+    if (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
   return (
     <AuthLayout
       title="Welcome back"
@@ -37,6 +45,16 @@ export default function LoginPage() {
         </>
       }
     >
+      <div className="space-y-4">
+        <Button type="button" variant="default" className="w-full" onClick={handleGoogleSignIn}>
+          Continue with Google
+        </Button>
+        <div className="flex items-center gap-3 text-xs text-zinc-400">
+          <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
+          <span>or</span>
+          <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
+        </div>
+      </div>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <Input
           label="Email"

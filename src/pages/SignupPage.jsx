@@ -10,7 +10,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const { signUp } = useAuthContext();
+  const { signUp, signInWithGoogle } = useAuthContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -32,6 +32,15 @@ export default function SignupPage() {
     navigate('/account');
   };
 
+  const handleGoogleSignIn = async () => {
+    setErrorMessage('');
+    setSuccessMessage('');
+    const { error } = await signInWithGoogle();
+    if (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
   const passwordMismatch = password && confirmPassword && password !== confirmPassword;
 
   return (
@@ -47,6 +56,16 @@ export default function SignupPage() {
         </>
       }
     >
+      <div className="space-y-4">
+        <Button type="button" variant="default" className="w-full" onClick={handleGoogleSignIn}>
+          Continue with Google
+        </Button>
+        <div className="flex items-center gap-3 text-xs text-zinc-400">
+          <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
+          <span>or</span>
+          <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
+        </div>
+      </div>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <Input
           label="Email"
