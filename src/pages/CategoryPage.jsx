@@ -169,9 +169,22 @@ export default function CategoryPage() {
             <p className="text-zinc-600 dark:text-zinc-300 mt-3 max-w-2xl">
               {categoryData?.description || 'Select an algorithm to visualize'}
             </p>
-            <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-zinc-200/80 dark:border-zinc-700/70 bg-zinc-50/80 dark:bg-zinc-900/70 px-3 py-1 text-xs text-zinc-500 dark:text-zinc-300">
-              <span className="inline-flex h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />
-              {algorithms.length} visualizer{algorithms.length === 1 ? '' : 's'} available
+            <div className="mt-5 flex items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200/80 dark:border-zinc-700/70 bg-zinc-50/80 dark:bg-zinc-900/70 px-3 py-1 text-xs text-zinc-500 dark:text-zinc-300">
+                <span className="inline-flex h-2 w-2 rounded-full" style={{ backgroundColor: accent }} />
+                {algorithms.length} visualizer{algorithms.length === 1 ? '' : 's'} available
+              </div>
+              {algorithms.length >= 2 && (
+                <Link
+                  to={`/compare/${categoryId}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-teal-500 hover:bg-teal-600 text-white text-sm font-medium transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                  </svg>
+                  Compare Algorithms
+                </Link>
+              )}
             </div>
           </div>
           <div className="flex items-center justify-center">
