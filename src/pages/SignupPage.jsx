@@ -57,8 +57,18 @@ export default function SignupPage() {
       }
     >
       <div className="space-y-4">
-        <Button type="button" variant="default" className="w-full" onClick={handleGoogleSignIn}>
-          Continue with Google
+        <Button
+          type="button"
+          variant="default"
+          className="w-full flex items-center justify-center gap-2"
+          onClick={handleGoogleSignIn}
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google"
+            className="h-4 w-4 shrink-0"
+          />
+          <span className="relative top-px">Continue with Google</span>
         </Button>
         <div className="flex items-center gap-3 text-xs text-zinc-400">
           <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-700" />
