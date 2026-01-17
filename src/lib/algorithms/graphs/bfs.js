@@ -2,16 +2,16 @@ export const template = {
   name: 'Breadth-First Search',
   description: 'Level-by-level graph traversal using a queue',
   code: [
-    { line: 'BFS(graph, start):', indent: 0 },
+    { line: 'def bfs(graph, start):', indent: 0 },
     { line: 'queue = [start]', indent: 1 },
     { line: 'visited = {start}', indent: 1 },
-    { line: 'while queue not empty:', indent: 1 },
-    { line: 'node = queue.dequeue()', indent: 2 },
+    { line: 'while queue:', indent: 1 },
+    { line: 'node = queue.pop(0)', indent: 2 },
     { line: 'process(node)', indent: 2 },
     { line: 'for neighbor in graph[node]:', indent: 2 },
     { line: 'if neighbor not in visited:', indent: 3 },
     { line: 'visited.add(neighbor)', indent: 4 },
-    { line: 'queue.enqueue(neighbor)', indent: 4 },
+    { line: 'queue.append(neighbor)', indent: 4 },
   ],
 };
 

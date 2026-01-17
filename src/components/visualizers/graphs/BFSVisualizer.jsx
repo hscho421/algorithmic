@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Select, GraphEditor } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Select, GraphEditor } from '../../shared/ui';
+import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { GraphDisplay } from '../../shared/visualization';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import { createGraph, PRESET_GRAPHS } from '../../../lib/dataStructures/Graph';
 import { calculatePositions } from '../../../lib/utils/graphLayout';
 import {
@@ -106,141 +106,148 @@ export default function BFSVisualizer() {
 
   const result = state ? getResult(state) : null;
 
+  const infoTabs = [
+    {
+      id: 'explanation',
+      label: 'Explanation',
+      content: state ? (
+        <ExplanationPanel
+          explanation={getExplanation(state)}
+          status={state.done ? 'success' : 'running'}
+        />
+      ) : (
+        <div className="text-zinc-500 dark:text-zinc-400 text-sm">
+          Click Step or Run to begin
+        </div>
+      ),
+    },
+    {
+      id: 'complexity',
+      label: 'Complexity',
+      content: <ComplexityPanel complexity={complexity} />,
+    },
+    {
+      id: 'guide',
+      label: 'Guide',
+      content: (
+        <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <p><span className="text-zinc-900 dark:text-white font-medium">Queue:</span> FIFO — first in, first out</p>
+          <p><span className="text-zinc-900 dark:text-white font-medium">Level-order:</span> Visits all nodes at depth d before d+1</p>
+          <p><span className="text-zinc-900 dark:text-white font-medium">Shortest path:</span> Finds shortest path in unweighted graphs</p>
+        </div>
+      ),
+    },
+  ];
+
+  if (result) {
+    infoTabs.push({
+      id: 'result',
+      label: 'Result',
+      content: (
+        <ResultBanner
+          success={result.success}
+          title={result.title}
+          message={result.message}
+          details={result.details}
+        />
+      ),
+    });
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <VisualizerLayout
+      configurationContent={
         <div className="space-y-4">
-          <Card title="Graph Configuration">
-            <div className="space-y-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setMode('preset')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                    mode === 'preset'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                  }`}
-                >
-                  Preset
-                </button>
-                <button
-                  onClick={() => setMode('custom')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                    mode === 'custom'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-                  }`}
-                >
-                  Custom
-                </button>
-              </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setMode('preset')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                mode === 'preset'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+              }`}
+            >
+              Preset
+            </button>
+            <button
+              onClick={() => setMode('custom')}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                mode === 'custom'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+              }`}
+            >
+              Custom
+            </button>
+          </div>
 
-              {mode === 'preset' ? (
-                <Select
-                  label="Select Graph"
-                  value={selectedPreset}
-                  onChange={(e) => setSelectedPreset(e.target.value)}
-                  options={presetOptions}
-                />
-              ) : (
-                <GraphEditor
-                  vertices={customVertices}
-                  edges={customEdges}
-                  onVerticesChange={setCustomVertices}
-                  onEdgesChange={setCustomEdges}
-                  directed={false}
-                  weighted={false}
-                />
-              )}
+          {mode === 'preset' ? (
+            <Select
+              label="Select Graph"
+              value={selectedPreset}
+              onChange={(e) => setSelectedPreset(e.target.value)}
+              options={presetOptions}
+            />
+          ) : (
+            <GraphEditor
+              vertices={customVertices}
+              edges={customEdges}
+              onVerticesChange={setCustomVertices}
+              onEdgesChange={setCustomEdges}
+              directed={false}
+              weighted={false}
+            />
+          )}
 
-              {nodeOptions.length > 0 && (
-                <Select
-                  label="Start Node"
-                  value={startNode}
-                  onChange={(e) => setStartNode(e.target.value)}
-                  options={nodeOptions}
-                />
-              )}
-            </div>
-          </Card>
-
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
+          {nodeOptions.length > 0 && (
+            <Select
+              label="Start Node"
+              value={startNode}
+              onChange={(e) => setStartNode(e.target.value)}
+              options={nodeOptions}
+            />
           )}
         </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Graph Visualization">
-            <div className="min-h-[400px]">
-              {state && (
-                <GraphDisplay
-                  vertices={state.vertices}
-                  edges={state.edges}
-                  positions={state.positions}
-                  highlightedNodes={state.highlightedNodes}
-                  highlightedEdges={state.highlightedEdges}
-                  current={state.current}
-                  queue={state.queue}
-                />
-              )}
-            </div>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={template.code}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={template.name}
-                description={template.description}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? 'success' : 'running'}
-                />
-              )}
-
-              <ComplexityPanel complexity={complexity} />
-
-              <Card title="BFS Key Points">
-                <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                  <p><span className="text-zinc-900 dark:text-white font-medium">Queue:</span> FIFO — first in, first out</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">Level-order:</span> Visits all nodes at depth d before d+1</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">Shortest path:</span> Finds shortest path in unweighted graphs</p>
-                </div>
-              </Card>
-            </div>
-          </div>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        <div className="min-h-[400px] w-full">
+          {state && (
+            <GraphDisplay
+              vertices={state.vertices}
+              edges={state.edges}
+              positions={state.positions}
+              highlightedNodes={state.highlightedNodes}
+              highlightedEdges={state.highlightedEdges}
+              current={state.current}
+              queue={state.queue}
+            />
+          )}
         </div>
-      </div>
-    </div>
-    </div>
+      }
+      codeProps={
+        state
+          ? {
+              code: template.code,
+              currentLine: state.currentLine,
+              done: state.done,
+              title: template.name,
+              description: template.description,
+            }
+          : null
+      }
+      stateProps={state ? { variables, additionalInfo } : null}
+      infoTabs={infoTabs}
+    />
   );
 }

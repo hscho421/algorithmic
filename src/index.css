@@ -193,3 +193,105 @@ html.dark, html.dark body {
   animation: heapSwapSlideNode 0.45s ease-in-out forwards;
   will-change: transform;
 }
+
+/* Z-Index Management */
+:root {
+  --z-visualization: 1;
+  --z-floating-panel: 10;
+  --z-bottom-panel: 15;
+  --z-modal: 50;
+  --z-tooltip: 100;
+}
+
+/* Floating Panel Animations */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Floating Panel Utilities */
+.panel-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.panel-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.panel-slide-in-bottom {
+  animation: slideInBottom 0.3s ease-out;
+}
+
+/* Smooth Scrolling */
+.smooth-scroll {
+  scroll-behavior: smooth;
+}
+
+/* Backdrop Blur */
+.backdrop-blur-panel {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Custom Scrollbar for Panels */
+.floating-panel-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.floating-panel-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.floating-panel-scroll::-webkit-scrollbar-thumb {
+  background: rgba(161, 161, 170, 0.3);
+  border-radius: 4px;
+}
+
+.floating-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(161, 161, 170, 0.5);
+}
+
+.dark .floating-panel-scroll::-webkit-scrollbar-thumb {
+  background: rgba(113, 113, 122, 0.3);
+}
+
+.dark .floating-panel-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(113, 113, 122, 0.5);
+}

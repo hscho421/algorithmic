@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input, Select, Button } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input, Select, Button } from '../../shared/ui';
+import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { TreeDisplay } from '../../shared/visualization';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   template,
   complexity,
@@ -93,126 +93,139 @@ export default function TraversalVisualizer() {
 
   const result = state ? getResult(state) : null;
 
-  return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="space-y-4">
-          <Card title="Build Tree">
-            <div className="space-y-4">
-              <Input
-                label="Initial values (insertion order)"
-                value={treeInput}
-                onChange={(e) => setTreeInput(e.target.value)}
-                placeholder="50, 30, 70, 20, 40"
-              />
-              <Button onClick={handleBuildTree} variant="primary" className="w-full">
-                Build Tree
-              </Button>
-            </div>
-          </Card>
-
-          <Card title="Traversal Type">
-            <div className="space-y-4">
-              <Select
-                label="Select traversal"
-                value={traversalType}
-                onChange={(e) => setTraversalType(e.target.value)}
-                options={traversalOptions}
-              />
-              <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
-                <div className="text-sm text-white font-medium">{currentInfo.name}</div>
-                <div className="text-xs text-zinc-400 mt-1">{currentInfo.description}</div>
-              </div>
-            </div>
-          </Card>
-
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
-          )}
+  const infoTabs = [
+    {
+      id: 'explanation',
+      label: 'Explanation',
+      content: state ? (
+        <ExplanationPanel
+          explanation={getExplanation(state)}
+          status={state.done ? 'success' : 'running'}
+        />
+      ) : (
+        <div className="text-zinc-500 dark:text-zinc-400 text-sm">
+          Click Step or Run to begin
         </div>
+      ),
+    },
+    {
+      id: 'complexity',
+      label: 'Complexity',
+      content: <ComplexityPanel complexity={complexity} />,
+    },
+    {
+      id: 'guide',
+      label: 'Guide',
+      content: (
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-zinc-400">In-order</span>
+            <span className="text-zinc-300 font-mono">L → Root → R</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-zinc-400">Pre-order</span>
+            <span className="text-zinc-300 font-mono">Root → L → R</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-zinc-400">Post-order</span>
+            <span className="text-zinc-300 font-mono">L → R → Root</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-zinc-400">Level-order</span>
+            <span className="text-zinc-300 font-mono">BFS (queue)</span>
+          </div>
+        </div>
+      ),
+    },
+  ];
 
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Tree Visualization">
-            <div className="min-h-[300px]">
-              {state && (
-                <TreeDisplay
-                  tree={state.tree}
-                  highlightedNodes={state.highlightedNodes}
-                  activeNode={state.activeNode}
-                  queue={state.queue}
-                />
-              )}
+  if (result) {
+    infoTabs.push({
+      id: 'result',
+      label: 'Result',
+      content: (
+        <ResultBanner
+          success={result.success}
+          title={result.title}
+          message={result.message}
+          details={result.details}
+        />
+      ),
+    });
+  }
+
+  return (
+    <VisualizerLayout
+      configurationContent={
+        <div className="space-y-5">
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Build Tree
             </div>
-          </Card>
+            <Input
+              label="Initial values (insertion order)"
+              value={treeInput}
+              onChange={(e) => setTreeInput(e.target.value)}
+              placeholder="50, 30, 70, 20, 40"
+            />
+            <Button onClick={handleBuildTree} variant="primary" className="w-full">
+              Build Tree
+            </Button>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={template.code[traversalType]}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={currentInfo.name}
-                description={currentInfo.order}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? 'success' : 'running'}
-                />
-              )}
-
-              <ComplexityPanel complexity={complexity} />
-
-              <Card title="Traversal Comparison">
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">In-order</span>
-                    <span className="text-zinc-300 font-mono">L → Root → R</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Pre-order</span>
-                    <span className="text-zinc-300 font-mono">Root → L → R</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Post-order</span>
-                    <span className="text-zinc-300 font-mono">L → R → Root</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400">Level-order</span>
-                    <span className="text-zinc-300 font-mono">BFS (queue)</span>
-                  </div>
-                </div>
-              </Card>
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Traversal Type
+            </div>
+            <Select
+              label="Select traversal"
+              value={traversalType}
+              onChange={(e) => setTraversalType(e.target.value)}
+              options={traversalOptions}
+            />
+            <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
+              <div className="text-sm text-white font-medium">{currentInfo.name}</div>
+              <div className="text-xs text-zinc-400 mt-1">{currentInfo.description}</div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-    </div>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        <div className="min-h-[300px] w-full">
+          {state && (
+            <TreeDisplay
+              tree={state.tree}
+              highlightedNodes={state.highlightedNodes}
+              activeNode={state.activeNode}
+              queue={state.queue}
+            />
+          )}
+        </div>
+      }
+      codeProps={
+        state
+          ? {
+              code: template.code[traversalType],
+              currentLine: state.currentLine,
+              done: state.done,
+              title: currentInfo.name,
+              description: currentInfo.order,
+            }
+          : null
+      }
+      stateProps={state ? { variables, additionalInfo } : null}
+      infoTabs={infoTabs}
+    />
   );
 }

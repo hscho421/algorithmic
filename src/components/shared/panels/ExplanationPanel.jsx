@@ -1,5 +1,3 @@
-import Card from '../ui/Card';
-
 export default function ExplanationPanel({ explanation, status }) {
   const statusStyles = {
     running: 'border-blue-300 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/5',
@@ -18,12 +16,10 @@ export default function ExplanationPanel({ explanation, status }) {
   const currentStatus = status || 'default';
 
   return (
-    <Card title="Explanation">
-      <div className={`rounded-lg p-4 border ${statusStyles[currentStatus]}`}>
-        <p className={`text-sm ${statusTextStyles[currentStatus]}`}>
-          {explanation || 'Click Step or Run to begin'}
-        </p>
-      </div>
-    </Card>
+    <div className={`rounded-lg p-4 border ${statusStyles[currentStatus]}`}>
+      <p className={`text-sm ${statusTextStyles[currentStatus]}`}>
+        {explanation || 'Click Step or Run to begin'}
+      </p>
+    </div>
   );
 }

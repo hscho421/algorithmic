@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input, Select, Button } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input, Select, Button } from '../../shared/ui';
+import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   TEMPLATES,
   complexity,
@@ -76,136 +76,145 @@ export default function CoinChangeVisualizer() {
 
   const result = state ? getResult(state) : null;
 
-  return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div className="space-y-4">
-            <Card title="Configuration">
-              <div className="space-y-4">
-                <Select
-                  label="Problem"
-                  value={mode}
-                  onChange={(e) => setMode(e.target.value)}
-                  options={modeOptions}
-                />
-
-                <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
-                  {TEMPLATES[mode].description}
-                </div>
-
-                <div className="flex gap-2">
-                  <Input
-                    label="Coins (comma-separated)"
-                    value={coinsInput}
-                    onChange={(e) => setCoinsInput(e.target.value)}
-                    placeholder="1, 2, 5"
-                    className="flex-1"
-                  />
-                  <Button onClick={handleRandomize} className="self-end" title="Generate random coins">
-                    🎲
-                  </Button>
-                </div>
-
-                <Input
-                  label="Target amount"
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  min="1"
-                  max="100"
-                />
-              </div>
-            </Card>
-
-            <ControlPanel
-              onStep={step}
-              onBack={handleBack}
-              onRun={toggle}
-              onReset={handleReset}
-              isRunning={isRunning}
-              canStep={canStep}
-              canBack={canBack}
-              speed={speed}
-              onSpeedChange={setSpeed}
-            />
-
-            {state && <StatePanel variables={variables} additionalInfo={additionalInfo} />}
-          </div>
-
-          <div className="lg:col-span-2 space-y-6">
-            <Card title="Coin Change DP Table">
-              <div className="min-h-[200px] flex items-center justify-center">
-                {state && (
-                  <DPTable1D
-                    dp={state.dp.map((v) => (v === Infinity ? '∞' : v))}
-                    highlightIndex={state.highlightCell}
-                    label="dp"
-                    comparing={state.comparing || []}
-                  />
-                )}
-              </div>
-            </Card>
-
-            {result && (
-              <ResultBanner
-                success={result.success}
-                title={result.title}
-                message={result.message}
-                details={result.details}
-              />
-            )}
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {state && (
-                <CodePanel
-                  code={state.template.code}
-                  currentLine={state.currentLine}
-                  done={state.done}
-                  title={state.template.name}
-                  description={state.template.description}
-                />
-              )}
-
-              <div className="space-y-4">
-                {state && (
-                  <ExplanationPanel
-                    explanation={getExplanation(state)}
-                    status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
-                  />
-                )}
-
-                <ComplexityPanel complexity={complexity} />
-
-                <Card title="Key Concept">
-                  <div className="p-3 rounded-lg border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
-                    <div className="font-bold mb-2 text-amber-700 dark:text-amber-400">
-                      {mode === 'min_coins' ? 'Minimum Coins' : 'Count Ways'}
-                    </div>
-                    <ul className="text-zinc-600 dark:text-zinc-400 space-y-1.5 text-xs">
-                      {mode === 'min_coins' ? (
-                        <>
-                          <li>• dp[i] = minimum coins to make amount i</li>
-                          <li>• For each amount, try all coins</li>
-                          <li>• dp[i] = min(dp[i], dp[i-coin] + 1)</li>
-                          <li>• Infinity means impossible</li>
-                        </>
-                      ) : (
-                        <>
-                          <li>• dp[i] = number of ways to make amount i</li>
-                          <li>• Process coins one at a time</li>
-                          <li>• dp[i] += dp[i-coin] for each coin</li>
-                          <li>• Counts all unique combinations</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          </div>
+  const infoTabs = [
+    {
+      id: 'explanation',
+      label: 'Explanation',
+      content: state ? (
+        <ExplanationPanel
+          explanation={getExplanation(state)}
+          status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
+        />
+      ) : (
+        <div className="text-zinc-500 dark:text-zinc-400 text-sm">
+          Click Step or Run to begin
         </div>
-      </div>
-    </div>
+      ),
+    },
+    {
+      id: 'complexity',
+      label: 'Complexity',
+      content: <ComplexityPanel complexity={complexity} />,
+    },
+    {
+      id: 'guide',
+      label: 'Guide',
+      content: (
+        <div className="p-3 rounded-lg border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
+          <div className="font-bold mb-2 text-amber-700 dark:text-amber-400">
+            {mode === 'min_coins' ? 'Minimum Coins' : 'Count Ways'}
+          </div>
+          <ul className="text-zinc-600 dark:text-zinc-400 space-y-1.5 text-xs">
+            {mode === 'min_coins' ? (
+              <>
+                <li>• dp[i] = minimum coins to make amount i</li>
+                <li>• For each amount, try all coins</li>
+                <li>• dp[i] = min(dp[i], dp[i-coin] + 1)</li>
+                <li>• Infinity means impossible</li>
+              </>
+            ) : (
+              <>
+                <li>• dp[i] = number of ways to make amount i</li>
+                <li>• Process coins one at a time</li>
+                <li>• dp[i] += dp[i-coin] for each coin</li>
+                <li>• Counts all unique combinations</li>
+              </>
+            )}
+          </ul>
+        </div>
+      ),
+    },
+  ];
+
+  if (result) {
+    infoTabs.push({
+      id: 'result',
+      label: 'Result',
+      content: (
+        <ResultBanner
+          success={result.success}
+          title={result.title}
+          message={result.message}
+          details={result.details}
+        />
+      ),
+    });
+  }
+
+  return (
+    <VisualizerLayout
+      configurationContent={
+        <div className="space-y-4">
+          <Select
+            label="Problem"
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+            options={modeOptions}
+          />
+
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
+            {TEMPLATES[mode].description}
+          </div>
+
+          <div className="flex gap-2">
+            <Input
+              label="Coins (comma-separated)"
+              value={coinsInput}
+              onChange={(e) => setCoinsInput(e.target.value)}
+              placeholder="1, 2, 5"
+              className="flex-1"
+            />
+            <Button onClick={handleRandomize} className="self-end" title="Generate random coins">
+              🎲
+            </Button>
+          </div>
+
+          <Input
+            label="Target amount"
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            min="1"
+            max="100"
+          />
+        </div>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        <div className="min-h-[200px] flex items-center justify-center w-full">
+          {state && (
+            <DPTable1D
+              dp={state.dp.map((v) => (v === Infinity ? '∞' : v))}
+              highlightIndex={state.highlightCell}
+              label="dp"
+              comparing={state.comparing || []}
+            />
+          )}
+        </div>
+      }
+      codeProps={
+        state
+          ? {
+              code: state.template.code,
+              currentLine: state.currentLine,
+              done: state.done,
+              title: state.template.name,
+              description: state.template.description,
+            }
+          : null
+      }
+      stateProps={state ? { variables, additionalInfo } : null}
+      infoTabs={infoTabs}
+    />
   );
 }

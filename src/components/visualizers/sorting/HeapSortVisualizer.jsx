@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input } from '../../shared/ui';
+import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   template,
   complexity,
@@ -77,94 +77,120 @@ export default function HeapSortVisualizer() {
   const result = state ? getResult(state) : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="space-y-4">
-          <Card title="Configuration">
-            <div className="space-y-4">
-              <Input
-                label="Array (comma or space separated)"
-                value={arrayInput}
-                onChange={(e) => setArrayInput(e.target.value)}
-                placeholder="38, 27, 43, 3, 9, 82, 10"
-              />
-
-              <button
-                onClick={handleRandomize}
-                className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm rounded-lg transition-colors"
-              >
-                Randomize Array
-              </button>
-            </div>
-          </Card>
-
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
+    <VisualizerLayout
+      configurationContent={
+        <>
+          <Input
+            label="Array (comma or space separated)"
+            value={arrayInput}
+            onChange={(e) => setArrayInput(e.target.value)}
+            placeholder="38, 27, 43, 3, 9, 82, 10"
           />
 
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
-          )}
-        </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Array Visualization">
-            <div className="min-h-[240px] flex items-start justify-center pt-2">
-              {state && <SortingArrayVisualization state={state} />}
+          <button
+            onClick={handleRandomize}
+            className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors"
+          >
+            Randomize Array
+          </button>
+        </>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        state && <SortingArrayVisualization state={state} />
+      }
+      visualizationMinHeight="240px"
+      codeProps={
+        state
+          ? {
+              code: template.code,
+              currentLine: state.currentLine,
+              done: state.done,
+              title: template.name,
+              description: template.description,
+            }
+          : null
+      }
+      stateProps={
+        state
+          ? {
+              variables,
+              additionalInfo,
+            }
+          : null
+      }
+      infoTabs={[
+        ...(state
+          ? [
+              {
+                id: 'explanation',
+                label: 'Explanation',
+                content: (
+                  <ExplanationPanel
+                    explanation={getExplanation(state)}
+                    status={state.done ? 'success' : 'running'}
+                  />
+                ),
+              },
+            ]
+          : []),
+        {
+          id: 'complexity',
+          label: 'Complexity',
+          content: <ComplexityPanel complexity={complexity} />,
+        },
+        {
+          id: 'guide',
+          label: 'Guide',
+          content: (
+            <div className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <p><span className="text-zinc-900 dark:text-white font-medium">1. Build heap:</span> Convert array into a max heap</p>
+              <p><span className="text-zinc-900 dark:text-white font-medium">2. Extract:</span> Swap max to end and shrink heap</p>
+              <p><span className="text-zinc-900 dark:text-white font-medium">3. Sift down:</span> Restore heap property each round</p>
             </div>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={template.code}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={template.name}
-                description={template.description}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? 'success' : 'running'}
-                />
-              )}
-
-              <ComplexityPanel complexity={complexity} />
-
-              <Card title="How Heap Sort Works">
-                <div className="space-y-2 text-sm text-zinc-400">
-                  <p><span className="text-zinc-900 dark:text-white font-medium">1. Build heap:</span> Convert array into a max heap</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">2. Extract:</span> Swap max to end and shrink heap</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">3. Sift down:</span> Restore heap property each round</p>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
+          ),
+        },
+        ...(result
+          ? [
+              {
+                id: 'result',
+                label: 'Result',
+                content: (
+                  <div className={`rounded-lg p-4 ${result.success ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-rose-50 dark:bg-rose-900/20'}`}>
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl">{result.success ? '✓' : '✗'}</span>
+                      <div className="flex-1">
+                        <div className={`font-semibold ${result.success ? 'text-emerald-900 dark:text-emerald-100' : 'text-rose-900 dark:text-rose-100'}`}>
+                          {result.title}
+                        </div>
+                        <div className={`text-sm mt-1 ${result.success ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
+                          {result.message}
+                        </div>
+                        {result.details && (
+                          <div className="text-xs mt-2 space-y-1 text-zinc-600 dark:text-zinc-400">
+                            {result.details.map((detail, idx) => (
+                              <div key={idx}>• {detail}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 }

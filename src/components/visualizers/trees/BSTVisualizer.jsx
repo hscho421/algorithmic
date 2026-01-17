@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input, Select, Button } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input, Select, Button } from '../../shared/ui';
+import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { TreeDisplay } from '../../shared/visualization';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   template,
   complexity,
@@ -87,115 +87,127 @@ export default function BSTVisualizer() {
 
   const result = state ? getResult(state) : null;
 
-  return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="space-y-4">
-          <Card title="Build Tree">
-            <div className="space-y-4">
-              <Input
-                label="Initial values (insertion order)"
-                value={treeInput}
-                onChange={(e) => setTreeInput(e.target.value)}
-                placeholder="50, 30, 70, 20, 40"
-              />
-              <Button onClick={handleBuildTree} variant="primary" className="w-full">
-                Build Tree
-              </Button>
-            </div>
-          </Card>
-
-          <Card title="Operation">
-            <div className="space-y-4">
-              <Select
-                label="Operation"
-                value={operation}
-                onChange={(e) => setOperation(e.target.value)}
-                options={operationOptions}
-              />
-
-              <Input
-                label="Value"
-                type="number"
-                value={valueInput}
-                onChange={(e) => setValueInput(e.target.value)}
-              />
-            </div>
-          </Card>
-
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
-          )}
+  const infoTabs = [
+    {
+      id: 'explanation',
+      label: 'Explanation',
+      content: state ? (
+        <ExplanationPanel
+          explanation={getExplanation(state)}
+          status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
+        />
+      ) : (
+        <div className="text-zinc-500 dark:text-zinc-400 text-sm">
+          Click Step or Run to begin
         </div>
+      ),
+    },
+    {
+      id: 'complexity',
+      label: 'Complexity',
+      content: <ComplexityPanel complexity={complexity} />,
+    },
+    {
+      id: 'guide',
+      label: 'Guide',
+      content: (
+        <div className="space-y-2 text-sm text-zinc-400">
+          <p>For every node:</p>
+          <p><span className="text-blue-400 font-medium">Left subtree</span> contains only values <span className="text-white">less than</span> the node</p>
+          <p><span className="text-rose-400 font-medium">Right subtree</span> contains only values <span className="text-white">greater than</span> the node</p>
+        </div>
+      ),
+    },
+  ];
 
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Tree Visualization">
-            <div className="min-h-[300px]">
-              {state && (
-                <TreeDisplay
-                  tree={state.tree}
-                  highlightedNodes={state.highlightedNodes}
-                  activeNode={state.activeNode}
-                />
-              )}
+  if (result) {
+    infoTabs.push({
+      id: 'result',
+      label: 'Result',
+      content: (
+        <ResultBanner
+          success={result.success}
+          title={result.title}
+          message={result.message}
+          details={result.details}
+        />
+      ),
+    });
+  }
+
+  return (
+    <VisualizerLayout
+      configurationContent={
+        <div className="space-y-5">
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Build Tree
             </div>
-          </Card>
+            <Input
+              label="Initial values (insertion order)"
+              value={treeInput}
+              onChange={(e) => setTreeInput(e.target.value)}
+              placeholder="50, 30, 70, 20, 40"
+            />
+            <Button onClick={handleBuildTree} variant="primary" className="w-full">
+              Build Tree
+            </Button>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={template.code}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={template.name}
-                description={template.description}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
-                />
-              )}
-
-              <ComplexityPanel complexity={complexity} />
-
-              <Card title="BST Property">
-                <div className="space-y-2 text-sm text-zinc-400">
-                  <p>For every node:</p>
-                  <p><span className="text-blue-400 font-medium">Left subtree</span> contains only values <span className="text-white">less than</span> the node</p>
-                  <p><span className="text-rose-400 font-medium">Right subtree</span> contains only values <span className="text-white">greater than</span> the node</p>
-                </div>
-              </Card>
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Operation
             </div>
+            <Select
+              label="Operation"
+              value={operation}
+              onChange={(e) => setOperation(e.target.value)}
+              options={operationOptions}
+            />
+            <Input
+              label="Value"
+              type="number"
+              value={valueInput}
+              onChange={(e) => setValueInput(e.target.value)}
+            />
           </div>
         </div>
-      </div>
-    </div>
-    </div>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        <div className="min-h-[300px] w-full">
+          {state && (
+            <TreeDisplay
+              tree={state.tree}
+              highlightedNodes={state.highlightedNodes}
+              activeNode={state.activeNode}
+            />
+          )}
+        </div>
+      }
+      codeProps={
+        state
+          ? {
+              code: template.code,
+              currentLine: state.currentLine,
+              done: state.done,
+              title: template.name,
+              description: template.description,
+            }
+          : null
+      }
+      stateProps={state ? { variables, additionalInfo } : null}
+      infoTabs={infoTabs}
+    />
   );
 }

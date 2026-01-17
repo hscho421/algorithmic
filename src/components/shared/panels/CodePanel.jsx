@@ -122,39 +122,37 @@ const HighlightedLine = ({ line, isActive, isPast }) => {
 
 export default function CodePanel({ code, currentLine, done, title, description }) {
   return (
-    <Card title="Code">
-      <div className="font-mono text-sm">
-        {(title || description) && (
-          <div className="mb-4 pb-3 border-b border-zinc-200 dark:border-zinc-800">
-            {title && <h3 className="text-zinc-700 dark:text-zinc-300 font-semibold">{title}</h3>}
-            {description && <p className="text-zinc-500 text-xs mt-1">{description}</p>}
-          </div>
-        )}
-
-        <div className="space-y-0.5">
-          {code.map((item, idx) => {
-            const isActive = idx === currentLine && !done;
-            const isPast = idx < currentLine || done;
-
-            return (
-              <div
-                key={idx}
-                className={`
-                  flex items-center rounded px-2 py-1 transition-all duration-200
-                  ${isActive ? 'bg-amber-100 dark:bg-amber-500/20 border-l-2 border-amber-500' : 'border-l-2 border-transparent'}
-                `}
-              >
-                <span className={`w-6 text-right mr-4 text-xs ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 dark:text-zinc-600'}`}>
-                  {idx + 1}
-                </span>
-                <span style={{ paddingLeft: `${item.indent * 1.5}rem` }}>
-                  <HighlightedLine line={item.line} isActive={isActive} isPast={isPast} />
-                </span>
-              </div>
-            );
-          })}
+    <div className="font-mono text-sm">
+      {(title || description) && (
+        <div className="mb-4 pb-3 border-b border-zinc-200 dark:border-zinc-800">
+          {title && <h3 className="text-zinc-700 dark:text-zinc-300 font-semibold">{title}</h3>}
+          {description && <p className="text-zinc-500 text-xs mt-1">{description}</p>}
         </div>
+      )}
+
+      <div className="space-y-0.5">
+        {code.map((item, idx) => {
+          const isActive = idx === currentLine && !done;
+          const isPast = idx < currentLine || done;
+
+          return (
+            <div
+              key={idx}
+              className={`
+                flex items-center rounded px-2 py-1 transition-all duration-200
+                ${isActive ? 'bg-amber-100 dark:bg-amber-500/20 border-l-2 border-amber-500' : 'border-l-2 border-transparent'}
+              `}
+            >
+              <span className={`w-6 text-right mr-4 text-xs ${isActive ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-400 dark:text-zinc-600'}`}>
+                {idx + 1}
+              </span>
+              <span style={{ paddingLeft: `${item.indent * 1.5}rem` }}>
+                <HighlightedLine line={item.line} isActive={isActive} isPast={isPast} />
+              </span>
+            </div>
+          );
+        })}
       </div>
-    </Card>
+    </div>
   );
 }

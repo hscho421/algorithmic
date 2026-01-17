@@ -2,17 +2,17 @@ export const template = {
   name: 'Depth-First Search',
   description: 'Explore as deep as possible before backtracking',
   code: [
-    { line: 'DFS(graph, start):', indent: 0 },
+    { line: 'def dfs(graph, start):', indent: 0 },
     { line: 'stack = [start]', indent: 1 },
-    { line: 'visited = {}', indent: 1 },
-    { line: 'while stack not empty:', indent: 1 },
+    { line: 'visited = set()', indent: 1 },
+    { line: 'while stack:', indent: 1 },
     { line: 'node = stack.pop()', indent: 2 },
     { line: 'if node in visited: continue', indent: 2 },
     { line: 'visited.add(node)', indent: 2 },
     { line: 'process(node)', indent: 2 },
     { line: 'for neighbor in graph[node]:', indent: 2 },
     { line: 'if neighbor not in visited:', indent: 3 },
-    { line: 'stack.push(neighbor)', indent: 4 },
+    { line: 'stack.append(neighbor)', indent: 4 },
   ],
 };
 

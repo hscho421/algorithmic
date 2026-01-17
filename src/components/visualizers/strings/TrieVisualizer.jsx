@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input, Select, Button } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input, Select, Button } from '../../shared/ui';
+import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import TrieDisplay from '../../shared/visualization/TrieDisplay';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   template,
   complexity,
@@ -98,114 +98,127 @@ export default function TrieVisualizer() {
     prefix: template.code.prefix,
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="space-y-4">
-          <Card title="Build Trie">
-            <div className="space-y-4">
-              <Input
-                label="Initial words"
-                value={wordsInput}
-                onChange={(e) => setWordsInput(e.target.value)}
-                placeholder="cat, car, cart"
-              />
-              <Button onClick={handleBuildTrie} variant="primary" className="w-full">
-                Build Trie
-              </Button>
-            </div>
-          </Card>
-
-          <Card title="Operation">
-            <div className="space-y-4">
-              <Select
-                label="Mode"
-                value={operation}
-                onChange={(e) => setOperation(e.target.value)}
-                options={operationOptions}
-              />
-              <Input
-                label={operation === 'prefix' ? 'Prefix' : 'Word'}
-                value={wordInput}
-                onChange={(e) => setWordInput(e.target.value)}
-              />
-            </div>
-          </Card>
-
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
-          )}
+  const infoTabs = [
+    {
+      id: 'explanation',
+      label: 'Explanation',
+      content: state ? (
+        <ExplanationPanel
+          explanation={getExplanation(state)}
+          status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
+        />
+      ) : (
+        <div className="text-zinc-500 dark:text-zinc-400 text-sm">
+          Click Step or Run to begin
         </div>
+      ),
+    },
+    {
+      id: 'complexity',
+      label: 'Complexity',
+      content: <ComplexityPanel complexity={complexity} />,
+    },
+    {
+      id: 'guide',
+      label: 'Guide',
+      content: (
+        <div className="space-y-2 text-sm text-zinc-400">
+          <p><span className="text-zinc-900 dark:text-white font-medium">1. Prefix tree:</span> each edge is a character</p>
+          <p><span className="text-zinc-900 dark:text-white font-medium">2. Shared paths:</span> words share prefixes</p>
+          <p><span className="text-zinc-900 dark:text-white font-medium">3. Fast lookup:</span> O(L) per word</p>
+        </div>
+      ),
+    },
+  ];
 
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Trie Visualization">
-            <div className="min-h-[180px]">
-              {state && (
-                <TrieDisplay
-                  nodes={state.nodes}
-                  edges={state.edges}
-                  highlightedNodes={state.highlightedNodes}
-                  activeNode={state.activeNode}
-                />
-              )}
+  if (result) {
+    infoTabs.push({
+      id: 'result',
+      label: 'Result',
+      content: (
+        <ResultBanner
+          success={result.success}
+          title={result.title}
+          message={result.message}
+          details={result.details}
+        />
+      ),
+    });
+  }
+
+  return (
+    <VisualizerLayout
+      configurationContent={
+        <div className="space-y-5">
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Build Trie
             </div>
-          </Card>
+            <Input
+              label="Initial words"
+              value={wordsInput}
+              onChange={(e) => setWordsInput(e.target.value)}
+              placeholder="cat, car, cart"
+            />
+            <Button onClick={handleBuildTrie} variant="primary" className="w-full">
+              Build Trie
+            </Button>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={codeMap[operation]}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={template.name}
-                description={template.description}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
-                />
-              )}
-
-              <ComplexityPanel complexity={complexity} />
-
-              <Card title="Trie Tips">
-                <div className="space-y-2 text-sm text-zinc-400">
-                  <p><span className="text-zinc-900 dark:text-white font-medium">1. Prefix tree:</span> each edge is a character</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">2. Shared paths:</span> words share prefixes</p>
-                  <p><span className="text-zinc-900 dark:text-white font-medium">3. Fast lookup:</span> O(L) per word</p>
-                </div>
-              </Card>
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Operation
             </div>
+            <Select
+              label="Mode"
+              value={operation}
+              onChange={(e) => setOperation(e.target.value)}
+              options={operationOptions}
+            />
+            <Input
+              label={operation === 'prefix' ? 'Prefix' : 'Word'}
+              value={wordInput}
+              onChange={(e) => setWordInput(e.target.value)}
+            />
           </div>
         </div>
-      </div>
-    </div>
-    </div>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        <div className="min-h-[180px] w-full">
+          {state && (
+            <TrieDisplay
+              nodes={state.nodes}
+              edges={state.edges}
+              highlightedNodes={state.highlightedNodes}
+              activeNode={state.activeNode}
+            />
+          )}
+        </div>
+      }
+      codeProps={
+        state
+          ? {
+              code: codeMap[operation],
+              currentLine: state.currentLine,
+              done: state.done,
+              title: template.name,
+              description: template.description,
+            }
+          : null
+      }
+      stateProps={state ? { variables, additionalInfo } : null}
+      infoTabs={infoTabs}
+    />
   );
 }

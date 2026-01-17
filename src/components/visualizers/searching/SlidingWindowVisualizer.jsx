@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input, Select, Button } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input, Select, Button } from '../../shared/ui';
+import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   TEMPLATES,
   complexity,
@@ -106,138 +106,165 @@ export default function SlidingWindowVisualizer() {
   const result = state ? getResult(state) : null;
 
   return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="space-y-4">
-          <Card title="Configuration">
-            <div className="space-y-4">
-              <Select
-                label="Problem"
-                value={mode}
-                onChange={(e) => setMode(e.target.value)}
-                options={modeOptions}
-              />
-              <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
-                {template.description}
-              </div>
-
-              {template.inputType === 'array' && (
-                <>
-                  <div className="flex gap-2">
-                    <Input
-                      label="Array"
-                      value={arrayInput}
-                      onChange={(e) => setArrayInput(e.target.value)}
-                      placeholder="4, 2, 1, 7"
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={handleRandomize}
-                      className="self-end"
-                      title="Generate random array"
-                    >
-                      🎲
-                    </Button>
-                  </div>
-                  {mode === 'fixed_max_sum' && (
-                    <Input
-                      label="Window size (k)"
-                      type="number"
-                      value={windowSize}
-                      onChange={(e) => setWindowSize(e.target.value)}
-                      min="1"
-                    />
-                  )}
-                  {mode === 'min_len_subarray' && (
-                    <Input
-                      label="Target sum"
-                      type="number"
-                      value={target}
-                      onChange={(e) => setTarget(e.target.value)}
-                      min="1"
-                    />
-                  )}
-                </>
-              )}
-
-              {template.inputType === 'string' && (
-                <div className="flex gap-2">
-                  <Input
-                    label="Text"
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    placeholder="abcaabcd"
-                    className="flex-1"
-                  />
-                  <Button
-                    onClick={handleRandomize}
-                    className="self-end"
-                    title="Generate random string"
-                  >
-                    🎲
-                  </Button>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
+    <VisualizerLayout
+      configurationContent={
+        <>
+          <Select
+            label="Problem"
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+            options={modeOptions}
           />
-
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
-          )}
-        </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Sliding Window Visualization">
-            <div className="min-h-[220px]">
-              {state && <SlidingWindowVisualization state={state} />}
-            </div>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={template.code}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={template.name}
-                description={template.description}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
-                />
-              )}
-              <ComplexityPanel complexity={complexity[mode]} />
-            </div>
+          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
+            {template.description}
           </div>
-        </div>
-      </div>
-    </div>
-    </div>
+
+          {template.inputType === 'array' && (
+            <>
+              <div className="flex gap-2">
+                <Input
+                  label="Array"
+                  value={arrayInput}
+                  onChange={(e) => setArrayInput(e.target.value)}
+                  placeholder="4, 2, 1, 7"
+                  className="flex-1"
+                />
+                <Button
+                  onClick={handleRandomize}
+                  className="self-end"
+                  title="Generate random array"
+                >
+                  🎲
+                </Button>
+              </div>
+              {mode === 'fixed_max_sum' && (
+                <Input
+                  label="Window size (k)"
+                  type="number"
+                  value={windowSize}
+                  onChange={(e) => setWindowSize(e.target.value)}
+                  min="1"
+                />
+              )}
+              {mode === 'min_len_subarray' && (
+                <Input
+                  label="Target sum"
+                  type="number"
+                  value={target}
+                  onChange={(e) => setTarget(e.target.value)}
+                  min="1"
+                />
+              )}
+            </>
+          )}
+
+          {template.inputType === 'string' && (
+            <div className="flex gap-2">
+              <Input
+                label="Text"
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                placeholder="abcaabcd"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleRandomize}
+                className="self-end"
+                title="Generate random string"
+              >
+                🎲
+              </Button>
+            </div>
+          )}
+        </>
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        state && <SlidingWindowVisualization state={state} />
+      }
+      visualizationMinHeight="220px"
+      codeProps={
+        state
+          ? {
+              code: template.code,
+              currentLine: state.currentLine,
+              done: state.done,
+              title: template.name,
+              description: template.description,
+            }
+          : null
+      }
+      stateProps={
+        state
+          ? {
+              variables,
+              additionalInfo,
+            }
+          : null
+      }
+      infoTabs={[
+        ...(state
+          ? [
+              {
+                id: 'explanation',
+                label: 'Explanation',
+                content: (
+                  <ExplanationPanel
+                    explanation={getExplanation(state)}
+                    status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
+                  />
+                ),
+              },
+            ]
+          : []),
+        {
+          id: 'complexity',
+          label: 'Complexity',
+          content: <ComplexityPanel complexity={complexity[mode]} />,
+        },
+        ...(result
+          ? [
+              {
+                id: 'result',
+                label: 'Result',
+                content: (
+                  <div>
+                    <div className={`rounded-lg p-4 ${result.success ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-rose-50 dark:bg-rose-900/20'}`}>
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{result.success ? '✓' : '✗'}</span>
+                        <div className="flex-1">
+                          <div className={`font-semibold ${result.success ? 'text-emerald-900 dark:text-emerald-100' : 'text-rose-900 dark:text-rose-100'}`}>
+                            {result.title}
+                          </div>
+                          <div className={`text-sm mt-1 ${result.success ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
+                            {result.message}
+                          </div>
+                          {Array.isArray(result.details) && result.details.length > 0 && (
+                            <div className="text-xs mt-2 space-y-1 text-zinc-600 dark:text-zinc-400">
+                              {result.details.map((detail, idx) => (
+                                <div key={idx}>• {detail}</div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ),
+              },
+            ]
+          : []),
+      ]}
+    />
   );
 }

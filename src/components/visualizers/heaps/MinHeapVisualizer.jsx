@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
-import { Card, Input, Select, Button } from '../../shared/ui';
-import { ControlPanel } from '../../shared/controls';
-import { CodePanel, StatePanel, ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
+import { Input, Select, Button } from '../../shared/ui';
+import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { TreeDisplay } from '../../shared/visualization';
+import VisualizerLayout from '../../shared/layout/VisualizerLayout';
 import {
   template,
   complexity,
@@ -212,150 +212,164 @@ export default function MinHeapVisualizer() {
   };
   const currentCode = codeMap[operation] || template.code.insert;
 
+  const infoTabs = [
+    {
+      id: 'explanation',
+      label: 'Explanation',
+      content: state ? (
+        <ExplanationPanel
+          explanation={getExplanation(state)}
+          status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
+        />
+      ) : (
+        <div className="text-zinc-500 dark:text-zinc-400 text-sm">
+          Click Step or Run to begin
+        </div>
+      ),
+    },
+    {
+      id: 'complexity',
+      label: 'Complexity',
+      content: <ComplexityPanel complexity={complexity} />,
+    },
+    {
+      id: 'guide',
+      label: 'Guide',
+      content: (
+        <div className="space-y-2 text-sm text-zinc-400">
+          <p>
+            Every parent value is {heapType === 'min' ? 'less than or equal to' : 'greater than or equal to'} its children.
+          </p>
+          <p>Complete tree: nodes fill each level from left to right.</p>
+        </div>
+      ),
+    },
+  ];
+
+  if (result) {
+    infoTabs.push({
+      id: 'result',
+      label: 'Result',
+      content: (
+        <ResultBanner
+          success={result.success}
+          title={result.title}
+          message={result.message}
+          details={result.details}
+        />
+      ),
+    });
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="space-y-4">
-          <Card title="Build Heap">
-            <div className="space-y-4">
-              <Select
-                label="Heap Type"
-                value={heapType}
-                onChange={(e) => setHeapType(e.target.value)}
-                options={heapTypeOptions}
+    <VisualizerLayout
+      configurationContent={
+        <div className="space-y-5">
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Build Heap
+            </div>
+            <Select
+              label="Heap Type"
+              value={heapType}
+              onChange={(e) => setHeapType(e.target.value)}
+              options={heapTypeOptions}
+            />
+            <div className="flex gap-2">
+              <Input
+                label="Initial values"
+                value={heapInput}
+                onChange={(e) => setHeapInput(e.target.value)}
+                placeholder="41, 29, 18, 14"
+                className="flex-1"
               />
-              <div className="flex gap-2">
-                <Input
-                  label="Initial values"
-                  value={heapInput}
-                  onChange={(e) => setHeapInput(e.target.value)}
-                  placeholder="41, 29, 18, 14"
-                  className="flex-1"
-                />
-                <Button
-                  onClick={handleGenerateHeap}
-                  className="self-end"
-                  title="Generate random heap input"
-                >
-                  🎲
-                </Button>
-              </div>
-              <Button onClick={handleBuildHeap} variant="primary" className="w-full">
-                Build Heap
+              <Button
+                onClick={handleGenerateHeap}
+                className="self-end"
+                title="Generate random heap input"
+              >
+                🎲
               </Button>
             </div>
-          </Card>
+            <Button onClick={handleBuildHeap} variant="primary" className="w-full">
+              Build Heap
+            </Button>
+          </div>
 
-          <Card title="Operation">
-            <div className="space-y-4">
-              <Select
-                label="Operation"
-                value={operation}
-                onChange={(e) => setOperation(e.target.value)}
-                options={operationOptions}
-              />
+          <div className="space-y-4">
+            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+              Operation
+            </div>
+            <Select
+              label="Operation"
+              value={operation}
+              onChange={(e) => setOperation(e.target.value)}
+              options={operationOptions}
+            />
 
-              {requiresIndex && (
-                <Input
-                  label="Index"
-                  type="number"
-                  value={indexInput}
-                  onChange={(e) => setIndexInput(e.target.value)}
-                  min="0"
-                />
-              )}
-
+            {requiresIndex && (
               <Input
-                label={operation === 'change-key' ? 'New value' : 'Value'}
+                label="Index"
                 type="number"
-                value={valueInput}
-                onChange={(e) => setValueInput(e.target.value)}
-                disabled={!requiresValue}
+                value={indexInput}
+                onChange={(e) => setIndexInput(e.target.value)}
+                min="0"
               />
-            </div>
-          </Card>
+            )}
 
-          <ControlPanel
-            onStep={step}
-            onBack={handleBack}
-            onRun={toggle}
-            onReset={handleReset}
-            isRunning={isRunning}
-            canStep={canStep}
-            canBack={canBack}
-            speed={speed}
-            onSpeedChange={setSpeed}
-          />
-
-          {state && (
-            <StatePanel variables={variables} additionalInfo={additionalInfo} />
-          )}
+            <Input
+              label={operation === 'change-key' ? 'New value' : 'Value'}
+              type="number"
+              value={valueInput}
+              onChange={(e) => setValueInput(e.target.value)}
+              disabled={!requiresValue}
+            />
+          </div>
         </div>
-
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="Heap Visualization">
-            <div className="min-h-[300px]">
-              {state && (
-                <TreeDisplay
-                  tree={state.tree}
-                  highlightedNodes={state.highlightedNodes}
-                  activeNode={state.activeNode}
-                  animationKey={state.stepIndex}
-                />
-              )}
-            </div>
-          </Card>
-
-          <Card title="Heap Array">
+      }
+      controlProps={{
+        onStep: step,
+        onBack: handleBack,
+        onRun: toggle,
+        onReset: handleReset,
+        isRunning,
+        canStep,
+        canBack,
+        speed,
+        onSpeedChange: setSpeed,
+      }}
+      visualizationContent={
+        <div className="w-full space-y-4">
+          <div className="min-h-[300px]">
+            {state && (
+              <TreeDisplay
+                tree={state.tree}
+                highlightedNodes={state.highlightedNodes}
+                activeNode={state.activeNode}
+                animationKey={state.stepIndex}
+              />
+            )}
+          </div>
+          <div>
             {state && (
               <HeapArrayDisplay heap={state.heap} highlights={state.highlights} phase={state.phase} />
             )}
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {state && (
-              <CodePanel
-                code={currentCode}
-                currentLine={state.currentLine}
-                done={state.done}
-                title={heapLabel}
-                description={template.description}
-              />
-            )}
-
-            <div className="space-y-4">
-              {result && (
-                <ResultBanner
-                  success={result.success}
-                  title={result.title}
-                  message={result.message}
-                  details={result.details}
-                />
-              )}
-
-              {state && (
-                <ExplanationPanel
-                  explanation={getExplanation(state)}
-                  status={state.done ? (result?.success ? 'success' : 'failure') : 'running'}
-                />
-              )}
-
-              <ComplexityPanel complexity={complexity} />
-
-              <Card title="Heap Property">
-                <div className="space-y-2 text-sm text-zinc-400">
-                  <p>
-                    Every parent value is {heapType === 'min' ? 'less than or equal to' : 'greater than or equal to'} its children.
-                  </p>
-                  <p>Complete tree: nodes fill each level from left to right.</p>
-                </div>
-              </Card>
-            </div>
           </div>
         </div>
-      </div>
-    </div>
-    </div>
+      }
+      codeProps={
+        state
+          ? {
+              code: currentCode,
+              currentLine: state.currentLine,
+              done: state.done,
+              title: heapLabel,
+              description: template.description,
+            }
+          : null
+      }
+      stateProps={state ? { variables, additionalInfo } : null}
+      infoTabs={infoTabs}
+    />
   );
 }
