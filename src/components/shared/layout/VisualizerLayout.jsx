@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import ControlPanel from '../controls/ControlPanel';
 import StatePanel from '../panels/StatePanel';
 import CodePanel from '../panels/CodePanel';
@@ -16,6 +16,152 @@ export default function VisualizerLayout({
   className = '',
 }) {
   const [showHelp, setShowHelp] = useState(false);
+  const gridRef = useRef(null);
+  const dragRef = useRef(null);
+
+  const GAP_PX = 16;
+  const DEFAULT_COLS = [25, 50, 25];
+  const SNAP_PX = 24;
+  const MIN_COL_PX = { left: 240, center: 360, right: 240 };
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [colPercents, setColPercents] = useState(DEFAULT_COLS);
+  const colPercentsRef = useRef(colPercents);
+  const [isLg, setIsLg] = useState(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return true;
+    return window.matchMedia('(min-width: 1024px)').matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const query = window.matchMedia('(min-width: 1024px)');
+    const onChange = (event) => setIsLg(event.matches);
+    query.addEventListener?.('change', onChange);
+    query.addListener?.(onChange);
+    return () => {
+      query.removeEventListener?.('change', onChange);
+      query.removeListener?.(onChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!gridRef.current || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry && entry.contentRect) {
+        setContainerWidth(entry.contentRect.width);
+      }
+    });
+    observer.observe(gridRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isLg) {
+      setColPercents(DEFAULT_COLS);
+    }
+  }, [isLg]);
+
+  useEffect(() => {
+    colPercentsRef.current = colPercents;
+  }, [colPercents]);
+
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const availableWidth = Math.max(0, containerWidth - GAP_PX * 2);
+  const leftPx = (availableWidth * colPercents[0]) / 100;
+  const centerPx = (availableWidth * colPercents[1]) / 100;
+  const rightPx = (availableWidth * colPercents[2]) / 100;
+  const defaultLeftPx = (availableWidth * DEFAULT_COLS[0]) / 100;
+  const defaultCenterPx = (availableWidth * DEFAULT_COLS[1]) / 100;
+  const defaultRightPx = (availableWidth * DEFAULT_COLS[2]) / 100;
+
+  const updateColumns = useCallback(
+    (clientX) => {
+      if (!gridRef.current || !availableWidth) return;
+      const rect = gridRef.current.getBoundingClientRect();
+      const x = clamp(clientX - rect.left, 0, containerWidth);
+      const dragType = dragRef.current?.type;
+
+      if (dragType === 'left') {
+        const minLeft = MIN_COL_PX.left;
+        const maxLeft = Math.max(minLeft, availableWidth - MIN_COL_PX.center - rightPx);
+        const nextLeftPx = clamp(x - GAP_PX, minLeft, maxLeft);
+        const nextLeft = (nextLeftPx / availableWidth) * 100;
+        const nextRight = colPercents[2];
+        let nextCenter = Math.max(0, 100 - nextLeft - nextRight);
+        const leftDelta = Math.abs(nextLeftPx - defaultLeftPx);
+        const centerDelta = Math.abs((availableWidth * nextCenter) / 100 - defaultCenterPx);
+        const rightDelta = Math.abs((availableWidth * nextRight) / 100 - defaultRightPx);
+        if (leftDelta <= SNAP_PX && centerDelta <= SNAP_PX && rightDelta <= SNAP_PX) {
+          setColPercents(DEFAULT_COLS);
+          return;
+        }
+        setColPercents([nextLeft, nextCenter, nextRight]);
+      } else if (dragType === 'right') {
+        const minCenter = MIN_COL_PX.center;
+        const maxCenter = Math.max(minCenter, availableWidth - leftPx - MIN_COL_PX.right);
+        const nextCenterPx = clamp(x - leftPx - GAP_PX, minCenter, maxCenter);
+        const nextRightPx = Math.max(0, availableWidth - leftPx - nextCenterPx);
+        const nextLeft = colPercents[0];
+        let nextCenter = (nextCenterPx / availableWidth) * 100;
+        const nextRight = Math.max(0, 100 - nextLeft - nextCenter);
+        const leftDelta = Math.abs((availableWidth * nextLeft) / 100 - defaultLeftPx);
+        const centerDelta = Math.abs(nextCenterPx - defaultCenterPx);
+        const rightDelta = Math.abs(nextRightPx - defaultRightPx);
+        if (leftDelta <= SNAP_PX && centerDelta <= SNAP_PX && rightDelta <= SNAP_PX) {
+          setColPercents(DEFAULT_COLS);
+          return;
+        }
+        setColPercents([nextLeft, nextCenter, nextRight]);
+      }
+    },
+    [
+      availableWidth,
+      colPercents,
+      containerWidth,
+      defaultCenterPx,
+      defaultLeftPx,
+      defaultRightPx,
+      leftPx,
+      rightPx,
+    ],
+  );
+
+  const handlePointerDown = useCallback((type, event) => {
+    if (!isLg) return;
+    event.preventDefault();
+    dragRef.current = { type };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }, [isLg]);
+
+  const handlePointerMove = useCallback(
+    (event) => {
+      if (!dragRef.current) return;
+      updateColumns(event.clientX);
+    },
+    [updateColumns],
+  );
+
+  const handlePointerUp = useCallback(() => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    const [left, center, right] = colPercentsRef.current;
+    const leftDelta = Math.abs((availableWidth * left) / 100 - defaultLeftPx);
+    const centerDelta = Math.abs((availableWidth * center) / 100 - defaultCenterPx);
+    const rightDelta = Math.abs((availableWidth * right) / 100 - defaultRightPx);
+    if (leftDelta <= SNAP_PX && centerDelta <= SNAP_PX && rightDelta <= SNAP_PX) {
+      setColPercents(DEFAULT_COLS);
+    }
+  }, [availableWidth, defaultCenterPx, defaultLeftPx, defaultRightPx]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+    };
+  }, [handlePointerMove, handlePointerUp]);
 
   // Separate info tabs into reference and status
   const explanationTab = infoTabs.find(tab => tab.id === 'explanation');
@@ -118,9 +264,48 @@ export default function VisualizerLayout({
     <div className={`w-full font-body ${className}`}>
       <div className="w-full px-4 py-6">
         {/* Three Column Grid Layout - Screen Height */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4" style={{ minHeight: 'calc(100vh - 60px)' }}>
+        <div
+          ref={gridRef}
+          className="relative grid grid-cols-1 lg:grid-cols-3 gap-4"
+          style={{
+            minHeight: 'calc(100vh - 60px)',
+            ...(isLg
+              ? {
+                  gridTemplateColumns: `calc((100% - ${GAP_PX * 2}px) * ${
+                    colPercents[0] / 100
+                  }) calc((100% - ${GAP_PX * 2}px) * ${
+                    colPercents[1] / 100
+                  }) calc((100% - ${GAP_PX * 2}px) * ${colPercents[2] / 100})`,
+                }
+              : {}),
+          }}
+        >
+          {isLg && (
+            <>
+              <div
+                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none"
+                style={{ left: leftPx, width: GAP_PX }}
+                onPointerDown={(event) => handlePointerDown('left', event)}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize left panel"
+              >
+                <div className="w-1 h-full bg-transparent hover:bg-blue-400/40 transition-colors" />
+              </div>
+              <div
+                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none"
+                style={{ left: leftPx + GAP_PX + centerPx, width: GAP_PX }}
+                onPointerDown={(event) => handlePointerDown('right', event)}
+                role="separator"
+                aria-orientation="vertical"
+                aria-label="Resize right panel"
+              >
+                <div className="w-1 h-full bg-transparent hover:bg-blue-400/40 transition-colors" />
+              </div>
+            </>
+          )}
           {/* Left Column - Configuration, Controls & Guide (3 cols) */}
-          <div className="lg:col-span-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 flex flex-col overflow-hidden">
             {/* Configuration Section */}
             {configurationContent && (
               <div className="flex-shrink-0">
@@ -149,7 +334,7 @@ export default function VisualizerLayout({
           </div>
 
           {/* Center Column - Visualization & State (6 cols) */}
-          <div className="lg:col-span-6 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 flex flex-col overflow-hidden">
             {/* Visualization Section */}
             <div className="flex-1 flex flex-col overflow-hidden">
               <h3 className="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-4 flex-shrink-0">
@@ -182,7 +367,7 @@ export default function VisualizerLayout({
           </div>
 
           {/* Right Column - Explanation/Result, Code & Complexity (3 cols) */}
-          <div className="lg:col-span-3 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-5 flex flex-col overflow-hidden">
             {rightTabs.length > 0 && (
               <div className="flex flex-col flex-shrink-0">
                 <div className="flex flex-wrap gap-2 pb-3 border-b border-zinc-200 dark:border-zinc-800">
