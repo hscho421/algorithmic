@@ -42,15 +42,22 @@ const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minG
 };
 
 export default function SortingArrayVisualization({ state }) {
-  const { array, highlights = [], ranges = [], leftCopy, rightCopy, leftPointer, rightPointer } = state;
+  // Handle both 'array' (sorting/binary search) and 'items' (sliding window)
+  const arrayData = state.array || state.items || [];
+  const { highlights = [], ranges = [], leftCopy, rightCopy, leftPointer, rightPointer, l, r, m } = state;
 
-  if (!array || array.length === 0) {
+  if (!arrayData || arrayData.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-zinc-500 italic">
         Empty array — add elements to visualize
       </div>
     );
   }
+
+  const array = arrayData;
+
+  // Detect if this is a pointer-based algorithm (binary search, sliding window)
+  const isPointerBased = (l !== undefined || r !== undefined) && !ranges.length;
 
   const maxVal = Math.max(...array, 1);
 
@@ -72,6 +79,19 @@ export default function SortingArrayVisualization({ state }) {
     const highlightType = getHighlightType(idx);
     const rangeType = getRangeType(idx);
 
+    // For pointer-based algorithms (binary search, sliding window)
+    if (isPointerBased) {
+      if (idx === m) return 'bg-purple-500'; // Mid pointer
+      if (idx === l) return 'bg-blue-500';   // Left pointer
+      if (idx === r) return 'bg-rose-500';   // Right pointer
+      // Sliding window range highlighting
+      if (l !== undefined && r !== undefined && idx >= l && idx <= r) {
+        return 'bg-amber-500/70'; // Window range
+      }
+      return 'bg-zinc-600';
+    }
+
+    // For sorting algorithms
     if (highlightType === 'sorted') return 'bg-emerald-500';
     if (highlightType === 'swapping' || highlightType === 'swapped') return 'bg-rose-500';
     if (highlightType === 'comparing') return 'bg-amber-400';
@@ -126,26 +146,56 @@ export default function SortingArrayVisualization({ state }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-center pb-1">
-        <div className="flex items-end h-40 px-4 pt-3 w-full" style={{ gap: `${barGap}px` }} ref={mainRef}>
-          {array.map((value, idx) => {
-            const minHeight = 12;
-            const maxHeight = 130;
-            const height = minHeight + (value / maxVal) * (maxHeight - minHeight);
-            const barColor = getBarColor(idx);
-            const borderStyle = getBorderStyle(idx);
+        {isPointerBased ? (
+          // Flat array visualization for pointer-based algorithms
+          <div className="flex" style={{ gap: `${barGap}px` }} ref={mainRef}>
+            {array.map((value, idx) => {
+              const barColor = getBarColor(idx);
+              const isPointer = idx === l || idx === r || idx === m;
 
-            return (
-              <div key={idx} className="flex flex-col items-center">
-                <div
-                  className={`rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
-                  style={{ width: `${barWidth}px`, height: `${height}px` }}
-                />
-                <div className="mt-0.5 text-xs font-mono text-zinc-400 leading-none">{value}</div>
-                <div className="text-xs font-mono text-zinc-600 leading-none">[{idx}]</div>
-              </div>
-            );
-          })}
-        </div>
+              return (
+                <div key={idx} className="flex flex-col items-center gap-1">
+                  <div
+                    className={`flex items-center justify-center rounded transition-all duration-300 font-mono text-sm ${barColor} ${
+                      isPointer ? 'text-white font-semibold' : 'text-zinc-300'
+                    }`}
+                    style={{
+                      width: `${barWidth}px`,
+                      height: `${barWidth}px`,
+                      minWidth: '32px',
+                      minHeight: '32px'
+                    }}
+                  >
+                    {value}
+                  </div>
+                  <div className="text-xs font-mono text-zinc-600 leading-none">[{idx}]</div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          // Bar graph visualization for sorting algorithms
+          <div className="flex items-end h-40 px-4 pt-3" style={{ gap: `${barGap}px` }} ref={mainRef}>
+            {array.map((value, idx) => {
+              const minHeight = 12;
+              const maxHeight = 130;
+              const height = minHeight + (value / maxVal) * (maxHeight - minHeight);
+              const barColor = getBarColor(idx);
+              const borderStyle = getBorderStyle(idx);
+
+              return (
+                <div key={idx} className="flex flex-col items-center">
+                  <div
+                    className={`rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
+                    style={{ width: `${barWidth}px`, height: `${height}px` }}
+                  />
+                  <div className="mt-0.5 text-xs font-mono text-zinc-400 leading-none">{value}</div>
+                  <div className="text-xs font-mono text-zinc-600 leading-none">[{idx}]</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {leftCopy && rightCopy && (
@@ -189,22 +239,53 @@ export default function SortingArrayVisualization({ state }) {
       )}
 
       <div className="flex items-center justify-center gap-4 text-xs mt-1">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-blue-500"></div>
-          <span className="text-zinc-400">Left half</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-rose-500"></div>
-          <span className="text-zinc-400">Right half</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-amber-400"></div>
-          <span className="text-zinc-400">Merging</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-emerald-500"></div>
-          <span className="text-zinc-400">Sorted</span>
-        </div>
+        {isPointerBased ? (
+          // Legend for pointer-based algorithms (binary search, sliding window)
+          <>
+            {l !== undefined && (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-blue-500"></div>
+                <span className="text-zinc-400">Left pointer</span>
+              </div>
+            )}
+            {r !== undefined && (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-rose-500"></div>
+                <span className="text-zinc-400">Right pointer</span>
+              </div>
+            )}
+            {m !== undefined && m !== null && (
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded bg-purple-500"></div>
+                <span className="text-zinc-400">Mid pointer</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-amber-500/70"></div>
+              <span className="text-zinc-400">Window/Range</span>
+            </div>
+          </>
+        ) : (
+          // Legend for sorting algorithms
+          <>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-blue-500"></div>
+              <span className="text-zinc-400">Left half</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-rose-500"></div>
+              <span className="text-zinc-400">Right half</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-amber-400"></div>
+              <span className="text-zinc-400">Merging</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded bg-emerald-500"></div>
+              <span className="text-zinc-400">Sorted</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

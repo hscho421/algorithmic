@@ -59,6 +59,24 @@ All keyboard shortcuts work the same as single visualizer mode:
 - **Graphs** (bfs, dfs, dijkstra, topological-sort, union-find)
 - **Dynamic Programming** (fibonacci, coin-change, lcs, knapsack)
 
+### Visualization Mapping (Comparison Panels)
+- **Sorting**: `SortingArrayVisualization`
+  - merge-sort, quick-sort, heap-sort
+- **Searching**:
+  - binary-search → `ArrayVisualization`
+  - sliding-window → `SlidingWindowVisualization`
+- **Trees**: `TreeDisplay`
+  - bst, tree-traversals
+- **Heaps**:
+  - min-heap → `TreeDisplay` + `HeapArrayDisplay` (combined)
+- **Strings**:
+  - trie → `TrieDisplay`
+- **Graphs**:
+  - bfs, dfs, dijkstra, topological-sort → `GraphDisplay`
+  - union-find → `UnionFindDisplay`
+- **Dynamic Programming**:
+  - fibonacci, coin-change, lcs, knapsack → `DPTable1D`/`DPTable2D` via `DPVisualization`
+
 ## Implementation Details
 
 ### Architecture

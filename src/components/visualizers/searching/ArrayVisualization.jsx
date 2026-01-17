@@ -103,8 +103,20 @@ function ComparisonBadge({ comparison, m, array, target, r }) {
 }
 
 export default function ArrayVisualization({ state }) {
-  const { array, l, r, m, templateKey, done, target, comparison, result, iteration } = state;
-  const template = TEMPLATES[templateKey];
+  // Handle both 'array' (binary search) and 'items' (sliding window)
+  const arrayData = state?.array || state?.items;
+
+  if (!state || !arrayData || arrayData.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-48 text-zinc-500 dark:text-zinc-500 italic">
+        Empty array — add elements to visualize
+      </div>
+    );
+  }
+
+  const array = arrayData;
+  const { l, r, m, templateKey, done, target, comparison, result, iteration } = state;
+  const template = TEMPLATES[templateKey] || {};
   const n = array.length;
   const containerRef = useRef(null);
   const containerWidth = useContainerWidth(containerRef);
