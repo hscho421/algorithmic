@@ -45,6 +45,9 @@ Billing (Stripe)
 2. Checkout and Portal
 - Use Stripe Checkout for initial subscription.
 - Use Customer Portal for upgrades/cancellations.
+Production note:
+- Create Checkout sessions on the server (not in the client) so you can attach trusted metadata.
+- Verify the Supabase user from the Authorization header before creating the session.
 
 3. Webhooks
 - Create a webhook endpoint (Vercel/Netlify/Cloudflare Functions).
@@ -54,6 +57,9 @@ Billing (Stripe)
   - customer.subscription.updated
   - customer.subscription.deleted
   - invoice.payment_failed
+Production note:
+- Verify Stripe signatures using the raw request body.
+- Make webhook handling idempotent (unique event IDs).
 
 4. Sync to Supabase
 - Webhook uses service role key to upsert subscription row.
@@ -66,6 +72,8 @@ Billing (Stripe)
 - username (text, unique, optional for public profiles)
 - avatar_url (text)
 - created_at (timestamp)
+Constraints:
+- user_id NOT NULL (if using a separate `user_id` column)
 
 ### user_preferences
 - id (uuid, primary key)
@@ -104,12 +112,16 @@ Constraints:
 - user_id (uuid, FK to auth.users)
 - algorithm_id (text)
 - created_at (timestamp)
+Constraints:
+- UNIQUE (user_id, algorithm_id)
 
 ### recent_activity
 - id (uuid, primary key)
 - user_id (uuid, FK to auth.users)
 - algorithm_id (text)
 - visited_at (timestamp)
+Indexes:
+- INDEX (user_id, visited_at DESC)
 
 ### subscriptions
 - id (uuid, primary key)
@@ -123,6 +135,11 @@ Constraints:
 - updated_at (timestamp)
 Notes:
 - `user_id` can be null until a Stripe customer is linked to an auth user.
+Constraints:
+- UNIQUE (stripe_customer_id)
+- UNIQUE (stripe_subscription_id)
+Optional:
+- store `price_id` (Stripe Price) instead of `plan_id` for direct mapping
 
 ## 5) RLS Policies (Must Have)
 
@@ -139,6 +156,11 @@ Example policy:
 - SELECT: `user_id = auth.uid()`
 - INSERT: no user policy
 - UPDATE: no user policy
+
+Additional safety requirements:
+- Use `user_id NOT NULL` on all user-owned rows.
+- FK to `auth.users(id)` with cascade delete if you want cleanup.
+- INSERT/UPDATE policies must enforce `user_id = auth.uid()` on new rows.
 
 ## 6) Client Integration Steps
 
@@ -170,6 +192,9 @@ Implementation notes:
 6. Feature gating
 - Check subscription status on login.
 - Hide or lock premium features accordingly.
+Production note:
+- Do not trust client state for entitlements.
+- Read a subscriptions row or a DB view (recommended) to gate access.
 
 ## 7) Serverless Webhooks
 
@@ -178,6 +203,11 @@ Create a function (Vercel example):
 - Verify Stripe signature.
 - On events, upsert to Supabase `subscriptions` table.
 - Use `SUPABASE_SERVICE_ROLE_KEY` for admin access.
+Recommended additions:
+- Create `api/stripe/create-checkout-session` to generate Checkout sessions server-side.
+- Validate Supabase JWT in this endpoint and derive `user_id` from the token.
+- Set Stripe metadata: `client_reference_id` and `metadata.supabase_user_id`.
+- Add a `stripe_events` table with unique `event_id` to avoid double writes.
 
 ## 8) Security Considerations
 
@@ -186,6 +216,7 @@ Create a function (Vercel example):
 - Validate inputs before writing to the database.
 - Rate limit any custom endpoints (if added).
 - Keep webhook signature validation strict.
+- Ensure no client route can create or update subscriptions.
 
 ## 9) Suggested Feature Mapping
 
@@ -204,6 +235,12 @@ Gating model:
 - Auth gates identity.
 - Subscription gates entitlement.
 - Premium content can be visible but locked to improve conversion.
+
+Optional view for entitlements:
+- Create a Postgres view `active_subscription` that returns true if:
+  - status IN ('active', 'trialing')
+  - current_period_end > now()
+Client reads from this view instead of raw Stripe fields.
 
 ## 10) Deployment Checklist
 
