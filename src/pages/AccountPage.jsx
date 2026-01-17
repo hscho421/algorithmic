@@ -21,7 +21,9 @@ export default function AccountPage() {
       <div className="rounded-3xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white/70 dark:bg-zinc-900/60 p-6 shadow-sm">
         <div className="text-sm font-semibold text-zinc-900 dark:text-white">Account actions</div>
         <button
-          onClick={signOut}
+          onClick={() => {
+            signOut();
+          }}
           className="mt-4 inline-flex items-center gap-2 rounded-full border border-zinc-200/70 dark:border-zinc-700/70 px-4 py-2 text-sm text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors"
         >
           Sign out

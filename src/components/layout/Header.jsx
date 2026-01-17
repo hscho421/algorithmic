@@ -126,7 +126,9 @@ export default function Header({ onToggleSidebar }) {
                 <span className="text-zinc-300 dark:text-zinc-600">•</span>
                 <button
                   type="button"
-                  onClick={signOut}
+                  onClick={() => {
+                    signOut();
+                  }}
                   className="text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
                 >
                   Sign out

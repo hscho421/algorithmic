@@ -4,6 +4,8 @@ import { Input, Select, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import TrieDisplay from '../../shared/visualization/TrieDisplay';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   template,
   complexity,
@@ -49,6 +51,12 @@ export default function TrieVisualizer() {
   const [operation, setOperation] = useState('insert');
   const [currentTrie, setCurrentTrie] = useState(() => buildTrieFromWords(['cat', 'car', 'cart', 'dog', 'dot']));
   const skipNextResetRef = useRef(false);
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('trie');
 
   const parseWords = useCallback((input) => {
     return input
@@ -101,6 +109,17 @@ export default function TrieVisualizer() {
     const word = pool[Math.floor(Math.random() * pool.length)];
     setWordInput(word);
   }, [parseWords, wordsInput]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { wordsInput, wordInput, operation });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setWordsInput(payload.wordsInput ?? '');
+    setWordInput(payload.wordInput ?? '');
+    setOperation(payload.operation ?? 'insert');
+  };
 
   const handleReset = useCallback(() => {
     stop();
@@ -249,6 +268,14 @@ export default function TrieVisualizer() {
               Random Word
             </Button>
           </div>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

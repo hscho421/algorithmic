@@ -7,13 +7,19 @@ import useAuthContext from '../context/useAuthContext';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const { signIn } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    signIn(email || 'demo@dsavisualizer.com');
+    setErrorMessage('');
+    const { error } = await signIn(email, password);
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
     const nextPath = location.state?.from || '/account';
     navigate(nextPath);
   };
@@ -48,9 +54,16 @@ export default function LoginPage() {
           placeholder="••••••••"
           required
         />
+        {errorMessage && <div className="text-xs text-rose-500">{errorMessage}</div>}
         <Button type="submit" variant="primary" className="w-full">
           Sign in
         </Button>
+        <Link
+          to="/forgot-password"
+          className="block text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white text-center"
+        >
+          Forgot your password?
+        </Link>
       </form>
     </AuthLayout>
   );

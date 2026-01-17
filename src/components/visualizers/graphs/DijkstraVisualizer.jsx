@@ -4,6 +4,8 @@ import { Select, GraphEditor } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { GraphDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import { createGraph, WEIGHTED_GRAPHS } from '../../../lib/dataStructures/Graph';
 import { calculatePositions } from '../../../lib/utils/graphLayout';
 import {
@@ -24,6 +26,12 @@ export default function DijkstraVisualizer() {
 
   const [customVertices, setCustomVertices] = useState(['A', 'B', 'C', 'D']);
   const [customEdges, setCustomEdges] = useState([['A', 'B', 4], ['A', 'C', 2], ['B', 'D', 3], ['C', 'D', 1]]);
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('dijkstra');
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(
     initialState,
@@ -82,6 +90,25 @@ export default function DijkstraVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, {
+      mode,
+      selectedPreset,
+      startNode,
+      customVertices,
+      customEdges,
+    });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setMode(payload.mode ?? 'preset');
+    setSelectedPreset(payload.selectedPreset ?? 'simple');
+    setStartNode(payload.startNode ?? 'A');
+    setCustomVertices(payload.customVertices ?? ['A', 'B', 'C', 'D']);
+    setCustomEdges(payload.customEdges ?? [['A', 'B', 4], ['A', 'C', 2], ['B', 'D', 3], ['C', 'D', 1]]);
+  };
 
   const presetOptions = Object.entries(WEIGHTED_GRAPHS).map(([key, preset]) => ({
     value: key,
@@ -231,6 +258,14 @@ export default function DijkstraVisualizer() {
               options={nodeOptions}
             />
           )}
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

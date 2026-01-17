@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input, Select, Button } from '../../shared/ui';
 import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   TEMPLATES,
   complexity,
@@ -19,6 +21,13 @@ export default function SlidingWindowVisualizer() {
   const [windowSize, setWindowSize] = useState('3');
   const [target, setTarget] = useState('8');
   const [textInput, setTextInput] = useState('abcaabcd');
+
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('sliding-window');
 
   const template = TEMPLATES[mode];
 
@@ -67,6 +76,25 @@ export default function SlidingWindowVisualizer() {
     const size = 8 + Math.floor(Math.random() * 5);
     const arr = Array.from({ length: size }, () => Math.floor(Math.random() * 9) + 1);
     setArrayInput(arr.join(', '));
+  };
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, {
+      mode,
+      arrayInput,
+      windowSize,
+      target,
+      textInput,
+    });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setMode(payload.mode ?? 'fixed_max_sum');
+    setArrayInput(payload.arrayInput ?? '');
+    setWindowSize(payload.windowSize ?? '3');
+    setTarget(payload.target ?? '8');
+    setTextInput(payload.textInput ?? '');
   };
 
   const modeOptions = Object.values(TEMPLATES).map((option) => ({
@@ -176,6 +204,14 @@ export default function SlidingWindowVisualizer() {
               </Button>
             </div>
           )}
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </>
       }
       controlProps={{

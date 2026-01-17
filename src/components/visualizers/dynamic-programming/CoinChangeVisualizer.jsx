@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input, Select, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   TEMPLATES,
   complexity,
@@ -17,6 +19,12 @@ export default function CoinChangeVisualizer() {
   const [coinsInput, setCoinsInput] = useState('1, 2, 5');
   const [amount, setAmount] = useState('11');
   const [mode, setMode] = useState('min_coins');
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('coin-change');
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
@@ -44,6 +52,17 @@ export default function CoinChangeVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { coinsInput, amount, mode });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setCoinsInput(payload.coinsInput ?? '1, 2, 5');
+    setAmount(payload.amount ?? '11');
+    setMode(payload.mode ?? 'min_coins');
+  };
 
   const handleRandomize = () => {
     const numCoins = 3 + Math.floor(Math.random() * 2);
@@ -176,6 +195,14 @@ export default function CoinChangeVisualizer() {
             onChange={(e) => setAmount(e.target.value)}
             min="1"
             max="100"
+          />
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
           />
         </div>
       }

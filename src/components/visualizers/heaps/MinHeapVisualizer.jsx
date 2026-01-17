@@ -4,6 +4,8 @@ import { Input, Select, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { TreeDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   template,
   complexity,
@@ -86,6 +88,12 @@ export default function MinHeapVisualizer() {
   const [indexInput, setIndexInput] = useState('0');
   const [currentHeap, setCurrentHeap] = useState([]);
   const skipResetRef = useRef(false);
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('min-heap');
 
   const parseArray = useCallback((input) => {
     const parts = input.replace(/,/g, ' ').split(/\s+/).filter(Boolean);
@@ -120,6 +128,25 @@ export default function MinHeapVisualizer() {
     const heap = buildHeapFromArray(values, heapType);
     setCurrentHeap(heap);
   }, [operation, heapType]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, {
+      heapInput,
+      valueInput,
+      operation,
+      heapType,
+      indexInput,
+    });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setHeapInput(payload.heapInput ?? '');
+    setValueInput(payload.valueInput ?? '');
+    setOperation(payload.operation ?? 'insert');
+    setHeapType(payload.heapType ?? 'min');
+    setIndexInput(payload.indexInput ?? '0');
+  };
 
   const handleReset = useCallback(() => {
     stop();
@@ -325,6 +352,14 @@ export default function MinHeapVisualizer() {
               disabled={!requiresValue}
             />
           </div>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

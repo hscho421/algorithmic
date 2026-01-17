@@ -4,6 +4,8 @@ import { Input, Select, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { TreeDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   template,
   complexity,
@@ -19,6 +21,12 @@ export default function TraversalVisualizer() {
   const [treeInput, setTreeInput] = useState('50, 30, 70, 20, 40, 60, 80');
   const [traversalType, setTraversalType] = useState('inorder');
   const [currentTree, setCurrentTree] = useState(null);
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('tree-traversal');
 
   const parseArray = useCallback((input) => {
     const parts = input.replace(/,/g, ' ').split(/\s+/).filter(Boolean);
@@ -62,6 +70,16 @@ export default function TraversalVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { treeInput, traversalType });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setTreeInput(payload.treeInput ?? '');
+    setTraversalType(payload.traversalType ?? 'inorder');
+  };
 
   const traversalOptions = Object.entries(TRAVERSAL_INFO).map(([key, info]) => ({
     value: key,
@@ -188,6 +206,14 @@ export default function TraversalVisualizer() {
               <div className="text-xs text-zinc-400 mt-1">{currentInfo.description}</div>
             </div>
           </div>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

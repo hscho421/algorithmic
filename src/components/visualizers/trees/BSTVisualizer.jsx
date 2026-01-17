@@ -4,6 +4,8 @@ import { Input, Select, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { TreeDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   template,
   complexity,
@@ -19,6 +21,12 @@ export default function BSTVisualizer() {
   const [valueInput, setValueInput] = useState('25');
   const [operation, setOperation] = useState('insert');
   const [currentTree, setCurrentTree] = useState(null);
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('bst');
 
   const parseArray = useCallback((input) => {
     const parts = input.replace(/,/g, ' ').split(/\s+/).filter(Boolean);
@@ -65,6 +73,17 @@ export default function BSTVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { treeInput, valueInput, operation });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setTreeInput(payload.treeInput ?? '');
+    setValueInput(payload.valueInput ?? '');
+    setOperation(payload.operation ?? 'insert');
+  };
 
   const operationOptions = [
     { value: 'insert', label: 'Insert' },
@@ -171,6 +190,14 @@ export default function BSTVisualizer() {
               onChange={(e) => setValueInput(e.target.value)}
             />
           </div>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

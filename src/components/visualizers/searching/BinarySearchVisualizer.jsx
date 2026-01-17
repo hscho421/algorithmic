@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input, Select, Checkbox, Button } from '../../shared/ui';
 import { ExplanationPanel, ComplexityPanel, ResultBanner } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   TEMPLATES,
   initialState,
@@ -62,6 +64,14 @@ export default function BinarySearchVisualizer() {
   const [templateKey, setTemplateKey] = useState('lower_bound');
   const [autoSort, setAutoSort] = useState(true);
   const [dedupe, setDedupe] = useState(false);
+  const skipTemplatePresetRef = useRef(false);
+
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('binary-search');
 
   const currentTemplate = TEMPLATES[templateKey];
 
@@ -98,6 +108,10 @@ export default function BinarySearchVisualizer() {
 
   // Generate special arrays when switching to rotated/peak modes
   useEffect(() => {
+    if (skipTemplatePresetRef.current) {
+      skipTemplatePresetRef.current = false;
+      return;
+    }
     if (currentTemplate.useRotatedArray) {
       const rotated = generateRotatedArray(8);
       setArrayInput(rotated.join(', '));
@@ -128,6 +142,26 @@ export default function BinarySearchVisualizer() {
       const arr = Array.from({ length: size }, () => Math.floor(Math.random() * 50) + 1);
       setArrayInput(arr.join(', '));
     }
+  };
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, {
+      arrayInput,
+      targetInput,
+      templateKey,
+      autoSort,
+      dedupe,
+    });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    skipTemplatePresetRef.current = true;
+    setTemplateKey(payload.templateKey ?? 'lower_bound');
+    setArrayInput(payload.arrayInput ?? '');
+    setTargetInput(payload.targetInput ?? '');
+    setAutoSort(Boolean(payload.autoSort));
+    setDedupe(Boolean(payload.dedupe));
   };
 
   const flatTemplateOptions = Object.entries(TEMPLATES).map(([key, t]) => ({
@@ -277,6 +311,14 @@ export default function BinarySearchVisualizer() {
               min="0"
             />
           )}
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </>
       }
 

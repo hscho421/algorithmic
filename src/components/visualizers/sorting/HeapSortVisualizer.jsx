@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input } from '../../shared/ui';
 import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   template,
   complexity,
@@ -15,6 +17,12 @@ import SortingArrayVisualization from './SortingArrayVisualization';
 
 export default function HeapSortVisualizer() {
   const [arrayInput, setArrayInput] = useState('38, 27, 43, 3, 9, 82, 10');
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('heap-sort');
 
   const parseArray = useCallback((input) => {
     const parts = input.replace(/,/g, ' ').split(/\s+/).filter(Boolean);
@@ -58,6 +66,15 @@ export default function HeapSortVisualizer() {
     setArrayInput(arr.join(', '));
   }, [stop]);
 
+  const handleSaveInput = (name) => {
+    return saveInput(name, { arrayInput });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setArrayInput(payload.arrayInput ?? '');
+  };
+
   const variables = state
     ? [
         { name: 'n', value: state.array?.length || 0, desc: 'array length' },
@@ -93,6 +110,14 @@ export default function HeapSortVisualizer() {
           >
             Randomize Array
           </button>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </>
       }
       controlProps={{

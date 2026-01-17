@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   TEMPLATES,
   complexity,
@@ -15,6 +17,12 @@ import { DPTable1D } from './DPTableVisualization';
 
 export default function FibonacciVisualizer() {
   const [n, setN] = useState('7');
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('fibonacci');
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
 
@@ -32,6 +40,15 @@ export default function FibonacciVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { n });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setN(payload.n ?? '7');
+  };
 
   const variables = state
     ? [
@@ -123,6 +140,14 @@ export default function FibonacciVisualizer() {
           <div className="text-xs text-zinc-500 dark:text-zinc-400">
             Range: 0-20 (larger values increase table size)
           </div>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

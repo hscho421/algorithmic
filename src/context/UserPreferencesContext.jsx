@@ -1,4 +1,6 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
+import useAuthContext from './useAuthContext';
 
 const UserPreferencesContext = createContext(null);
 
@@ -30,11 +32,51 @@ const loadPreferences = () => {
 };
 
 export function UserPreferencesProvider({ children }) {
+  const { user } = useAuthContext();
   const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
+  const suppressRemoteSyncRef = useRef(false);
+  const debounceRef = useRef(null);
 
   useEffect(() => {
     setPreferences(loadPreferences());
   }, []);
+
+  useEffect(() => {
+    if (!user || !supabase) return;
+    let cancelled = false;
+
+    const loadRemote = async () => {
+      const { data, error } = await supabase
+        .from('user_preferences')
+        .select('playback_speed, layout_prefs')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+
+      suppressRemoteSyncRef.current = true;
+      setPreferences((prev) => {
+        const merged = {
+          ...prev,
+          playbackSpeed: data.playback_speed ?? prev.playbackSpeed,
+          layout: {
+            ...prev.layout,
+            ...(data.layout_prefs || {}),
+          },
+        };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+        } catch {
+          // ignore storage failures
+        }
+        return merged;
+      });
+    };
+
+    loadRemote();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const persist = useCallback((next) => {
     setPreferences(next);
@@ -116,6 +158,40 @@ export function UserPreferencesProvider({ children }) {
       setPanelPreference,
     ],
   );
+
+  useEffect(() => {
+    if (!user || !supabase) return;
+    if (suppressRemoteSyncRef.current) {
+      suppressRemoteSyncRef.current = false;
+      return;
+    }
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
+    debounceRef.current = setTimeout(() => {
+      supabase
+        .from('user_preferences')
+        .upsert(
+          {
+            user_id: user.id,
+            playback_speed: preferences.playbackSpeed,
+            layout_prefs: preferences.layout,
+          },
+          { onConflict: 'user_id' },
+        )
+        .then(() => {
+          // ignore errors for now
+        });
+    }, 600);
+
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, [preferences, user]);
 
   return (
     <UserPreferencesContext.Provider value={value}>

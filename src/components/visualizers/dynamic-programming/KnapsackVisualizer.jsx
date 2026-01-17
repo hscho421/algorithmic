@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   TEMPLATES,
   complexity,
@@ -17,6 +19,12 @@ export default function KnapsackVisualizer() {
   const [weightsInput, setWeightsInput] = useState('2, 3, 4, 5');
   const [valuesInput, setValuesInput] = useState('3, 4, 5, 6');
   const [capacity, setCapacity] = useState('8');
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('knapsack');
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
@@ -51,6 +59,17 @@ export default function KnapsackVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { weightsInput, valuesInput, capacity });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setWeightsInput(payload.weightsInput ?? '2, 3, 4, 5');
+    setValuesInput(payload.valuesInput ?? '3, 4, 5, 6');
+    setCapacity(payload.capacity ?? '8');
+  };
 
   const handleRandomize = () => {
     const numItems = 3 + Math.floor(Math.random() * 3);
@@ -187,6 +206,14 @@ export default function KnapsackVisualizer() {
               ))}
             </div>
           )}
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

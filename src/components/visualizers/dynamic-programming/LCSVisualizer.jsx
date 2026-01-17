@@ -3,6 +3,8 @@ import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input, Button } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   TEMPLATES,
   complexity,
@@ -16,6 +18,12 @@ import { DPTable2D } from './DPTableVisualization';
 export default function LCSVisualizer() {
   const [text1Input, setText1Input] = useState('ABCDGH');
   const [text2Input, setText2Input] = useState('AEDFHR');
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('lcs');
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
@@ -35,6 +43,16 @@ export default function LCSVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, { text1Input, text2Input });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setText1Input(payload.text1Input ?? '');
+    setText2Input(payload.text2Input ?? '');
+  };
 
   const handleRandomize = () => {
     const letters = 'ABCDEFGH';
@@ -150,6 +168,14 @@ export default function LCSVisualizer() {
           <div className="text-xs text-zinc-500 dark:text-zinc-400">
             Use uppercase letters (max 15 characters each)
           </div>
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

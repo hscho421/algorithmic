@@ -4,6 +4,8 @@ import { Select, GraphEditor } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { GraphDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import { createGraph, PRESET_GRAPHS } from '../../../lib/dataStructures/Graph';
 import { calculatePositions } from '../../../lib/utils/graphLayout';
 import {
@@ -24,6 +26,12 @@ export default function DFSVisualizer() {
 
   const [customVertices, setCustomVertices] = useState(['A', 'B', 'C', 'D']);
   const [customEdges, setCustomEdges] = useState([['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D']]);
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('dfs');
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(
     initialState,
@@ -82,6 +90,25 @@ export default function DFSVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, {
+      mode,
+      selectedPreset,
+      startNode,
+      customVertices,
+      customEdges,
+    });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setMode(payload.mode ?? 'preset');
+    setSelectedPreset(payload.selectedPreset ?? 'simple');
+    setStartNode(payload.startNode ?? 'A');
+    setCustomVertices(payload.customVertices ?? ['A', 'B', 'C', 'D']);
+    setCustomEdges(payload.customEdges ?? [['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D']]);
+  };
 
   const presetOptions = Object.entries(PRESET_GRAPHS).map(([key, preset]) => ({
     value: key,
@@ -207,6 +234,14 @@ export default function DFSVisualizer() {
               options={nodeOptions}
             />
           )}
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

@@ -1,54 +1,63 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 
 const AuthContext = createContext(null);
 
-const STORAGE_KEY = 'auth:user';
-
-const getStoredUser = () => {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-};
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const stored = getStoredUser();
-    if (stored) {
-      setUser(stored);
+    if (!supabase) {
+      setIsLoading(false);
+      return undefined;
     }
+
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data?.session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+    });
+
+    return () => listener?.subscription?.unsubscribe();
   }, []);
 
-  const signIn = useCallback((email) => {
-    const nextUser = { id: 'mock-user', email };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
-    setUser(nextUser);
+  const signIn = useCallback(async (email, password) => {
+    if (!supabase) {
+      return { error: new Error('Supabase client not configured') };
+    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return { error };
   }, []);
 
-  const signUp = useCallback((email) => {
-    const nextUser = { id: 'mock-user', email };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
-    setUser(nextUser);
+  const signUp = useCallback(async (email, password) => {
+    if (!supabase) {
+      return { error: new Error('Supabase client not configured') };
+    }
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    const needsEmailConfirmation = !data?.session;
+    return { error, needsEmailConfirmation };
   }, []);
 
-  const signOut = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
-    setUser(null);
+  const signOut = useCallback(async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
   }, []);
 
   const value = useMemo(
     () => ({
       user,
+      isLoading,
       isAuthenticated: Boolean(user),
       signIn,
       signUp,
       signOut,
     }),
-    [user, signIn, signUp, signOut],
+    [user, isLoading, signIn, signUp, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

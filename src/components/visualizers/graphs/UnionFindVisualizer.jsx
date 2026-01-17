@@ -4,6 +4,8 @@ import { Select, Input, Button, OperationBuilder } from '../../shared/ui';
 import { ExplanationPanel, ResultBanner, ComplexityPanel } from '../../shared/panels';
 import { UnionFindDisplay } from '../../shared/visualization';
 import VisualizerLayout from '../../shared/layout/VisualizerLayout';
+import useSavedInputs from '../../../hooks/useSavedInputs';
+import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import {
   template,
   complexity,
@@ -26,6 +28,12 @@ export default function UnionFindVisualizer() {
     { type: OPERATION_TYPES.CONNECTED, x: 'A', y: 'C' },
   ]);
   const [newElement, setNewElement] = useState('');
+  const {
+    items: savedInputs,
+    isLoading: savedLoading,
+    saveInput,
+    deleteInput,
+  } = useSavedInputs('union-find');
 
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(
     initialState,
@@ -72,6 +80,29 @@ export default function UnionFindVisualizer() {
     stop();
     back();
   }, [back, stop]);
+
+  const handleSaveInput = (name) => {
+    return saveInput(name, {
+      mode,
+      selectedPreset,
+      customElements,
+      customOperations,
+    });
+  };
+
+  const handleLoadInput = (item) => {
+    const payload = item.input_json || {};
+    setMode(payload.mode ?? 'preset');
+    setSelectedPreset(payload.selectedPreset ?? 'simple');
+    setCustomElements(payload.customElements ?? ['A', 'B', 'C', 'D', 'E']);
+    setCustomOperations(
+      payload.customOperations ?? [
+        { type: OPERATION_TYPES.UNION, x: 'A', y: 'B' },
+        { type: OPERATION_TYPES.UNION, x: 'C', y: 'D' },
+        { type: OPERATION_TYPES.CONNECTED, x: 'A', y: 'C' },
+      ],
+    );
+  };
 
   const handleAddElement = () => {
     const trimmed = newElement.trim();
@@ -271,6 +302,14 @@ export default function UnionFindVisualizer() {
               )}
             </div>
           )}
+
+          <SavedInputsPanel
+            items={savedInputs}
+            isLoading={savedLoading}
+            onSave={handleSaveInput}
+            onLoad={handleLoadInput}
+            onDelete={(item) => deleteInput(item.id)}
+          />
         </div>
       }
       controlProps={{

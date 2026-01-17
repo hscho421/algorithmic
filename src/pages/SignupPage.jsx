@@ -8,15 +8,27 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const { signUp } = useAuthContext();
   const navigate = useNavigate();
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (password !== confirmPassword) {
       return;
     }
-    signUp(email || 'demo@dsavisualizer.com');
+    setErrorMessage('');
+    setSuccessMessage('');
+    const { error, needsEmailConfirmation } = await signUp(email, password);
+    if (error) {
+      setErrorMessage(error.message);
+      return;
+    }
+    if (needsEmailConfirmation) {
+      setSuccessMessage('Check your email to confirm your account, then sign in.');
+      return;
+    }
     navigate('/account');
   };
 
@@ -63,6 +75,8 @@ export default function SignupPage() {
         {passwordMismatch && (
           <div className="text-xs text-rose-500">Passwords do not match.</div>
         )}
+        {errorMessage && <div className="text-xs text-rose-500">{errorMessage}</div>}
+        {successMessage && <div className="text-xs text-emerald-600">{successMessage}</div>}
         <Button type="submit" variant="primary" className="w-full" disabled={passwordMismatch}>
           Create account
         </Button>
