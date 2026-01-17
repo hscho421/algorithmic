@@ -2,40 +2,82 @@ import { Link } from 'react-router-dom';
 
 const SECTIONS = [
   {
-    title: 'Overview',
+    title: 'Agreement to terms',
     items: [
-      'Algorithmic is an educational platform for learning data structures and algorithms.',
-      'By using the site, you agree to follow these terms and any future updates.',
+      'These Terms of Service govern your access to and use of DSA Visualizer.',
+      'By accessing or using the service, you agree to be bound by these terms and any updates.',
     ],
   },
   {
-    title: 'Accounts + Access',
+    title: 'Eligibility and accounts',
     items: [
-      'You are responsible for keeping your account secure.',
-      'Do not share or resell access to paid features.',
-      'We may suspend access if usage violates these terms.',
+      'You must be at least 13 years old to use the service.',
+      'You are responsible for maintaining the confidentiality of your account credentials.',
+      'You may not share or resell access to paid features or content.',
     ],
   },
   {
-    title: 'Content + Usage',
+    title: 'Acceptable use',
     items: [
-      'All visualizations, lessons, and UI are owned by Algorithmic.',
-      'You may use the content for personal learning and teaching.',
-      'Bulk scraping or automated copying is not permitted.',
+      'You agree not to misuse the service, attempt unauthorized access, or interfere with its operation.',
+      'Automated scraping, copying, or bulk extraction of content is prohibited.',
+      'You may use the content for personal learning, teaching, or internal training purposes.',
     ],
   },
   {
-    title: 'Payments',
+    title: 'Intellectual property',
     items: [
-      'Paid plans will be billed on a recurring basis when available.',
-      'Refunds and cancellation policies will be listed on the pricing page.',
+      'The service, including all visualizations, code, and design, is owned by DSA Visualizer or its licensors.',
+      'You receive a limited, non-exclusive, non-transferable license to use the service.',
+      'You may not reproduce, distribute, or create derivative works without permission.',
     ],
   },
   {
-    title: 'Availability',
+    title: 'Payments and subscriptions',
     items: [
-      'We may update, pause, or discontinue features without notice.',
-      'We aim for reliability but do not guarantee uninterrupted access.',
+      'Paid plans, if offered, are billed in advance on a recurring basis.',
+      'Pricing, taxes, and billing terms will be described at checkout or on the pricing page.',
+      'Refund and cancellation policies will be stated at the time of purchase.',
+    ],
+  },
+  {
+    title: 'Third-party services',
+    items: [
+      'The service may link to third-party sites or tools; we are not responsible for their content or practices.',
+    ],
+  },
+  {
+    title: 'Availability and changes',
+    items: [
+      'We may update, modify, or discontinue features at any time.',
+      'We strive for reliability but do not guarantee uninterrupted or error-free service.',
+    ],
+  },
+  {
+    title: 'Disclaimers',
+    items: [
+      'The service is provided “as is” and “as available.”',
+      'We disclaim warranties of merchantability, fitness for a particular purpose, and non-infringement to the extent permitted by law.',
+    ],
+  },
+  {
+    title: 'Limitation of liability',
+    items: [
+      'To the maximum extent permitted by law, DSA Visualizer is not liable for indirect, incidental, special, or consequential damages.',
+      'Our total liability for any claim is limited to the amount paid to use the service in the 12 months preceding the claim.',
+    ],
+  },
+  {
+    title: 'Termination',
+    items: [
+      'We may suspend or terminate access if you violate these terms.',
+      'You may stop using the service at any time.',
+    ],
+  },
+  {
+    title: 'Contact',
+    items: [
+      'Questions about these terms? Email hello@dsavisualizer.com.',
     ],
   },
 ];
@@ -48,13 +90,13 @@ export default function TermsPage() {
         <div className="relative z-10">
           <div className="text-xs uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Terms</div>
           <h1 className="text-3xl md:text-4xl font-display text-zinc-900 dark:text-white mt-3">
-            Terms of service
+            Terms of Service
           </h1>
           <p className="text-zinc-600 dark:text-zinc-300 mt-3 max-w-2xl">
-            These terms explain how you can use Algorithmic and what you can expect from us.
+            These terms explain how you can use DSA Visualizer and what you can expect from us.
           </p>
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-zinc-200/80 dark:border-zinc-700/70 bg-zinc-50/80 dark:bg-zinc-900/70 px-3 py-1 text-xs text-zinc-500 dark:text-zinc-300">
-            Effective: today
+            Effective: upon posting
           </div>
         </div>
       </section>

@@ -2,39 +2,64 @@ import { Link } from 'react-router-dom';
 
 const SECTIONS = [
   {
-    title: 'What we collect',
+    title: 'Information we collect',
     items: [
-      'Basic usage analytics to improve the experience.',
-      'Optional account details if you sign up in the future.',
+      'Information you provide directly, such as name, email address, and account credentials if you create an account.',
+      'Inputs you submit in visualizers (e.g., arrays, graphs, words) and saved configurations if you choose to store them.',
+      'Usage data such as pages viewed, feature interactions, and performance metrics.',
+      'Device and log data such as browser type, operating system, IP address, and approximate location derived from IP.',
     ],
   },
   {
-    title: 'How we use data',
+    title: 'How we use information',
     items: [
-      'To personalize your learning and save progress.',
-      'To measure what content is most helpful.',
-      'To communicate product updates if you opt in.',
+      'Provide and maintain the service, including running visualizations and saving preferences.',
+      'Improve performance, reliability, and educational outcomes through analytics and testing.',
+      'Respond to inquiries, provide support, and send service-related communications.',
+      'Send marketing communications only if you opt in, and you can opt out at any time.',
     ],
   },
   {
-    title: 'What we do not sell',
+    title: 'Sharing and disclosure',
     items: [
-      'We do not sell your personal data.',
-      'We do not share data with advertisers.',
+      'We do not sell personal information.',
+      'We may share information with service providers that process data on our behalf (e.g., hosting, analytics, support).',
+      'We may disclose information to comply with legal obligations or to protect our rights and users.',
+    ],
+  },
+  {
+    title: 'Cookies and analytics',
+    items: [
+      'We may use cookies or similar technologies to remember preferences and measure usage.',
+      'You can control cookies through your browser settings and opt out of non-essential analytics where available.',
+    ],
+  },
+  {
+    title: 'Data retention',
+    items: [
+      'We retain information as long as necessary to provide the service and for legitimate business purposes.',
+      'You may request deletion of your account or stored data, subject to legal or operational requirements.',
+    ],
+  },
+  {
+    title: 'Your rights and choices',
+    items: [
+      'Access, correct, or delete your information by contacting us.',
+      'Opt out of marketing communications at any time.',
+      'Depending on your location, you may have additional rights under applicable privacy laws.',
     ],
   },
   {
     title: 'Security',
     items: [
-      'We use industry-standard practices to protect data.',
-      'No system is perfect, but we continuously improve safeguards.',
+      'We use administrative, technical, and physical safeguards designed to protect data.',
+      'No method of transmission or storage is 100% secure; we continuously improve safeguards.',
     ],
   },
   {
-    title: 'Your choices',
+    title: 'Children',
     items: [
-      'Request data removal by emailing support.',
-      'Opt out of non-essential analytics where available.',
+      'The service is not directed to children under 13. We do not knowingly collect personal information from children.',
     ],
   },
 ];
@@ -47,13 +72,13 @@ export default function PrivacyPage() {
         <div className="relative z-10">
           <div className="text-xs uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Privacy</div>
           <h1 className="text-3xl md:text-4xl font-display text-zinc-900 dark:text-white mt-3">
-            Privacy policy
+            Privacy Policy
           </h1>
           <p className="text-zinc-600 dark:text-zinc-300 mt-3 max-w-2xl">
-            We are building Algorithmic with privacy in mind. Here is how we handle your data.
+            This Privacy Policy explains how DSA Visualizer collects, uses, and shares information.
           </p>
           <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-zinc-200/80 dark:border-zinc-700/70 bg-zinc-50/80 dark:bg-zinc-900/70 px-3 py-1 text-xs text-zinc-500 dark:text-zinc-300">
-            Effective: today
+            Effective: upon posting
           </div>
         </div>
       </section>
@@ -79,7 +104,7 @@ export default function PrivacyPage() {
 
       <div className="rounded-3xl border border-dashed border-zinc-200/70 dark:border-zinc-800/70 bg-white/60 dark:bg-zinc-900/60 p-8 text-center">
         <p className="text-zinc-500 dark:text-zinc-400">
-          Want more details? Email hello@dsavisualizer.com.
+          Questions about privacy? Email hello@dsavisualizer.com.
         </p>
         <Link
           to="/"
