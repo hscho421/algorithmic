@@ -14,6 +14,35 @@ import {
   buildTrieFromWords,
 } from '../../../lib/algorithms/strings/trie';
 
+const SAMPLE_WORDS = [
+  'cat',
+  'car',
+  'cart',
+  'dog',
+  'dot',
+  'dove',
+  'door',
+  'apple',
+  'ape',
+  'apex',
+  'bat',
+  'bath',
+  'batch',
+  'ball',
+  'bell',
+  'bear',
+  'bead',
+  'book',
+  'code',
+  'coder',
+  'cope',
+  'cope',
+  'dear',
+  'deal',
+  'deer',
+  'doll',
+];
+
 export default function TrieVisualizer() {
   const [wordsInput, setWordsInput] = useState('cat, car, cart, dog, dot');
   const [wordInput, setWordInput] = useState('car');
@@ -41,6 +70,37 @@ export default function TrieVisualizer() {
     const trie = buildTrieFromWords(words);
     setCurrentTrie(trie);
   }, [wordsInput, parseWords, stop]);
+
+  const handleRandomWords = useCallback(() => {
+    stop();
+    const pool = [...SAMPLE_WORDS];
+    const count = Math.max(4, Math.min(8, Math.floor(Math.random() * 5) + 4));
+    const words = [];
+    while (words.length < count && pool.length > 0) {
+      const index = Math.floor(Math.random() * pool.length);
+      words.push(pool.splice(index, 1)[0]);
+    }
+    const nextInput = words.join(', ');
+    setWordsInput(nextInput);
+    setWordInput(words[0] || '');
+    setCurrentTrie(buildTrieFromWords(words));
+  }, [stop]);
+
+  const handleRandomWord = useCallback(() => {
+    const pool = parseWords(wordsInput);
+    if (pool.length === 0) {
+      const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+      const length = Math.floor(Math.random() * 4) + 3;
+      let randomWord = '';
+      for (let i = 0; i < length; i += 1) {
+        randomWord += alphabet[Math.floor(Math.random() * alphabet.length)];
+      }
+      setWordInput(randomWord);
+      return;
+    }
+    const word = pool[Math.floor(Math.random() * pool.length)];
+    setWordInput(word);
+  }, [parseWords, wordsInput]);
 
   const handleReset = useCallback(() => {
     stop();
@@ -160,9 +220,14 @@ export default function TrieVisualizer() {
               onChange={(e) => setWordsInput(e.target.value)}
               placeholder="cat, car, cart"
             />
-            <Button onClick={handleBuildTrie} variant="primary" className="w-full">
-              Build Trie
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={handleBuildTrie} variant="primary" className="flex-1">
+                Build Trie
+              </Button>
+              <Button onClick={handleRandomWords} variant="default" className="flex-1">
+                Random Words
+              </Button>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -180,6 +245,9 @@ export default function TrieVisualizer() {
               value={wordInput}
               onChange={(e) => setWordInput(e.target.value)}
             />
+            <Button onClick={handleRandomWord} variant="default" size="sm" className="w-full">
+              Random Word
+            </Button>
           </div>
         </div>
       }
@@ -195,7 +263,7 @@ export default function TrieVisualizer() {
         onSpeedChange: setSpeed,
       }}
       visualizationContent={
-        <div className="min-h-[180px] w-full">
+        <div className="w-full h-full min-h-[240px]">
           {state && (
             <TrieDisplay
               nodes={state.nodes}
