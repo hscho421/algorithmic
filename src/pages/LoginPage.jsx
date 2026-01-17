@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AuthLayout from '../components/auth/AuthLayout';
 import { Input, Button } from '../components/shared/ui';
 import useAuthContext from '../context/useAuthContext';
+import googleLogo from '../assets/google.svg';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -53,7 +54,7 @@ export default function LoginPage() {
           onClick={handleGoogleSignIn}
         >
           <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            src={googleLogo}
             alt="Google"
             className="h-4 w-4 shrink-0"
           />
