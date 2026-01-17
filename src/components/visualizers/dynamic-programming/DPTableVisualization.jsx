@@ -1,27 +1,82 @@
 // Shared DP Table Visualization Component
 // Used for visualizing 1D and 2D DP tables
+import { useEffect, useRef, useState } from 'react';
+
+const useContainerWidth = (ref) => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!ref.current || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry && entry.contentRect) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return width;
+};
+
+const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
+  if (!containerWidth || count <= 0) {
+    return { cell: maxCell, gap: baseGap };
+  }
+
+  const gap = Math.max(minGap, Math.min(baseGap, Math.floor(containerWidth / 120)));
+  const totalGap = gap * Math.max(0, count - 1);
+  const available = Math.max(0, containerWidth - totalGap);
+  const cell = Math.floor(available / count);
+
+  return {
+    cell: Math.max(minCell, Math.min(maxCell, cell)),
+    gap,
+  };
+};
 
 export function DPTable1D({ dp, highlightIndex, label = 'dp', comparing = [] }) {
   if (!dp || dp.length === 0) {
     return <div className="text-zinc-500 dark:text-zinc-400 text-sm">No data to display</div>;
   }
 
-  const filtered = dp.filter((v) => v !== Infinity && v !== '∞');
-  const maxValue = filtered.length > 0 ? Math.max(...filtered) : 0;
-  const hasInfinity = dp.some((v) => v === Infinity || v === '∞');
+  const containerRef = useRef(null);
+  const containerWidth = useContainerWidth(containerRef);
+  const labelWidth = 64;
+  const { cell: cellWidth, gap: cellGap } = getCellMetrics(
+    Math.max(0, containerWidth - labelWidth),
+    dp.length,
+    {
+      minCell: 28,
+      maxCell: 56,
+      baseGap: 4,
+      minGap: 2,
+    },
+  );
+  const indexHeight = Math.max(24, Math.min(32, Math.round(cellWidth * 0.6)));
+  const valueHeight = Math.max(32, Math.min(56, Math.round(cellWidth * 1)));
 
   return (
-    <div className="w-full overflow-x-auto flex justify-center">
-      <div className="flex flex-col gap-3 min-w-min">
+    <div ref={containerRef} className="w-full flex justify-center">
+      <div className="flex flex-col gap-3 min-w-0">
         {/* Index row */}
-        <div className="flex gap-1">
-          <div className="w-16 flex items-center justify-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+        <div className="flex" style={{ gap: cellGap }}>
+          <div
+            className="flex items-center justify-center text-xs font-medium text-zinc-500 dark:text-zinc-400"
+            style={{ width: labelWidth }}
+          >
             {label}
           </div>
           {dp.map((_, idx) => (
             <div
               key={idx}
-              className="w-14 h-8 flex items-center justify-center text-xs font-mono text-zinc-500 dark:text-zinc-400"
+              className="flex items-center justify-center text-xs font-mono text-zinc-500 dark:text-zinc-400"
+              style={{ width: cellWidth, height: indexHeight }}
             >
               [{idx}]
             </div>
@@ -29,8 +84,11 @@ export function DPTable1D({ dp, highlightIndex, label = 'dp', comparing = [] }) 
         </div>
 
         {/* Value row */}
-        <div className="flex gap-1">
-          <div className="w-16 flex items-center justify-center text-xs font-medium text-zinc-500 dark:text-zinc-400">
+        <div className="flex" style={{ gap: cellGap }}>
+          <div
+            className="flex items-center justify-center text-xs font-medium text-zinc-500 dark:text-zinc-400"
+            style={{ width: labelWidth }}
+          >
             value
           </div>
           {dp.map((value, idx) => {
@@ -42,7 +100,7 @@ export function DPTable1D({ dp, highlightIndex, label = 'dp', comparing = [] }) 
               <div
                 key={idx}
                 className={`
-                  w-14 h-14 flex items-center justify-center rounded-lg
+                  flex items-center justify-center rounded-lg
                   font-mono text-sm font-semibold transition-all duration-300
                   ${
                     isHighlighted
@@ -54,6 +112,7 @@ export function DPTable1D({ dp, highlightIndex, label = 'dp', comparing = [] }) 
                           : 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200'
                   }
                 `}
+                style={{ width: cellWidth, height: valueHeight }}
               >
                 {isInfinity ? '∞' : value}
               </div>

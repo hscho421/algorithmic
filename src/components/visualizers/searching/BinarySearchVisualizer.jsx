@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input, Select, Checkbox, Button } from '../../shared/ui';
 import { ExplanationPanel, ComplexityPanel, ResultBanner } from '../../shared/panels';
@@ -14,6 +14,47 @@ import {
   generatePeakArray,
 } from '../../../lib/algorithms/searching/binarySearch';
 import ArrayVisualization from './ArrayVisualization';
+
+const useContainerWidth = (ref) => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!ref.current || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return width;
+};
+
+const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
+  if (!containerWidth || count <= 0) {
+    return { cell: maxCell, gap: baseGap };
+  }
+
+  let gap = baseGap;
+  let available = containerWidth - gap * (count - 1);
+  let cell = Math.floor(available / count);
+
+  if (cell < minCell) {
+    gap = minGap;
+    available = containerWidth - gap * (count - 1);
+    cell = Math.floor(available / count);
+  }
+
+  cell = Math.max(12, Math.min(maxCell, cell));
+  return { cell, gap };
+};
 
 export default function BinarySearchVisualizer() {
   const [arrayInput, setArrayInput] = useState('1, 3, 5, 7, 9, 11, 13, 15');
@@ -387,6 +428,16 @@ function SqrtVisualization({ state }) {
 
   const maxDisplay = Math.min(target + 2, 25);
   const numbers = Array.from({ length: maxDisplay }, (_, i) => i);
+  const containerRef = useRef(null);
+  const containerWidth = useContainerWidth(containerRef);
+  const { cell: cellWidth, gap: cellGap } = getCellMetrics(containerWidth, numbers.length, {
+    minCell: 28,
+    maxCell: 48,
+    baseGap: 4,
+    minGap: 2,
+  });
+  const cellSize = Math.max(28, Math.min(48, cellWidth));
+  const totalWidth = numbers.length * cellWidth + (numbers.length - 1) * cellGap;
 
   return (
     <div className="space-y-8 w-full">
@@ -398,55 +449,66 @@ function SqrtVisualization({ state }) {
       </div>
 
       {/* Number line */}
-      <div className="flex justify-center overflow-x-auto pb-4">
-        <div className="relative">
-          {/* Pointer track */}
-          <div className="relative h-12 mb-2" style={{ width: `${maxDisplay * 48}px` }}>
-            {!done && (
-              <>
-                <SqrtPointer label="L" position={l} color="bg-blue-500" />
-                {m !== null && <SqrtPointer label="M" position={m} color="bg-emerald-500" />}
-                <SqrtPointer label="R" position={Math.min(r, maxDisplay - 1)} color="bg-red-500" />
-              </>
-            )}
-          </div>
-
-          {/* Numbers */}
-          <div className="flex gap-1">
-            {numbers.map((n) => {
-              const inRange = !done && n >= l && n < r;
-              const isMiddle = n === m && !done;
-              const isResult = done && n === result;
-              const square = n * n;
-
-              return (
-                <div key={n} className="flex flex-col items-center" style={{ width: 44 }}>
-                  <div
-                    className={`
-                      w-11 h-11 flex flex-col items-center justify-center rounded-lg
-                      font-mono text-sm font-semibold transition-all duration-300
-                      ${isResult
-                        ? 'bg-emerald-500 border-2 border-emerald-400 text-white scale-110 shadow-lg shadow-emerald-500/30'
-                        : inRange
-                          ? 'bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white'
-                          : 'bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600'
-                      }
-                      ${isMiddle ? 'ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950' : ''}
-                    `}
-                  >
-                    <span>{n}</span>
-                    <span className="text-[10px] opacity-60">{square}</span>
-                  </div>
-                  {isMiddle && comparison && (
-                    <div className="text-xs mt-1.5 font-medium whitespace-nowrap">
-                      <span className={comparison === 'less_or_equal' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
-                        {square} {comparison === 'less_or_equal' ? '≤' : '>'} {target}
-                      </span>
-                    </div>
+      <div className="flex justify-center pb-4">
+        <div className="w-full max-w-full" ref={containerRef}>
+          <div className="relative mx-auto" style={{ width: `${totalWidth}px` }}>
+            {/* Pointer track */}
+            <div className="relative h-12 mb-2" style={{ width: `${totalWidth}px` }}>
+              {!done && (
+                <>
+                  <SqrtPointer label="L" position={l} color="bg-blue-500" cellWidth={cellWidth} cellGap={cellGap} />
+                  {m !== null && (
+                    <SqrtPointer label="M" position={m} color="bg-emerald-500" cellWidth={cellWidth} cellGap={cellGap} />
                   )}
-                </div>
-              );
-            })}
+                  <SqrtPointer
+                    label="R"
+                    position={Math.min(r, maxDisplay - 1)}
+                    color="bg-red-500"
+                    cellWidth={cellWidth}
+                    cellGap={cellGap}
+                  />
+                </>
+              )}
+            </div>
+
+            {/* Numbers */}
+            <div className="flex" style={{ gap: `${cellGap}px` }}>
+              {numbers.map((n) => {
+                const inRange = !done && n >= l && n < r;
+                const isMiddle = n === m && !done;
+                const isResult = done && n === result;
+                const square = n * n;
+
+                return (
+                  <div key={n} className="flex flex-col items-center" style={{ width: cellWidth }}>
+                    <div
+                      className={`
+                        flex flex-col items-center justify-center rounded-lg
+                        font-mono text-sm font-semibold transition-all duration-300
+                        ${isResult
+                          ? 'bg-emerald-500 border-2 border-emerald-400 text-white scale-110 shadow-lg shadow-emerald-500/30'
+                          : inRange
+                            ? 'bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white'
+                            : 'bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600'
+                        }
+                        ${isMiddle ? 'ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950' : ''}
+                      `}
+                      style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+                    >
+                      <span>{n}</span>
+                      <span className="text-[10px] opacity-60">{square}</span>
+                    </div>
+                    {isMiddle && comparison && (
+                      <div className="text-xs mt-1.5 font-medium whitespace-nowrap">
+                        <span className={comparison === 'less_or_equal' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
+                          {square} {comparison === 'less_or_equal' ? '≤' : '>'} {target}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -474,11 +536,11 @@ function SqrtVisualization({ state }) {
 }
 
 // Helper for sqrt pointers
-function SqrtPointer({ label, position, color }) {
+function SqrtPointer({ label, position, color, cellWidth, cellGap }) {
   return (
     <div
       className="absolute flex flex-col items-center transition-all duration-400 ease-out"
-      style={{ left: `${position * 48 + 24}px`, transform: 'translateX(-50%)' }}
+      style={{ left: `${position * (cellWidth + cellGap) + cellWidth / 2}px`, transform: 'translateX(-50%)' }}
     >
       <span className={`px-2 py-0.5 rounded text-xs font-bold ${color} text-white shadow-sm`}>{label}</span>
       <svg width="12" height="16" viewBox="0 0 12 16" className="mt-0.5">

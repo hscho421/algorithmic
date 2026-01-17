@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useVisualizerState, usePlayback } from '../../../hooks';
 import { Input } from '../../shared/ui';
 import { ExplanationPanel, ComplexityPanel } from '../../shared/panels';
@@ -11,6 +11,47 @@ import {
   getExplanation,
   getResult,
 } from '../../../lib/algorithms/sorting/quickSort';
+
+const useContainerWidth = (ref) => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!ref.current || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return width;
+};
+
+const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
+  if (!containerWidth || count <= 0) {
+    return { cell: maxCell, gap: baseGap };
+  }
+
+  let gap = baseGap;
+  let available = containerWidth - gap * (count - 1);
+  let cell = Math.floor(available / count);
+
+  if (cell < minCell) {
+    gap = minGap;
+    available = containerWidth - gap * (count - 1);
+    cell = Math.floor(available / count);
+  }
+
+  cell = Math.max(8, Math.min(maxCell, cell));
+  return { cell, gap };
+};
 
 export default function QuickSortVisualizer() {
   const [arrayInput, setArrayInput] = useState('38, 27, 43, 3, 9, 82, 10');
@@ -206,6 +247,14 @@ function QuickSortVisualization({ state }) {
   }
 
   const maxVal = Math.max(...array, 1);
+  const containerRef = useRef(null);
+  const containerWidth = useContainerWidth(containerRef);
+  const { cell: barWidth, gap: barGap } = getCellMetrics(containerWidth, array.length, {
+    minCell: 8,
+    maxCell: 40,
+    baseGap: 4,
+    minGap: 2,
+  });
 
   const getHighlightType = (idx) => {
     const highlight = highlights.find((h) => h.index === idx);
@@ -242,8 +291,8 @@ function QuickSortVisualization({ state }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center overflow-x-auto pb-2">
-        <div className="flex items-end gap-1 h-60 px-4 pt-3">
+      <div className="flex justify-center pb-2">
+        <div className="flex items-end h-60 px-4 pt-3 w-full" style={{ gap: `${barGap}px` }} ref={containerRef}>
           {array.map((value, idx) => {
             const minHeight = 16;
             const maxHeight = 140;
@@ -267,8 +316,8 @@ function QuickSortVisualization({ state }) {
                   ))}
                 </div>
                 <div
-                  className={`w-10 rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
-                  style={{ height: `${height}px` }}
+                  className={`rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
+                  style={{ width: `${barWidth}px`, height: `${height}px` }}
                 />
                 <div className={`mt-1 text-xs font-mono ${isPivot ? 'text-purple-400 font-bold' : 'text-zinc-400'}`}>
                   {value}

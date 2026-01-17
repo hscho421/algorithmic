@@ -1,5 +1,46 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TEMPLATES } from '../../../lib/algorithms/searching/binarySearch';
+
+const useContainerWidth = (ref) => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!ref.current || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return width;
+};
+
+const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
+  if (!containerWidth || count <= 0) {
+    return { cell: maxCell, gap: baseGap };
+  }
+
+  let gap = baseGap;
+  let available = containerWidth - gap * (count - 1);
+  let cell = Math.floor(available / count);
+
+  if (cell < minCell) {
+    gap = minGap;
+    available = containerWidth - gap * (count - 1);
+    cell = Math.floor(available / count);
+  }
+
+  cell = Math.max(12, Math.min(maxCell, cell));
+  return { cell, gap };
+};
 
 // Helper component for pointer indicators
 function PointerIndicator({ label, value, color, suffix }) {
@@ -65,6 +106,9 @@ export default function ArrayVisualization({ state }) {
   const { array, l, r, m, templateKey, done, target, comparison, result, iteration } = state;
   const template = TEMPLATES[templateKey];
   const n = array.length;
+  const containerRef = useRef(null);
+  const containerWidth = useContainerWidth(containerRef);
+  const totalCells = n + (template.halfOpen ? 1 : 0);
 
   // Track previous positions for animation
   const [, setPrevPositions] = useState({ l: 0, r: n, m: null });
@@ -85,8 +129,15 @@ export default function ArrayVisualization({ state }) {
     );
   }
 
-  const cellWidth = 60;
-  const cellGap = 4;
+  const { cell: cellWidth, gap: cellGap } = getCellMetrics(containerWidth, totalCells, {
+    minCell: 24,
+    maxCell: 60,
+    baseGap: 4,
+    minGap: 2,
+  });
+  const cellSize = Math.max(24, Math.min(56, cellWidth));
+  const totalWidth = totalCells * cellWidth + (totalCells - 1) * cellGap;
+  const pointerSpread = Math.max(10, Math.min(24, Math.round(cellWidth * 0.4)));
 
   const isInRange = (idx) => {
     if (done) return idx === result && result !== -1;
@@ -141,7 +192,7 @@ export default function ArrayVisualization({ state }) {
       const count = group.length;
       group.forEach((p, i) => {
         // Spread pointers horizontally when overlapping
-        const offsetX = count === 1 ? 0 : (i - (count - 1) / 2) * 24;
+        const offsetX = count === 1 ? 0 : (i - (count - 1) / 2) * pointerSpread;
         result.push({ ...p, offsetX });
       });
     });
@@ -172,107 +223,111 @@ export default function ArrayVisualization({ state }) {
       </div>
 
       {/* Array visualization with sliding pointers */}
-      <div className="flex justify-center overflow-x-auto pb-2">
-        <div className="relative">
-          {/* Pointer track - positioned above cells */}
-          <div 
-            className="relative h-12 mb-2" 
-            style={{ width: `${(n + (template.halfOpen ? 1 : 0)) * (cellWidth + cellGap)}px` }}
-          >
-            {pointersWithOffsets.map((p) => (
-              <div
-                key={p.label}
-                className="absolute flex flex-col items-center transition-all duration-400 ease-out"
-                style={{
-                  left: `${getPointerX(p.idx) + p.offsetX}px`,
-                  transform: 'translateX(-50%)',
-                  top: 0,
-                  zIndex: p.priority,
-                }}
-              >
-                <span
-                  className="px-2 py-0.5 rounded text-xs font-bold shadow-lg whitespace-nowrap"
-                  style={{ backgroundColor: p.color, color: 'white' }}
+      <div className="flex justify-center pb-2">
+        <div className="w-full max-w-full" ref={containerRef}>
+          <div className="relative mx-auto" style={{ width: `${totalWidth}px` }}>
+            {/* Pointer track - positioned above cells */}
+            <div
+              className="relative h-12 mb-2"
+              style={{ width: `${totalWidth}px` }}
+            >
+              {pointersWithOffsets.map((p) => (
+                <div
+                  key={p.label}
+                  className="absolute flex flex-col items-center transition-all duration-400 ease-out"
+                  style={{
+                    left: `${getPointerX(p.idx) + p.offsetX}px`,
+                    transform: 'translateX(-50%)',
+                    top: 0,
+                    zIndex: p.priority,
+                  }}
                 >
-                  {p.label}
-                </span>
-                <svg 
-                  width="12" 
-                  height="16" 
-                  viewBox="0 0 12 16" 
-                  className="mt-0.5"
-                >
-                  <path 
-                    d={`M6 0 L6 12 L2 8 M6 12 L10 8`}
-                    fill="none"
-                    stroke={p.color}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-            ))}
-          </div>
+                  <span
+                    className="px-2 py-0.5 rounded text-xs font-bold shadow-lg whitespace-nowrap"
+                    style={{ backgroundColor: p.color, color: 'white' }}
+                  >
+                    {p.label}
+                  </span>
+                  <svg
+                    width="12"
+                    height="16"
+                    viewBox="0 0 12 16"
+                    className="mt-0.5"
+                  >
+                    <path
+                      d={`M6 0 L6 12 L2 8 M6 12 L10 8`}
+                      fill="none"
+                      stroke={p.color}
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              ))}
+            </div>
 
           {/* Array cells */}
-          <div className="flex items-end gap-1">
-            {array.map((value, idx) => {
-              const inRange = isInRange(idx);
-              const isMiddle = idx === m && !done;
-              const isTarget = value === target && isMiddle;
-              const isResultCell = isResultIndex(idx);
+            <div className="flex items-end" style={{ gap: `${cellGap}px` }}>
+              {array.map((value, idx) => {
+                const inRange = isInRange(idx);
+                const isMiddle = idx === m && !done;
+                const isTarget = value === target && isMiddle;
+                const isResultCell = isResultIndex(idx);
 
-              return (
-                <div key={idx} className="flex flex-col items-center" style={{ width: cellWidth }}>
-                  {/* Array cell */}
-                  <div
-                    className={`
-                      relative w-14 h-14 flex items-center justify-center rounded-lg
-                      font-mono text-lg font-semibold transition-all duration-300
-                      ${isResultCell
-                        ? 'bg-emerald-500 border-2 border-emerald-400 text-white scale-110 shadow-lg shadow-emerald-500/30'
-                        : inRange
-                          ? 'bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white shadow-lg shadow-zinc-900/20 dark:shadow-[0_6px_16px_rgba(0,0,0,0.55)]'
-                          : 'bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600'
-                      }
-                      ${isMiddle && !done ? 'ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950' : ''}
-                      ${isTarget && comparison === 'equal' ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500' : ''}
-                    `}
-                  >
-                    {value}
-                  </div>
+                return (
+                  <div key={idx} className="flex flex-col items-center" style={{ width: cellWidth }}>
+                    {/* Array cell */}
+                    <div
+                      className={`
+                        relative flex items-center justify-center rounded-lg
+                        font-mono text-lg font-semibold transition-all duration-300
+                        ${isResultCell
+                          ? 'bg-emerald-500 border-2 border-emerald-400 text-white scale-110 shadow-lg shadow-emerald-500/30'
+                          : inRange
+                            ? 'bg-zinc-200 dark:bg-zinc-800 border-2 border-zinc-400 dark:border-zinc-600 text-zinc-900 dark:text-white shadow-lg shadow-zinc-900/20 dark:shadow-[0_6px_16px_rgba(0,0,0,0.55)]'
+                            : 'bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-300 dark:border-zinc-800 text-zinc-400 dark:text-zinc-600'
+                        }
+                        ${isMiddle && !done ? 'ring-2 ring-emerald-500/50 ring-offset-2 ring-offset-white dark:ring-offset-zinc-950' : ''}
+                        ${isTarget && comparison === 'equal' ? 'bg-emerald-100 dark:bg-emerald-900/50 border-emerald-500' : ''}
+                      `}
+                      style={{ width: `${cellSize}px`, height: `${cellSize}px` }}
+                    >
+                      {value}
+                    </div>
 
                   {/* Index label */}
-                  <span className={`mt-2 text-xs font-mono transition-colors duration-300 ${
-                    isResultCell 
-                      ? 'text-emerald-600 dark:text-emerald-400 font-bold' 
-                      : inRange 
-                        ? 'text-zinc-600 dark:text-zinc-400' 
-                        : 'text-zinc-400 dark:text-zinc-700'
-                  }`}>
-                    [{idx}]
-                  </span>
-                </div>
-              );
-            })}
+                    <span className={`mt-2 text-xs font-mono transition-colors duration-300 ${
+                      isResultCell
+                        ? 'text-emerald-600 dark:text-emerald-400 font-bold'
+                        : inRange
+                          ? 'text-zinc-600 dark:text-zinc-400'
+                          : 'text-zinc-400 dark:text-zinc-700'
+                    }`}>
+                      [{idx}]
+                    </span>
+                  </div>
+                );
+              })}
 
             {/* End marker for half-open intervals */}
-            {template.halfOpen && (
-              <div className="flex flex-col items-center" style={{ width: cellWidth }}>
-                <div className={`
-                  w-14 h-14 flex items-center justify-center rounded-lg 
-                  border-2 border-dashed transition-all duration-300
-                  ${r === n && !done
-                    ? 'border-red-500/50 text-red-500 dark:text-red-400 bg-red-500/5'
-                    : 'border-zinc-300 dark:border-zinc-700 text-zinc-400 dark:text-zinc-600'
-                  }
-                `}>
-                  <span className="text-sm">end</span>
+              {template.halfOpen && (
+                <div className="flex flex-col items-center" style={{ width: cellWidth }}>
+                  <div className={`
+                    flex items-center justify-center rounded-lg 
+                    border-2 border-dashed transition-all duration-300
+                    ${r === n && !done
+                      ? 'border-red-500/50 text-red-500 dark:text-red-400 bg-red-500/5'
+                      : 'border-zinc-300 dark:border-zinc-700 text-zinc-400 dark:text-zinc-600'
+                    }
+                  `}
+                  style={{ width: `${cellSize}px`, height: `${cellSize}px` }}>
+                    <span className="text-sm">end</span>
+                  </div>
+                  <span className="mt-2 text-xs font-mono text-zinc-400 dark:text-zinc-700">[{n}]</span>
                 </div>
-                <span className="mt-2 text-xs font-mono text-zinc-400 dark:text-zinc-700">[{n}]</span>
-              </div>
-            )}
+              )}
+          </div>
           </div>
         </div>
       </div>

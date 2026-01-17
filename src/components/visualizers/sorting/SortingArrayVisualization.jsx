@@ -1,3 +1,46 @@
+import { useEffect, useRef, useState } from 'react';
+
+const useContainerWidth = (ref) => {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!ref.current || typeof ResizeObserver === 'undefined') {
+      return;
+    }
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry) {
+        setWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return width;
+};
+
+const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
+  if (!containerWidth || count <= 0) {
+    return { cell: maxCell, gap: baseGap };
+  }
+
+  let gap = baseGap;
+  let available = containerWidth - gap * (count - 1);
+  let cell = Math.floor(available / count);
+
+  if (cell < minCell) {
+    gap = minGap;
+    available = containerWidth - gap * (count - 1);
+    cell = Math.floor(available / count);
+  }
+
+  cell = Math.max(8, Math.min(maxCell, cell));
+  return { cell, gap };
+};
+
 export default function SortingArrayVisualization({ state }) {
   const { array, highlights = [], ranges = [], leftCopy, rightCopy, leftPointer, rightPointer } = state;
 
@@ -52,10 +95,38 @@ export default function SortingArrayVisualization({ state }) {
     return '';
   };
 
+  const mainRef = useRef(null);
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
+  const mainWidth = useContainerWidth(mainRef);
+  const leftWidth = useContainerWidth(leftRef);
+  const rightWidth = useContainerWidth(rightRef);
+
+  const { cell: barWidth, gap: barGap } = getCellMetrics(mainWidth, array.length, {
+    minCell: 8,
+    maxCell: 40,
+    baseGap: 4,
+    minGap: 2,
+  });
+
+  const leftMetrics = getCellMetrics(leftWidth, leftCopy?.length || 0, {
+    minCell: 16,
+    maxCell: 40,
+    baseGap: 4,
+    minGap: 2,
+  });
+
+  const rightMetrics = getCellMetrics(rightWidth, rightCopy?.length || 0, {
+    minCell: 16,
+    maxCell: 40,
+    baseGap: 4,
+    minGap: 2,
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-center overflow-x-auto pb-1">
-        <div className="flex items-end gap-1 h-40 px-4 pt-3">
+      <div className="flex justify-center pb-1">
+        <div className="flex items-end h-40 px-4 pt-3 w-full" style={{ gap: `${barGap}px` }} ref={mainRef}>
           {array.map((value, idx) => {
             const minHeight = 12;
             const maxHeight = 130;
@@ -66,8 +137,8 @@ export default function SortingArrayVisualization({ state }) {
             return (
               <div key={idx} className="flex flex-col items-center">
                 <div
-                  className={`w-10 rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
-                  style={{ height: `${height}px` }}
+                  className={`rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
+                  style={{ width: `${barWidth}px`, height: `${height}px` }}
                 />
                 <div className="mt-0.5 text-xs font-mono text-zinc-400 leading-none">{value}</div>
                 <div className="text-xs font-mono text-zinc-600 leading-none">[{idx}]</div>
@@ -79,16 +150,17 @@ export default function SortingArrayVisualization({ state }) {
 
       {leftCopy && rightCopy && (
         <div className="flex justify-center gap-8 pt-4 border-t border-zinc-800">
-          <div className="space-y-2">
+          <div className="space-y-2 w-full max-w-[420px]" ref={leftRef}>
             <div className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Left Copy</div>
-            <div className="flex gap-1">
+            <div className="flex" style={{ gap: `${leftMetrics.gap}px` }}>
               {leftCopy.map((val, idx) => (
                 <div
                   key={idx}
-                  className={`w-10 h-10 flex items-center justify-center rounded font-mono text-sm
+                  className={`flex items-center justify-center rounded font-mono text-sm
                     ${idx === leftPointer ? 'bg-blue-500 text-white ring-2 ring-blue-300' : 'bg-zinc-800 text-zinc-400'}
                     ${idx < leftPointer ? 'opacity-40' : ''}
                   `}
+                  style={{ width: `${leftMetrics.cell}px`, height: `${leftMetrics.cell}px` }}
                 >
                   {val}
                 </div>
@@ -96,16 +168,17 @@ export default function SortingArrayVisualization({ state }) {
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 w-full max-w-[420px]" ref={rightRef}>
             <div className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Right Copy</div>
-            <div className="flex gap-1">
+            <div className="flex" style={{ gap: `${rightMetrics.gap}px` }}>
               {rightCopy.map((val, idx) => (
                 <div
                   key={idx}
-                  className={`w-10 h-10 flex items-center justify-center rounded font-mono text-sm
+                  className={`flex items-center justify-center rounded font-mono text-sm
                     ${idx === rightPointer ? 'bg-rose-500 text-white ring-2 ring-rose-300' : 'bg-zinc-800 text-zinc-400'}
                     ${idx < rightPointer ? 'opacity-40' : ''}
                   `}
+                  style={{ width: `${rightMetrics.cell}px`, height: `${rightMetrics.cell}px` }}
                 >
                   {val}
                 </div>
