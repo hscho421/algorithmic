@@ -238,9 +238,9 @@ export default function GraphDisplay({
       </div>
 
       {queue !== undefined && (
-        <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 px-2">
           <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Queue (FIFO)</div>
-          <div className="flex gap-1 flex-wrap">
+          <div className="flex gap-1 flex-wrap justify-start">
             {queue.length === 0 ? (
               <span className="text-zinc-400 dark:text-zinc-600 text-sm italic">Empty</span>
             ) : (
@@ -263,9 +263,9 @@ export default function GraphDisplay({
       )}
 
       {stack !== undefined && (
-        <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 px-2">
           <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Stack (LIFO)</div>
-          <div className="flex gap-1 flex-wrap">
+          <div className="flex gap-1 flex-wrap justify-start">
             {stack.length === 0 ? (
               <span className="text-zinc-400 dark:text-zinc-600 text-sm italic">Empty</span>
             ) : (
