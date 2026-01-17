@@ -1,9 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import ControlPanel from '../controls/ControlPanel';
 import StatePanel from '../panels/StatePanel';
 import CodePanel from '../panels/CodePanel';
 import useKeyboardShortcuts from '../../../hooks/useKeyboardShortcuts';
 import { getPanelPreference, savePanelPreference } from '../../../utils/layoutPersistence';
+
+const GAP_PX = 16;
+const DEFAULT_COLS = [25, 50, 25];
+const SNAP_PX = 24;
+const MIN_COL_PX = { left: 240, center: 360, right: 240 };
+
+const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 export default function VisualizerLayout({
   configurationContent,
@@ -19,10 +26,6 @@ export default function VisualizerLayout({
   const gridRef = useRef(null);
   const dragRef = useRef(null);
 
-  const GAP_PX = 16;
-  const DEFAULT_COLS = [25, 50, 25];
-  const SNAP_PX = 24;
-  const MIN_COL_PX = { left: 240, center: 360, right: 240 };
   const [containerWidth, setContainerWidth] = useState(0);
   const [colPercents, setColPercents] = useState(DEFAULT_COLS);
   const colPercentsRef = useRef(colPercents);
@@ -56,20 +59,14 @@ export default function VisualizerLayout({
   }, []);
 
   useEffect(() => {
-    if (!isLg) {
-      setColPercents(DEFAULT_COLS);
-    }
-  }, [isLg]);
-
-  useEffect(() => {
     colPercentsRef.current = colPercents;
   }, [colPercents]);
 
-  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const effectiveCols = isLg ? colPercents : DEFAULT_COLS;
   const availableWidth = Math.max(0, containerWidth - GAP_PX * 2);
-  const leftPx = (availableWidth * colPercents[0]) / 100;
-  const centerPx = (availableWidth * colPercents[1]) / 100;
-  const rightPx = (availableWidth * colPercents[2]) / 100;
+  const leftPx = (availableWidth * effectiveCols[0]) / 100;
+  const centerPx = (availableWidth * effectiveCols[1]) / 100;
+  const rightPx = (availableWidth * effectiveCols[2]) / 100;
   const defaultLeftPx = (availableWidth * DEFAULT_COLS[0]) / 100;
   const defaultCenterPx = (availableWidth * DEFAULT_COLS[1]) / 100;
   const defaultRightPx = (availableWidth * DEFAULT_COLS[2]) / 100;
@@ -163,29 +160,31 @@ export default function VisualizerLayout({
     };
   }, [handlePointerMove, handlePointerUp]);
 
-  // Separate info tabs into reference and status
-  const explanationTab = infoTabs.find(tab => tab.id === 'explanation');
-  const complexityTab = infoTabs.find(tab => tab.id === 'complexity');
-  const guideTab = infoTabs.find(tab => tab.id === 'guide');
-  const resultTab = infoTabs.find(tab => tab.id === 'result');
+  const rightTabs = useMemo(() => {
+    const explanationTab = infoTabs.find((tab) => tab.id === 'explanation');
+    const complexityTab = infoTabs.find((tab) => tab.id === 'complexity');
+    const guideTab = infoTabs.find((tab) => tab.id === 'guide');
+    const resultTab = infoTabs.find((tab) => tab.id === 'result');
 
-  const explanationContent = (
-    <div className="space-y-4">
-      {resultTab?.content}
-      {explanationTab?.content}
-    </div>
-  );
+    const explanationContent = (
+      <div className="space-y-4">
+        {resultTab?.content}
+        {explanationTab?.content}
+      </div>
+    );
 
-  const rightTabs = [];
-  if (explanationTab || resultTab) {
-    rightTabs.push({ id: 'explanation', label: 'Explanation', content: explanationContent });
-  }
-  if (complexityTab) {
-    rightTabs.push({ id: 'complexity', label: 'Complexity', content: complexityTab.content });
-  }
-  if (guideTab) {
-    rightTabs.push({ id: 'guide', label: 'Guide', content: guideTab.content });
-  }
+    const tabs = [];
+    if (explanationTab || resultTab) {
+      tabs.push({ id: 'explanation', label: 'Explanation', content: explanationContent });
+    }
+    if (complexityTab) {
+      tabs.push({ id: 'complexity', label: 'Complexity', content: complexityTab.content });
+    }
+    if (guideTab) {
+      tabs.push({ id: 'guide', label: 'Guide', content: guideTab.content });
+    }
+    return tabs;
+  }, [infoTabs]);
 
   const [activeRightTab, setActiveRightTab] = useState(() => {
     const savedTab = getPanelPreference('visualizer-right', 'activeTab', null);
@@ -200,16 +199,9 @@ export default function VisualizerLayout({
     savePanelPreference('visualizer-right', 'activeTab', tabId);
   }, []);
 
-  useEffect(() => {
-    if (!rightTabs.length) {
-      return;
-    }
-
-    if (!rightTabs.some((tab) => tab.id === activeRightTab)) {
-      const nextTab = rightTabs[0].id;
-      setRightTab(nextTab);
-    }
-  }, [activeRightTab, rightTabs, setRightTab]);
+  const currentRightTab = rightTabs.some((tab) => tab.id === activeRightTab)
+    ? activeRightTab
+    : rightTabs[0]?.id;
 
   const handleStep = useCallback(() => {
     if (rightTabs.some((tab) => tab.id === 'explanation')) {
@@ -378,7 +370,7 @@ export default function VisualizerLayout({
                         setRightTab(tab.id);
                       }}
                       className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider border transition-colors ${
-                        activeRightTab === tab.id
+                        currentRightTab === tab.id
                           ? 'bg-blue-500 text-white border-blue-500'
                           : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-700'
                       }`}
@@ -389,7 +381,7 @@ export default function VisualizerLayout({
                 </div>
 
                 <div className="overflow-y-auto pt-4 max-h-[30vh]">
-                  {rightTabs.find((tab) => tab.id === activeRightTab)?.content}
+                  {rightTabs.find((tab) => tab.id === currentRightTab)?.content}
                 </div>
               </div>
             )}
