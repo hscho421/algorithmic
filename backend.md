@@ -63,6 +63,7 @@ Billing (Stripe)
 ### profiles
 - id (uuid, primary key, FK to auth.users)
 - display_name (text)
+- username (text, unique, optional for public profiles)
 - avatar_url (text)
 - created_at (timestamp)
 
@@ -74,6 +75,8 @@ Billing (Stripe)
 - layout_prefs (jsonb)  // split widths, active tab, etc.
 - created_at (timestamp)
 - updated_at (timestamp)
+Constraints:
+- UNIQUE (user_id)  // one preferences row per user
 
 ### saved_inputs
 - id (uuid, primary key)
@@ -83,6 +86,8 @@ Billing (Stripe)
 - input_json (jsonb)
 - created_at (timestamp)
 - updated_at (timestamp)
+Indexes:
+- INDEX (user_id, algorithm_id)
 
 ### progress
 - id (uuid, primary key)
@@ -91,6 +96,8 @@ Billing (Stripe)
 - last_state_json (jsonb)
 - last_step (integer)
 - last_seen_at (timestamp)
+Constraints:
+- UNIQUE (user_id, algorithm_id)
 
 ### favorites
 - id (uuid, primary key)
@@ -106,7 +113,7 @@ Billing (Stripe)
 
 ### subscriptions
 - id (uuid, primary key)
-- user_id (uuid, FK to auth.users)
+- user_id (uuid, FK to auth.users, nullable)
 - stripe_customer_id (text)
 - stripe_subscription_id (text)
 - status (text)  // active, trialing, canceled, past_due
@@ -114,6 +121,8 @@ Billing (Stripe)
 - plan_id (text)
 - created_at (timestamp)
 - updated_at (timestamp)
+Notes:
+- `user_id` can be null until a Stripe customer is linked to an auth user.
 
 ## 5) RLS Policies (Must Have)
 
@@ -124,11 +133,12 @@ For all user-owned tables:
 For subscriptions:
 - SELECT allowed for the user.
 - INSERT/UPDATE/DELETE only via service role (webhook).
+- Do not allow client writes at all.
 
 Example policy:
 - SELECT: `user_id = auth.uid()`
-- INSERT: `user_id = auth.uid()`
-- UPDATE: `user_id = auth.uid()`
+- INSERT: no user policy
+- UPDATE: no user policy
 
 ## 6) Client Integration Steps
 
@@ -153,6 +163,9 @@ Example policy:
 - Save preferences (tab choice, split widths, speed) into Supabase.
 - Save inputs for visualizers.
 - Track progress and last viewed algorithm.
+Implementation notes:
+- Load preferences once on login and store in context.
+- Debounce preference writes (avoid saving on every keystroke).
 
 6. Feature gating
 - Check subscription status on login.
@@ -187,6 +200,10 @@ Premium features (Stripe):
 - Advanced or premium visualizers.
 - Guided learning paths or quizzes.
 - Export/share state links.
+Gating model:
+- Auth gates identity.
+- Subscription gates entitlement.
+- Premium content can be visible but locked to improve conversion.
 
 ## 10) Deployment Checklist
 
@@ -206,4 +223,3 @@ Premium features (Stripe):
 4. Add saved inputs and favorites.
 5. Add Stripe checkout + webhook sync.
 6. Gate premium features.
-
