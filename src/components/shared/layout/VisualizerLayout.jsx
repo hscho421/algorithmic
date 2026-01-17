@@ -283,24 +283,24 @@ export default function VisualizerLayout({
           {isLg && (
             <>
               <div
-                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none"
+                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none group"
                 style={{ left: leftPx, width: GAP_PX }}
                 onPointerDown={(event) => handlePointerDown('left', event)}
                 role="separator"
                 aria-orientation="vertical"
                 aria-label="Resize left panel"
               >
-                <div className="w-1 h-full bg-transparent hover:bg-blue-400/40 transition-colors" />
+                <div className="w-1 h-12 rounded-full bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors" />
               </div>
               <div
-                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none"
+                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none group"
                 style={{ left: leftPx + GAP_PX + centerPx, width: GAP_PX }}
                 onPointerDown={(event) => handlePointerDown('right', event)}
                 role="separator"
                 aria-orientation="vertical"
                 aria-label="Resize right panel"
               >
-                <div className="w-1 h-full bg-transparent hover:bg-blue-400/40 transition-colors" />
+                <div className="w-1 h-12 rounded-full bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors" />
               </div>
             </>
           )}

@@ -41,6 +41,18 @@ const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minG
   return { cell, gap };
 };
 
+function PointerIndicator({ label, value, color, suffix }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className={`w-5 h-5 rounded ${color} flex items-center justify-center shadow-sm`}>
+        <span className="text-white text-xs font-bold">{label}</span>
+      </div>
+      <span className="text-zinc-600 dark:text-zinc-400 font-mono text-sm">= {value}</span>
+      {suffix && <span className="text-zinc-400 dark:text-zinc-500 text-xs">{suffix}</span>}
+    </div>
+  );
+}
+
 export default function SlidingWindowVisualization({ state }) {
   const {
     items = [],
@@ -171,6 +183,20 @@ export default function SlidingWindowVisualization({ state }) {
           </div>
         </div>
       </div>
+
+      {hasWindow && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center justify-center gap-6 text-sm">
+            <PointerIndicator label="L" value={l} color="bg-blue-500" />
+            <PointerIndicator label="R" value={r} color="bg-amber-500" />
+          </div>
+          {!done && (
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+              Window: [{l}, {r}] = {r - l + 1} element{r - l + 1 !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
