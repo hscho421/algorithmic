@@ -116,7 +116,7 @@ export default function VisualizerLayout({
 
   return (
     <div className={`w-full font-body ${className}`}>
-      <div className="max-w-[1800px] mx-auto px-4 py-6">
+      <div className="w-full px-4 py-6">
         {/* Three Column Grid Layout - Screen Height */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4" style={{ minHeight: 'calc(100vh - 60px)' }}>
           {/* Left Column - Configuration, Controls & Guide (3 cols) */}
