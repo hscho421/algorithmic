@@ -231,7 +231,7 @@ export default function CategoryPage() {
 
       {algorithms.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {algorithms.map((algorithm, idx) => (
+          {algorithms.map((algorithm) => (
             <Link to={`/visualize/${algorithm.id}`} key={algorithm.id}>
               <div
                 className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/70 bg-white/70 p-6 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 dark:border-zinc-800/70 dark:bg-zinc-900/60 dark:hover:shadow-black/40"
