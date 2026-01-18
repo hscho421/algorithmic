@@ -1,5 +1,5 @@
-const Stripe = require('stripe');
-const { createClient } = require('@supabase/supabase-js');
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-04-10',
@@ -18,7 +18,7 @@ const getSupabaseClient = () => {
   return createClient(url, anonKey);
 };
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -68,4 +68,4 @@ module.exports = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message || 'Stripe error' });
   }
-};
+}
