@@ -79,7 +79,14 @@ export default function QuickSortVisualizer() {
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { arrayInput, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'quick-sort',
     progressPayload,
   );
@@ -123,8 +130,8 @@ export default function QuickSortVisualizer() {
     setArrayInput(payload.arrayInput ?? '');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setArrayInput(payload.arrayInput ?? '');
   };
 
@@ -184,6 +191,10 @@ export default function QuickSortVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

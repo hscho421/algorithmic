@@ -74,7 +74,14 @@ export default function TrieVisualizer() {
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { wordsInput, wordInput, operation, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'trie',
     progressPayload,
   );
@@ -128,8 +135,8 @@ export default function TrieVisualizer() {
     setOperation(payload.operation ?? 'insert');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setWordsInput(payload.wordsInput ?? '');
     setWordInput(payload.wordInput ?? '');
     setOperation(payload.operation ?? 'insert');
@@ -305,6 +312,10 @@ export default function TrieVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

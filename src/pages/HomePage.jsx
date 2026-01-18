@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, isProCategory } from '../constants';
+import useUserPreferences from '../context/useUserPreferences';
 
 const MotionLink = motion(Link);
 
@@ -32,6 +33,7 @@ const QUICK_STARTS = [
     name: "Dijkstra's",
     description: 'Trace shortest paths across a weighted graph.',
     color: 'bg-amber-500',
+    isPro: true,
     icon: (
       <svg className="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -74,6 +76,7 @@ const CATEGORY_COLORS = [
 ];
 
 export default function HomePage() {
+  const { isPro } = useUserPreferences();
   const shouldReduceMotion = useReducedMotion();
   const stagger = {
     show: {
@@ -221,28 +224,37 @@ export default function HomePage() {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {QUICK_STARTS.map((item) => (
-            <motion.div key={item.id} variants={cardRise}>
-              <MotionLink
-                to={`/visualize/${item.id}`}
-                className="group block h-full p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-shadow duration-300 hover:shadow-xl transform-gpu will-change-transform"
-                whileHover={hoverLift}
-              >
-                <div className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center mb-6 shadow-lg shadow-zinc-200/50 dark:shadow-none`}>
-                  <div className="text-white">
-                    {item.icon}
+          {QUICK_STARTS.map((item) => {
+            const isLocked = item.isPro && !isPro;
+            const target = isLocked ? '/pricing' : `/visualize/${item.id}`;
+            return (
+              <motion.div key={item.id} variants={cardRise}>
+                <MotionLink
+                  to={target}
+                  className="group block h-full p-8 rounded-3xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-shadow duration-300 hover:shadow-xl transform-gpu will-change-transform"
+                  whileHover={hoverLift}
+                >
+                  {isLocked && (
+                    <div className="absolute top-6 right-6 text-[10px] uppercase tracking-[0.2em] bg-amber-100 text-amber-600 px-2 py-1 rounded-full">
+                      Pro
+                    </div>
+                  )}
+                  <div className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center mb-6 shadow-lg shadow-zinc-200/50 dark:shadow-none`}>
+                    <div className="text-white">
+                      {item.icon}
+                    </div>
                   </div>
-                </div>
-                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{item.name}</h3>
-                <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6">
-                  {item.description}
-                </p>
-                <div className="flex items-center text-sm font-semibold text-zinc-900 dark:text-white group-hover:translate-x-1 transition-transform">
-                  Launch Visualizer <span className="ml-2">→</span>
-                </div>
-              </MotionLink>
-            </motion.div>
-          ))}
+                  <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-2">{item.name}</h3>
+                  <p className="text-zinc-500 dark:text-zinc-400 text-sm leading-relaxed mb-6">
+                    {item.description}
+                  </p>
+                  <div className="flex items-center text-sm font-semibold text-zinc-900 dark:text-white group-hover:translate-x-1 transition-transform">
+                    {isLocked ? 'Unlock Pro' : 'Launch Visualizer'} <span className="ml-2">→</span>
+                  </div>
+                </MotionLink>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </motion.section>
 
@@ -332,36 +344,45 @@ export default function HomePage() {
           whileInView="show"
           viewport={{ once: true, amount: 0.2 }}
         >
-          {CATEGORIES.map((category, idx) => (
-            <motion.div key={category.id} variants={cardRise}>
-              <MotionLink
-                to={category.path}
-                className="group relative h-64 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 flex flex-col justify-between overflow-hidden hover:shadow-xl transition-shadow duration-300 transform-gpu will-change-transform"
-                whileHover={hoverLift}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${CATEGORY_COLORS[idx % CATEGORY_COLORS.length]} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-                
-                <div className="relative z-10">
-                  <div className={`w-12 h-12 rounded-2xl ${CATEGORY_COLORS[idx % CATEGORY_COLORS.length]} flex items-center justify-center text-2xl mb-4 shadow-sm text-white`}>
-                    {/* Simple icon mapping based on first letter or index */}
-                    {idx % 3 === 0 ? '🔍' : idx % 3 === 1 ? '🌳' : '🕸️'}
+          {CATEGORIES.map((category, idx) => {
+            const isLocked = isProCategory(category.id) && !isPro;
+            const target = isLocked ? '/pricing' : category.path;
+            return (
+              <motion.div key={category.id} variants={cardRise}>
+                <MotionLink
+                  to={target}
+                  className="group relative h-64 rounded-3xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-8 flex flex-col justify-between overflow-hidden hover:shadow-xl transition-shadow duration-300 transform-gpu will-change-transform"
+                  whileHover={hoverLift}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${CATEGORY_COLORS[idx % CATEGORY_COLORS.length]} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+                  {isLocked && (
+                    <div className="absolute top-6 right-6 text-[10px] uppercase tracking-[0.2em] bg-amber-100 text-amber-600 px-2 py-1 rounded-full">
+                      Pro
+                    </div>
+                  )}
+                  
+                  <div className="relative z-10">
+                    <div className={`w-12 h-12 rounded-2xl ${CATEGORY_COLORS[idx % CATEGORY_COLORS.length]} flex items-center justify-center text-2xl mb-4 shadow-sm text-white`}>
+                      {/* Simple icon mapping based on first letter or index */}
+                      {idx % 3 === 0 ? '🔍' : idx % 3 === 1 ? '🌳' : '🕸️'}
+                    </div>
+                    <h3 className="text-2xl font-display font-bold text-zinc-900 dark:text-white">
+                      {category.name}
+                    </h3>
                   </div>
-                  <h3 className="text-2xl font-display font-bold text-zinc-900 dark:text-white">
-                    {category.name}
-                  </h3>
-                </div>
 
-                <div className="relative z-10 flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 pt-6">
-                  <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
-                    View Collection
-                  </span>
-                  <span className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                    →
-                  </span>
-                </div>
-              </MotionLink>
-            </motion.div>
-          ))}
+                  <div className="relative z-10 flex items-center justify-between border-t border-zinc-200 dark:border-zinc-800 pt-6">
+                    <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">
+                      {isLocked ? 'Unlock Pro' : 'View Collection'}
+                    </span>
+                    <span className="w-8 h-8 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                      →
+                    </span>
+                  </div>
+                </MotionLink>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </motion.section>
     </motion.div>

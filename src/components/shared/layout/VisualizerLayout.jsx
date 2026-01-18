@@ -25,7 +25,13 @@ export default function VisualizerLayout({
   const [showHelp, setShowHelp] = useState(false);
   const gridRef = useRef(null);
   const dragRef = useRef(null);
-  const { visualizerColumns, setVisualizerColumns, getPanelPreference, setPanelPreference } = useUserPreferences();
+  const {
+    visualizerColumns,
+    setVisualizerColumns,
+    getPanelPreference,
+    setPanelPreference,
+    isPro,
+  } = useUserPreferences();
 
   const [containerWidth, setContainerWidth] = useState(0);
   const [colPercents, setColPercents] = useState(() => {
@@ -74,7 +80,7 @@ export default function VisualizerLayout({
     }
   }, [visualizerColumns]);
 
-  const effectiveCols = isLg ? colPercents : DEFAULT_COLS;
+  const effectiveCols = isLg ? (isPro ? colPercents : DEFAULT_COLS) : DEFAULT_COLS;
   const availableWidth = Math.max(0, containerWidth - GAP_PX * 2);
   const leftPx = (availableWidth * effectiveCols[0]) / 100;
   const centerPx = (availableWidth * effectiveCols[1]) / 100;
@@ -136,11 +142,11 @@ export default function VisualizerLayout({
   );
 
   const handlePointerDown = useCallback((type, event) => {
-    if (!isLg) return;
+    if (!isLg || !isPro) return;
     event.preventDefault();
     dragRef.current = { type };
     event.currentTarget.setPointerCapture?.(event.pointerId);
-  }, [isLg]);
+  }, [isLg, isPro]);
 
   const handlePointerMove = useCallback(
     (event) => {
@@ -290,22 +296,28 @@ export default function VisualizerLayout({
           {isLg && (
             <>
               <div
-                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none group"
+                className={`absolute top-0 bottom-0 hidden lg:flex items-center justify-center z-10 touch-none group ${
+                  isPro ? 'cursor-col-resize' : 'cursor-not-allowed opacity-40'
+                }`}
                 style={{ left: leftPx, width: GAP_PX }}
                 onPointerDown={(event) => handlePointerDown('left', event)}
                 role="separator"
                 aria-orientation="vertical"
                 aria-label="Resize left panel"
+                title={isPro ? 'Resize layout' : 'Upgrade to Pro for layout presets'}
               >
                 <div className="w-1 h-12 rounded-full bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors" />
               </div>
               <div
-                className="absolute top-0 bottom-0 cursor-col-resize hidden lg:flex items-center justify-center z-10 touch-none group"
+                className={`absolute top-0 bottom-0 hidden lg:flex items-center justify-center z-10 touch-none group ${
+                  isPro ? 'cursor-col-resize' : 'cursor-not-allowed opacity-40'
+                }`}
                 style={{ left: leftPx + GAP_PX + centerPx, width: GAP_PX }}
                 onPointerDown={(event) => handlePointerDown('right', event)}
                 role="separator"
                 aria-orientation="vertical"
                 aria-label="Resize right panel"
+                title={isPro ? 'Resize layout' : 'Upgrade to Pro for layout presets'}
               >
                 <div className="w-1 h-12 rounded-full bg-transparent group-hover:bg-zinc-200 dark:group-hover:bg-zinc-700 transition-colors" />
               </div>

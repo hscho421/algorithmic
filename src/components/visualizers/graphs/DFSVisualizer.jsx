@@ -49,7 +49,14 @@ export default function DFSVisualizer() {
     customEdges,
     stepIndex: state?.stepIndex ?? 0,
   };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'dfs',
     progressPayload,
   );
@@ -124,8 +131,8 @@ export default function DFSVisualizer() {
     setCustomEdges(payload.customEdges ?? [['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D']]);
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setMode(payload.mode ?? 'preset');
     setSelectedPreset(payload.selectedPreset ?? 'simple');
     setStartNode(payload.startNode ?? 'A');
@@ -275,6 +282,10 @@ export default function DFSVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

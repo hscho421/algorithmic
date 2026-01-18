@@ -50,7 +50,14 @@ export default function UnionFindVisualizer() {
     customOperations,
     stepIndex: state?.stepIndex ?? 0,
   };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'union-find',
     progressPayload,
   );
@@ -117,8 +124,8 @@ export default function UnionFindVisualizer() {
     );
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setMode(payload.mode ?? 'preset');
     setSelectedPreset(payload.selectedPreset ?? 'simple');
     setCustomElements(payload.customElements ?? ['A', 'B', 'C', 'D', 'E']);
@@ -347,6 +354,10 @@ export default function UnionFindVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

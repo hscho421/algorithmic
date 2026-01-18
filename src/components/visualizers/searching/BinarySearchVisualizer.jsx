@@ -105,7 +105,14 @@ export default function BinarySearchVisualizer() {
     dedupe,
     stepIndex: state?.stepIndex ?? 0,
   };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'binary-search',
     progressPayload,
   );
@@ -179,8 +186,8 @@ export default function BinarySearchVisualizer() {
     setDedupe(Boolean(payload.dedupe));
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     skipTemplatePresetRef.current = true;
     setTemplateKey(payload.templateKey ?? 'lower_bound');
     setArrayInput(payload.arrayInput ?? '');
@@ -358,6 +365,10 @@ export default function BinarySearchVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

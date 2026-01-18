@@ -2,11 +2,13 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useThemeContext } from '../../context/useThemeContext';
 import useAuthContext from '../../context/useAuthContext';
+import useUserPreferences from '../../context/useUserPreferences';
 import { ALGORITHMS } from '../../data/algorithms';
 
 export default function Header({ onToggleSidebar }) {
   const { theme, toggleTheme } = useThemeContext();
   const { isAuthenticated, user, signOut } = useAuthContext();
+  const { isPro } = useUserPreferences();
   const [query, setQuery] = useState('');
 
   const allAlgorithms = useMemo(() => {
@@ -96,9 +98,14 @@ export default function Header({ onToggleSidebar }) {
               Categories
             </button>
             <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full border border-zinc-200/70 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/70 text-zinc-600 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors"
+              onClick={isPro ? toggleTheme : undefined}
+              className={`p-2 rounded-full border border-zinc-200/70 dark:border-zinc-700/70 bg-white/80 dark:bg-zinc-900/70 text-zinc-600 dark:text-zinc-300 transition-colors ${
+                isPro
+                  ? 'hover:border-zinc-300 dark:hover:border-zinc-600'
+                  : 'cursor-not-allowed opacity-60'
+              }`}
               aria-label="Toggle theme"
+              title={isPro ? 'Toggle theme' : 'Upgrade to Pro for theme presets'}
             >
               {theme === 'dark' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

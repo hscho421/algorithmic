@@ -31,7 +31,14 @@ export default function CoinChangeVisualizer() {
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { coinsInput, amount, mode, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'coin-change',
     progressPayload,
   );
@@ -71,8 +78,8 @@ export default function CoinChangeVisualizer() {
     setMode(payload.mode ?? 'min_coins');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setCoinsInput(payload.coinsInput ?? '1, 2, 5');
     setAmount(payload.amount ?? '11');
     setMode(payload.mode ?? 'min_coins');
@@ -230,6 +237,10 @@ export default function CoinChangeVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

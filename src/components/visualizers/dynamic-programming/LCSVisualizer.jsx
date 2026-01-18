@@ -30,7 +30,14 @@ export default function LCSVisualizer() {
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { text1Input, text2Input, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'lcs',
     progressPayload,
   );
@@ -61,8 +68,8 @@ export default function LCSVisualizer() {
     setText2Input(payload.text2Input ?? '');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setText1Input(payload.text1Input ?? '');
     setText2Input(payload.text2Input ?? '');
   };
@@ -200,6 +207,10 @@ export default function LCSVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

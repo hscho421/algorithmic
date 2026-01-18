@@ -43,7 +43,14 @@ export default function BSTVisualizer() {
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { treeInput, valueInput, operation, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'bst',
     progressPayload,
   );
@@ -93,8 +100,8 @@ export default function BSTVisualizer() {
     setOperation(payload.operation ?? 'insert');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setTreeInput(payload.treeInput ?? '');
     setValueInput(payload.valueInput ?? '');
     setOperation(payload.operation ?? 'insert');
@@ -215,6 +222,10 @@ export default function BSTVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

@@ -43,7 +43,14 @@ export default function TraversalVisualizer() {
 
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { treeInput, traversalType, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'tree-traversal',
     progressPayload,
   );
@@ -89,8 +96,8 @@ export default function TraversalVisualizer() {
     setTraversalType(payload.traversalType ?? 'inorder');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setTreeInput(payload.treeInput ?? '');
     setTraversalType(payload.traversalType ?? 'inorder');
   };
@@ -230,6 +237,10 @@ export default function TraversalVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import useAuthContext from '../context/useAuthContext';
+import useUserPreferences from '../context/useUserPreferences';
+import { PRO_CHECKPOINT_LIMIT } from '../constants';
 
 export default function useProgress(algorithmId, payload) {
   const { user } = useAuthContext();
+  const { isPro } = useUserPreferences();
   const [progress, setProgress] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [checkpoints, setCheckpoints] = useState([]);
   const lastSavedRef = useRef('');
   const debounceRef = useRef(null);
+
+  const checkpointsKey = user && algorithmId
+    ? `progress-checkpoints:${user.id}:${algorithmId}`
+    : '';
 
   const fetchProgress = useCallback(async () => {
     if (!supabase || !user || !algorithmId) {
@@ -30,6 +38,29 @@ export default function useProgress(algorithmId, payload) {
   useEffect(() => {
     fetchProgress();
   }, [fetchProgress]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!isPro || !checkpointsKey) {
+      setCheckpoints([]);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(checkpointsKey);
+      if (!raw) {
+        setCheckpoints([]);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        setCheckpoints(parsed);
+      } else {
+        setCheckpoints([]);
+      }
+    } catch {
+      setCheckpoints([]);
+    }
+  }, [checkpointsKey, isPro]);
 
   useEffect(() => {
     if (!supabase || !user || !algorithmId || !payload) return;
@@ -79,9 +110,50 @@ export default function useProgress(algorithmId, payload) {
     lastSavedRef.current = '';
   }, [algorithmId, user]);
 
+  const persistCheckpoints = useCallback(
+    (next) => {
+      setCheckpoints(next);
+      if (!checkpointsKey) return;
+      if (typeof window === 'undefined') return;
+      try {
+        localStorage.setItem(checkpointsKey, JSON.stringify(next));
+      } catch {
+        // ignore storage errors
+      }
+    },
+    [checkpointsKey],
+  );
+
+  const saveCheckpoint = useCallback(() => {
+    if (!isPro || !payload) return;
+    const now = new Date();
+    const next = [
+      {
+        id: `${now.getTime()}-${Math.random().toString(16).slice(2)}`,
+        label: `Step ${payload?.stepIndex ?? 0}`,
+        payload,
+        savedAt: now.toLocaleString(),
+      },
+      ...checkpoints,
+    ].slice(0, PRO_CHECKPOINT_LIMIT);
+    persistCheckpoints(next);
+  }, [checkpoints, isPro, payload, persistCheckpoints]);
+
+  const deleteCheckpoint = useCallback(
+    (id) => {
+      if (!isPro) return;
+      const next = checkpoints.filter((checkpoint) => checkpoint.id !== id);
+      persistCheckpoints(next);
+    },
+    [checkpoints, isPro, persistCheckpoints],
+  );
+
   return {
     progress,
     isLoading,
     clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
   };
 }

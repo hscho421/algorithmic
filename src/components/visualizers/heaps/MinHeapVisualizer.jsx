@@ -116,7 +116,14 @@ export default function MinHeapVisualizer() {
     indexInput,
     stepIndex: state?.stepIndex ?? 0,
   };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'min-heap',
     progressPayload,
   );
@@ -162,8 +169,8 @@ export default function MinHeapVisualizer() {
     setIndexInput(payload.indexInput ?? '0');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setHeapInput(payload.heapInput ?? '');
     setValueInput(payload.valueInput ?? '');
     setOperation(payload.operation ?? 'insert');
@@ -386,6 +393,10 @@ export default function MinHeapVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

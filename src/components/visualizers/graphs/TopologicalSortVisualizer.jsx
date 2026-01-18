@@ -47,7 +47,14 @@ export default function TopologicalSortVisualizer() {
     customEdges,
     stepIndex: state?.stepIndex ?? 0,
   };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'topological-sort',
     progressPayload,
   );
@@ -101,8 +108,8 @@ export default function TopologicalSortVisualizer() {
     setCustomEdges(payload.customEdges ?? [['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'D'], ['D', 'E']]);
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setMode(payload.mode ?? 'preset');
     setSelectedPreset(payload.selectedPreset ?? 'simpleDAG');
     setCustomVertices(payload.customVertices ?? ['A', 'B', 'C', 'D', 'E']);
@@ -276,6 +283,10 @@ export default function TopologicalSortVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

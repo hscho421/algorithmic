@@ -7,6 +7,7 @@ const UserPreferencesContext = createContext(null);
 const STORAGE_KEY = 'user-preferences';
 const DEFAULT_PREFERENCES = {
   playbackSpeed: 500,
+  isPro: false,
   layout: {
     visualizerColumns: [25, 50, 25],
     panelPrefs: {},
@@ -19,11 +20,11 @@ const loadPreferences = () => {
     if (!raw) return DEFAULT_PREFERENCES;
     const parsed = JSON.parse(raw);
     return {
-      ...DEFAULT_PREFERENCES,
-      ...parsed,
-      layout: {
-        ...DEFAULT_PREFERENCES.layout,
-        ...(parsed?.layout || {}),
+        ...DEFAULT_PREFERENCES,
+        ...parsed,
+        layout: {
+          ...DEFAULT_PREFERENCES.layout,
+          ...(parsed?.layout || {}),
       },
     };
   } catch {
@@ -37,46 +38,55 @@ export function UserPreferencesProvider({ children }) {
   const suppressRemoteSyncRef = useRef(false);
   const debounceRef = useRef(null);
 
+  const refreshPreferences = useCallback(async () => {
+    if (!user || !supabase) return;
+    const { data, error } = await supabase
+      .from('user_preferences')
+      .select('playback_speed, layout_prefs, is_pro')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (error || !data) return;
+
+    suppressRemoteSyncRef.current = true;
+    setPreferences((prev) => {
+      const merged = {
+        ...prev,
+        playbackSpeed: data.playback_speed ?? prev.playbackSpeed,
+        isPro: data.is_pro ?? prev.isPro,
+        layout: {
+          ...prev.layout,
+          ...(data.layout_prefs || {}),
+        },
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+      } catch {
+        // ignore storage failures
+      }
+      return merged;
+    });
+  }, [user]);
+
   useEffect(() => {
     setPreferences(loadPreferences());
   }, []);
 
   useEffect(() => {
-    if (!user || !supabase) return;
-    let cancelled = false;
-
-    const loadRemote = async () => {
-      const { data, error } = await supabase
-        .from('user_preferences')
-        .select('playback_speed, layout_prefs')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      if (cancelled || error || !data) return;
-
-      suppressRemoteSyncRef.current = true;
-      setPreferences((prev) => {
-        const merged = {
-          ...prev,
-          playbackSpeed: data.playback_speed ?? prev.playbackSpeed,
-          layout: {
-            ...prev.layout,
-            ...(data.layout_prefs || {}),
-          },
-        };
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-        } catch {
-          // ignore storage failures
-        }
-        return merged;
-      });
-    };
-
-    loadRemote();
-    return () => {
-      cancelled = true;
-    };
+    if (user) return;
+    setPreferences((prev) => {
+      const next = { ...prev, isPro: false };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // ignore storage failures
+      }
+      return next;
+    });
   }, [user]);
+
+  useEffect(() => {
+    refreshPreferences();
+  }, [refreshPreferences]);
 
   const persist = useCallback((next) => {
     setPreferences(next);
@@ -144,7 +154,9 @@ export function UserPreferencesProvider({ children }) {
     () => ({
       preferences,
       playbackSpeed: preferences.playbackSpeed,
+      isPro: Boolean(user) && preferences.isPro,
       visualizerColumns: preferences.layout.visualizerColumns,
+      refreshPreferences,
       setPlaybackSpeed,
       setVisualizerColumns,
       getPanelPreference,
@@ -152,6 +164,8 @@ export function UserPreferencesProvider({ children }) {
     }),
     [
       preferences,
+      user,
+      refreshPreferences,
       setPlaybackSpeed,
       setVisualizerColumns,
       getPanelPreference,

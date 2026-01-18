@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Input, Button } from '../ui';
 import useAuthContext from '../../../context/useAuthContext';
+import useUserPreferences from '../../../context/useUserPreferences';
+import { FREE_SAVED_INPUTS_LIMIT } from '../../../constants';
 
 export default function SavedInputsPanel({
   items = [],
@@ -10,8 +13,10 @@ export default function SavedInputsPanel({
   onDelete,
 }) {
   const { isAuthenticated } = useAuthContext();
+  const { isPro } = useUserPreferences();
   const [name, setName] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const limitReached = !isPro && items.length >= FREE_SAVED_INPUTS_LIMIT;
 
   const handleSave = async () => {
     setErrorMessage('');
@@ -50,11 +55,20 @@ export default function SavedInputsPanel({
           onClick={handleSave}
           variant="primary"
           className="self-end"
-          disabled={!isAuthenticated}
+          disabled={!isAuthenticated || limitReached}
         >
           Save
         </Button>
       </div>
+      {isAuthenticated && limitReached && (
+        <div className="text-xs text-amber-500">
+          Free plan limit: {FREE_SAVED_INPUTS_LIMIT} saved inputs per algorithm.{' '}
+          <Link to="/pricing" className="underline hover:text-amber-400">
+            Upgrade to Pro
+          </Link>
+          .
+        </div>
+      )}
       {errorMessage && <div className="text-xs text-rose-500">{errorMessage}</div>}
       <div className="space-y-2">
         {isLoading && <div className="text-xs text-zinc-500">Loading…</div>}

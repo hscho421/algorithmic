@@ -31,7 +31,14 @@ export default function KnapsackVisualizer() {
   const { state, step, back, reset, canStep, canBack } = useVisualizerState(initialState, executeStep);
   const { isRunning, speed, setSpeed, toggle, stop } = usePlayback(step, canStep);
   const progressPayload = { weightsInput, valuesInput, capacity, stepIndex: state?.stepIndex ?? 0 };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'knapsack',
     progressPayload,
   );
@@ -78,8 +85,8 @@ export default function KnapsackVisualizer() {
     setCapacity(payload.capacity ?? '8');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setWeightsInput(payload.weightsInput ?? '2, 3, 4, 5');
     setValuesInput(payload.valuesInput ?? '3, 4, 5, 6');
     setCapacity(payload.capacity ?? '8');
@@ -241,6 +248,10 @@ export default function KnapsackVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>

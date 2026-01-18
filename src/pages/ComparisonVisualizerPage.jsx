@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getAlgorithmsByCategory, getCategoryById } from '../data/algorithms';
-import { CATEGORIES } from '../constants';
+import { CATEGORIES, isProCategory } from '../constants';
 import ComparisonVisualizer from '../components/comparison/ComparisonVisualizer';
+import useUserPreferences from '../context/useUserPreferences';
 
 export default function ComparisonVisualizerPage() {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const { isPro } = useUserPreferences();
   const category = CATEGORIES.find((c) => c.id === categoryId);
   const categoryData = getCategoryById(categoryId);
   const algorithms = getAlgorithmsByCategory(categoryId);
+  const isLocked = isProCategory(categoryId) && !isPro;
 
   const [selectedAlgorithms, setSelectedAlgorithms] = useState([]);
   const [isSelecting, setIsSelecting] = useState(true);
@@ -51,6 +54,36 @@ export default function ComparisonVisualizerPage() {
         <Link to="/" className="text-blue-500 hover:underline mt-4 inline-block">
           Go home
         </Link>
+      </div>
+    );
+  }
+
+  if (isLocked) {
+    return (
+      <div className="space-y-6 font-body max-w-4xl mx-auto px-6 py-10">
+        <div className="rounded-3xl border border-amber-200/80 dark:border-amber-500/40 bg-amber-50/70 dark:bg-amber-500/10 p-8">
+          <div className="text-xs uppercase tracking-[0.2em] text-amber-500">Pro Feature</div>
+          <h1 className="text-3xl font-display text-zinc-900 dark:text-white mt-3">
+            Compare {category.name} is Pro
+          </h1>
+          <p className="text-zinc-600 dark:text-zinc-300 mt-2">
+            Upgrade to unlock advanced visualizers, checkpoint history, and unlimited saved inputs.
+          </p>
+          <div className="mt-6 flex items-center gap-3">
+            <Link
+              to="/pricing"
+              className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors"
+            >
+              View Pro plans →
+            </Link>
+            <Link
+              to={`/category/${categoryId}`}
+              className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+            >
+              Back to {category.name}
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }

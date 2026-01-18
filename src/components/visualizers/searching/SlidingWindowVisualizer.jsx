@@ -57,7 +57,14 @@ export default function SlidingWindowVisualizer() {
     textInput,
     stepIndex: state?.stepIndex ?? 0,
   };
-  const { progress, isLoading: progressLoading, clearProgress } = useProgress(
+  const {
+    progress,
+    isLoading: progressLoading,
+    clearProgress,
+    checkpoints,
+    saveCheckpoint,
+    deleteCheckpoint,
+  } = useProgress(
     'sliding-window',
     progressPayload,
   );
@@ -112,8 +119,8 @@ export default function SlidingWindowVisualizer() {
     setTextInput(payload.textInput ?? '');
   };
 
-  const handleResume = () => {
-    const payload = progress?.last_state_json || {};
+  const handleResume = (payloadOverride) => {
+    const payload = payloadOverride ?? progress?.last_state_json ?? {};
     setMode(payload.mode ?? 'fixed_max_sum');
     setArrayInput(payload.arrayInput ?? '');
     setWindowSize(payload.windowSize ?? '3');
@@ -248,6 +255,10 @@ export default function SlidingWindowVisualizer() {
               isLoading={progressLoading}
               onResume={handleResume}
               onClear={clearProgress}
+              checkpoints={checkpoints}
+              onSaveCheckpoint={saveCheckpoint}
+              onLoadCheckpoint={handleResume}
+              onDeleteCheckpoint={deleteCheckpoint}
             />
           </ConfigSection>
         </div>
@@ -345,4 +356,3 @@ export default function SlidingWindowVisualizer() {
 
 
 // ... (the rest of the component code)
-

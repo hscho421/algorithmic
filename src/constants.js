@@ -32,6 +32,16 @@ export const TIMING = {
   }
 };
 
+export const FREE_SAVED_INPUTS_LIMIT = 3;
+export const PRO_CHECKPOINT_LIMIT = 10;
+export const PRO_CATEGORY_IDS = [
+  'graphs',
+  'dynamic-programming',
+  'strings',
+];
+
+export const isProCategory = (categoryId) => PRO_CATEGORY_IDS.includes(categoryId);
+
 export const CATEGORIES = [
   { id: 'searching', name: 'Searching', icon: 'Search', path: '/category/searching' },
   { id: 'sorting', name: 'Sorting', icon: 'ArrowUpDown', path: '/category/sorting' },
