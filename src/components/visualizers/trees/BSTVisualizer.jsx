@@ -8,6 +8,7 @@ import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import useProgress from '../../../hooks/useProgress';
 import ProgressPanel from '../../shared/controls/ProgressPanel';
+import ConfigSection from '../../shared/layout/ConfigSection';
 import {
   template,
   complexity,
@@ -171,11 +172,8 @@ export default function BSTVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <div className="space-y-5">
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Build Tree
-            </div>
+        <div className="space-y-4">
+          <ConfigSection title="Build Tree">
             <Input
               label="Initial values (insertion order)"
               value={treeInput}
@@ -185,12 +183,9 @@ export default function BSTVisualizer() {
             <Button onClick={handleBuildTree} variant="primary" className="w-full">
               Build Tree
             </Button>
-          </div>
+          </ConfigSection>
 
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Operation
-            </div>
+          <ConfigSection title="Operation">
             <Select
               label="Operation"
               value={operation}
@@ -203,21 +198,25 @@ export default function BSTVisualizer() {
               value={valueInput}
               onChange={(e) => setValueInput(e.target.value)}
             />
-          </div>
-
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+          </ConfigSection>
+          
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -258,3 +257,6 @@ export default function BSTVisualizer() {
     />
   );
 }
+
+
+// ... (the rest of the component code)

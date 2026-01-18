@@ -11,12 +11,16 @@ export const metadata = {
       name: 'Binary Search Tree',
       description: 'Insert and search operations with O(log n) average complexity',
       component: 'BSTVisualizer',
+      difficulty: 'Medium',
+      tags: ['BST', 'Search Tree'],
     },
     {
       id: 'tree-traversals',
       name: 'Tree Traversals',
       description: 'In-order, pre-order, post-order, and level-order traversals',
       component: 'TraversalVisualizer',
+      difficulty: 'Easy',
+      tags: ['DFS', 'BFS', 'Recursion'],
     },
   ],
 };

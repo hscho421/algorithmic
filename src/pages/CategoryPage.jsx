@@ -1,8 +1,10 @@
 import { useParams, Link } from 'react-router-dom';
 import { CATEGORIES } from '../constants';
 import { getAlgorithmsByCategory, getCategoryById } from '../data/algorithms';
+import DifficultyBadge from '../components/shared/ui/DifficultyBadge';
 
 export default function CategoryPage() {
+  // ... (keep existing code for CATEGORY_STYLES, accent, renderMotif, etc.)
   const { categoryId } = useParams();
   const category = CATEGORIES.find((c) => c.id === categoryId);
   const categoryData = getCategoryById(categoryId);
@@ -114,10 +116,6 @@ export default function CategoryPage() {
             <circle cx="66" cy="24" r="8" fill={accent} />
             <circle cx="86" cy="40" r="7" fill={accent} opacity="0.55" />
             <circle cx="106" cy="56" r="6" fill={accent} opacity="0.4" />
-            {/* <path d="M26 56 L46 40 L66 24" stroke={accent} strokeWidth="4" fill="none" strokeLinecap="round" />
-            <path d="M66 24 L86 40 L106 56" stroke={accent} strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.5" />
-            <path d="M66 24 Q70 34 58 40" stroke={accent} strokeWidth="4" fill="none" strokeLinecap="round" /> */}
-            {/* <polyline points="60,36 54,44 64,44" fill="none" stroke={accent} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" /> */}
           </svg>
         );
       case 'strings':
@@ -198,27 +196,44 @@ export default function CategoryPage() {
       {algorithms.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {algorithms.map((algorithm, idx) => (
-            <Link
-              key={algorithm.id}
-              to={`/visualize/${algorithm.id}`}
-              className="group relative overflow-hidden rounded-2xl border border-zinc-200/70 dark:border-zinc-800/70 bg-white/70 dark:bg-zinc-900/60 p-6 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 dark:hover:shadow-black/40"
-              style={{ animationDelay: `${idx * 60}ms` }}
-            >
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-400 via-emerald-400 to-amber-300 opacity-90" />
-              <div className="text-xs uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">Visualizer</div>
-              <h2 className="text-xl font-semibold text-zinc-900 dark:text-white mt-3 group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
-                {algorithm.name}
-              </h2>
-              <p className="text-zinc-500 dark:text-zinc-400 mt-2 text-sm">{algorithm.description}</p>
-              <div className="mt-5 flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500">
-                <span>Step-by-step</span>
-                <span>Open →</span>
+            <Link to={`/visualize/${algorithm.id}`} key={algorithm.id}>
+              <div
+                className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/70 bg-white/70 p-6 transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-200/50 dark:border-zinc-800/70 dark:bg-zinc-900/60 dark:hover:shadow-black/40"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
+                      Visualizer
+                    </span>
+                    {algorithm.difficulty && <DifficultyBadge difficulty={algorithm.difficulty} />}
+                  </div>
+                  <h2 className="mt-3 text-xl font-semibold text-zinc-900 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">
+                    {algorithm.name}
+                  </h2>
+                  <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">{algorithm.description}</p>
+                </div>
+                <div className="mt-5">
+                  <div className="flex flex-wrap gap-2">
+                    {algorithm.tags?.map((tag) => (
+                      <span
+                        key={tag}
+                        className="rounded-full bg-zinc-100 px-2 py-1 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="mt-4 flex items-center justify-between text-xs text-zinc-400 dark:text-zinc-500">
+                    <span>Step-by-step</span>
+                    <span>Open →</span>
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-zinc-200/70 dark:border-zinc-800/70 bg-white/60 dark:bg-zinc-900/60 p-10 text-center">
+        <div className="rounded-2xl border border-dashed border-zinc-200/70 bg-white/60 p-10 text-center dark:border-zinc-800/70 dark:bg-zinc-900/60">
           <p className="text-zinc-500 dark:text-zinc-400">Algorithms coming soon...</p>
         </div>
       )}

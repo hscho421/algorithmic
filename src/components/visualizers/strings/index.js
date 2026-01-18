@@ -10,6 +10,8 @@ export const metadata = {
       name: 'Trie (Prefix Tree)',
       description: 'Insert and search words by prefix in O(L)',
       component: 'TrieVisualizer',
+      difficulty: 'Hard',
+      tags: ['Prefix Tree', 'Lexicographical'],
     },
   ],
 };

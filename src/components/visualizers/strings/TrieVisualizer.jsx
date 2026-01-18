@@ -242,60 +242,71 @@ export default function TrieVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <div className="space-y-5">
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+        <div className="space-y-4">
+          <ConfigSection title="Build Trie">
+            <div className="flex gap-2 items-end">
+              <Input
+                label="Initial words"
+                value={wordsInput}
+                onChange={(e) => setWordsInput(e.target.value)}
+                placeholder="cat, car, cart"
+                className="flex-1"
+              />
+              <Button
+                onClick={handleRandomWords}
+                className="px-3"
+                title="Generate random words"
+              >
+                🎲
+              </Button>
+            </div>
+            <Button onClick={handleBuildTrie} variant="primary" className="w-full">
               Build Trie
-            </div>
-            <Input
-              label="Initial words"
-              value={wordsInput}
-              onChange={(e) => setWordsInput(e.target.value)}
-              placeholder="cat, car, cart"
-            />
-            <div className="flex gap-2">
-              <Button onClick={handleBuildTrie} variant="primary" className="flex-1">
-                Build Trie
-              </Button>
-              <Button onClick={handleRandomWords} variant="default" className="flex-1">
-                Random Words
-              </Button>
-            </div>
-          </div>
+            </Button>
+          </ConfigSection>
 
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Operation
-            </div>
+          <ConfigSection title="Operation">
             <Select
               label="Mode"
               value={operation}
               onChange={(e) => setOperation(e.target.value)}
               options={operationOptions}
             />
-            <Input
-              label={operation === 'prefix' ? 'Prefix' : 'Word'}
-              value={wordInput}
-              onChange={(e) => setWordInput(e.target.value)}
-            />
-            <Button onClick={handleRandomWord} variant="default" size="sm" className="w-full">
-              Random Word
-            </Button>
-          </div>
+            <div className="flex gap-2 items-end">
+              <Input
+                label={operation === 'prefix' ? 'Prefix' : 'Word'}
+                value={wordInput}
+                onChange={(e) => setWordInput(e.target.value)}
+                className="flex-1"
+              />
+              <Button
+                onClick={handleRandomWord}
+                className="px-3"
+                title="Generate random word"
+              >
+                🎲
+              </Button>
+            </div>
+          </ConfigSection>
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -335,5 +346,29 @@ export default function TrieVisualizer() {
       stateProps={state ? { variables, additionalInfo } : null}
       infoTabs={infoTabs}
     />
+  );
+}
+
+function ConfigSection({ title, children, open = true }) {
+  const [isOpen, setIsOpen] = useState(open);
+
+  return (
+    <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 last:border-b-0">
+      <button
+        className="w-full flex justify-between items-center py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{title}</span>
+        <svg
+          className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {isOpen && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
   );
 }

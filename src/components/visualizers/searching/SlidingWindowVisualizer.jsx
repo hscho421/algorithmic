@@ -7,6 +7,7 @@ import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import useProgress from '../../../hooks/useProgress';
 import ProgressPanel from '../../shared/controls/ProgressPanel';
+import ConfigSection from '../../shared/layout/ConfigSection';
 import {
   TEMPLATES,
   complexity,
@@ -159,89 +160,97 @@ export default function SlidingWindowVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <>
-          <Select
-            label="Problem"
-            value={mode}
-            onChange={(e) => setMode(e.target.value)}
-            options={modeOptions}
-          />
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
-            {template.description}
-          </div>
+        <div className="space-y-4">
+          <ConfigSection title="Problem">
+            <Select
+              label="Type"
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              options={modeOptions}
+            />
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2 mt-2">
+              {template.description}
+            </div>
+          </ConfigSection>
 
-          {template.inputType === 'array' && (
-            <>
-              <div className="flex gap-2">
+          <ConfigSection title="Input">
+            {template.inputType === 'array' && (
+              <div className="space-y-3">
+                <div className="flex gap-2 items-end">
+                  <Input
+                    label="Array"
+                    value={arrayInput}
+                    onChange={(e) => setArrayInput(e.target.value)}
+                    placeholder="4, 2, 1, 7"
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={handleRandomize}
+                    className="px-3"
+                    title="Generate random array"
+                  >
+                    🎲
+                  </Button>
+                </div>
+                {mode === 'fixed_max_sum' && (
+                  <Input
+                    label="Window size (k)"
+                    type="number"
+                    value={windowSize}
+                    onChange={(e) => setWindowSize(e.target.value)}
+                    min="1"
+                  />
+                )}
+                {mode === 'min_len_subarray' && (
+                  <Input
+                    label="Target sum"
+                    type="number"
+                    value={target}
+                    onChange={(e) => setTarget(e.target.value)}
+                    min="1"
+                  />
+                )}
+              </div>
+            )}
+
+            {template.inputType === 'string' && (
+              <div className="flex gap-2 items-end">
                 <Input
-                  label="Array"
-                  value={arrayInput}
-                  onChange={(e) => setArrayInput(e.target.value)}
-                  placeholder="4, 2, 1, 7"
+                  label="Text"
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="abcaabcd"
                   className="flex-1"
                 />
                 <Button
                   onClick={handleRandomize}
-                  className="self-end"
-                  title="Generate random array"
+                  className="px-3"
+                  title="Generate random string"
                 >
                   🎲
                 </Button>
               </div>
-              {mode === 'fixed_max_sum' && (
-                <Input
-                  label="Window size (k)"
-                  type="number"
-                  value={windowSize}
-                  onChange={(e) => setWindowSize(e.target.value)}
-                  min="1"
-                />
-              )}
-              {mode === 'min_len_subarray' && (
-                <Input
-                  label="Target sum"
-                  type="number"
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
-                  min="1"
-                />
-              )}
-            </>
-          )}
+            )}
+          </ConfigSection>
 
-          {template.inputType === 'string' && (
-            <div className="flex gap-2">
-              <Input
-                label="Text"
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-                placeholder="abcaabcd"
-                className="flex-1"
-              />
-              <Button
-                onClick={handleRandomize}
-                className="self-end"
-                title="Generate random string"
-              >
-                🎲
-              </Button>
-            </div>
-          )}
-
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
-        </>
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
+        </div>
       }
       controlProps={{
         onStep: step,
@@ -333,3 +342,7 @@ export default function SlidingWindowVisualizer() {
     />
   );
 }
+
+
+// ... (the rest of the component code)
+

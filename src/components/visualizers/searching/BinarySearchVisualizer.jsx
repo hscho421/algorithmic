@@ -7,6 +7,7 @@ import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import useProgress from '../../../hooks/useProgress';
 import ProgressPanel from '../../shared/controls/ProgressPanel';
+import ConfigSection from '../../shared/layout/ConfigSection';
 import {
   TEMPLATES,
   initialState,
@@ -269,21 +270,22 @@ export default function BinarySearchVisualizer() {
     <VisualizerLayout
       // Configuration section
       configurationContent={
-        <>
-          <Select
-            label="Algorithm"
-            value={templateKey}
-            onChange={(e) => setTemplateKey(e.target.value)}
-            options={flatTemplateOptions}
-          />
-
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2.5">
-            {currentTemplate.description}
-          </div>
+        <div className="space-y-4">
+          <ConfigSection title="Algorithm">
+            <Select
+              label="Variant"
+              value={templateKey}
+              onChange={(e) => setTemplateKey(e.target.value)}
+              options={flatTemplateOptions}
+            />
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2.5 mt-2">
+              {currentTemplate.description}
+            </div>
+          </ConfigSection>
 
           {!currentTemplate.useSqrtMode && (
-            <>
-              <div className="flex gap-2">
+            <ConfigSection title="Input">
+              <div className="flex gap-2 items-end">
                 <Input
                   label="Array"
                   value={arrayInput}
@@ -293,7 +295,7 @@ export default function BinarySearchVisualizer() {
                 />
                 <Button
                   onClick={handleGenerateArray}
-                  className="self-end"
+                  className="px-3"
                   title="Generate random array"
                 >
                   🎲
@@ -308,48 +310,57 @@ export default function BinarySearchVisualizer() {
                   onChange={(e) => setTargetInput(e.target.value)}
                 />
               )}
-
-              {!currentTemplate.useRotatedArray && !currentTemplate.usePeakArray && (
-                <div className="flex gap-4">
-                  <Checkbox
-                    label="Auto-sort"
-                    checked={autoSort}
-                    onChange={(e) => setAutoSort(e.target.checked)}
-                  />
-                  <Checkbox
-                    label="Deduplicate"
-                    checked={dedupe}
-                    onChange={(e) => setDedupe(e.target.checked)}
-                  />
-                </div>
-              )}
-            </>
+            </ConfigSection>
           )}
 
           {currentTemplate.useSqrtMode && (
-            <Input
-              label="Find sqrt of"
-              type="number"
-              value={targetInput}
-              onChange={(e) => setTargetInput(e.target.value)}
-              min="0"
-            />
+             <ConfigSection title="Input">
+              <Input
+                label="Find sqrt of"
+                type="number"
+                value={targetInput}
+                onChange={(e) => setTargetInput(e.target.value)}
+                min="0"
+              />
+            </ConfigSection>
+          )}
+          
+          {!currentTemplate.useRotatedArray && !currentTemplate.usePeakArray && !currentTemplate.useSqrtMode && (
+            <ConfigSection title="Options">
+              <div className="flex gap-4">
+                <Checkbox
+                  label="Auto-sort"
+                  checked={autoSort}
+                  onChange={(e) => setAutoSort(e.target.checked)}
+                />
+                <Checkbox
+                  label="Deduplicate"
+                  checked={dedupe}
+                  onChange={(e) => setDedupe(e.target.checked)}
+                />
+              </div>
+            </ConfigSection>
           )}
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
-        </>
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+
+           <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
+        </div>
       }
 
       // Control props

@@ -11,12 +11,16 @@ export const metadata = {
       name: 'Binary Search',
       description: 'Search in sorted arrays with O(log n) complexity',
       component: 'BinarySearchVisualizer',
+      difficulty: 'Easy',
+      tags: ['Sorted Array', 'Divide & Conquer'],
     },
     {
       id: 'sliding-window',
       name: 'Sliding Window',
       description: 'Fixed and variable window patterns for arrays and strings',
       component: 'SlidingWindowVisualizer',
+      difficulty: 'Medium',
+      tags: ['Array', 'String', 'Subarray'],
     },
   ],
 };

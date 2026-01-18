@@ -173,67 +173,76 @@ export default function KnapsackVisualizer() {
     <VisualizerLayout
       configurationContent={
         <div className="space-y-4">
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
-            Maximize value within weight capacity (each item used once)
-          </div>
-
-          <Input
-            label="Weights (comma-separated)"
-            value={weightsInput}
-            onChange={(e) => setWeightsInput(e.target.value)}
-            placeholder="2, 3, 4, 5"
-          />
-
-          <Input
-            label="Values (comma-separated)"
-            value={valuesInput}
-            onChange={(e) => setValuesInput(e.target.value)}
-            placeholder="3, 4, 5, 6"
-          />
-
-          <Input
-            label="Knapsack capacity"
-            type="number"
-            value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
-            min="1"
-            max="30"
-          />
-
-          <Button onClick={handleRandomize} className="w-full">
-            🎲 Generate Random Problem
-          </Button>
-
-          {state && (
-            <div className="space-y-2">
-              <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Items:</div>
-              {state.items.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-2 rounded bg-zinc-50 dark:bg-zinc-800/50 text-xs"
-                >
-                  <span className="font-medium">{item.name}</span>
-                  <span className="text-zinc-500 dark:text-zinc-400">
-                    w:{item.weight} v:{item.value}
-                  </span>
-                </div>
-              ))}
+          <ConfigSection title="Input">
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
+              Maximize value within weight capacity (each item used once)
             </div>
-          )}
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+            <Input
+              label="Weights (comma-separated)"
+              value={weightsInput}
+              onChange={(e) => setWeightsInput(e.target.value)}
+              placeholder="2, 3, 4, 5"
+            />
+
+            <Input
+              label="Values (comma-separated)"
+              value={valuesInput}
+              onChange={(e) => setValuesInput(e.target.value)}
+              placeholder="3, 4, 5, 6"
+            />
+
+            <Input
+              label="Knapsack capacity"
+              type="number"
+              value={capacity}
+              onChange={(e) => setCapacity(e.target.value)}
+              min="1"
+              max="30"
+            />
+            
+            <div className="flex justify-end">
+              <Button onClick={handleRandomize} className="px-3" title="Generate random problem">
+                🎲
+              </Button>
+            </div>
+
+
+            {state && (
+              <div className="space-y-2">
+                <div className="text-xs font-semibold text-zinc-700 dark:text-zinc-300">Items:</div>
+                {state.items.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded bg-zinc-50 dark:bg-zinc-800/50 text-xs"
+                  >
+                    <span className="font-medium">{item.name}</span>
+                    <span className="text-zinc-500 dark:text-zinc-400">
+                      w:{item.weight} v:{item.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </ConfigSection>
+
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -301,5 +310,29 @@ export default function KnapsackVisualizer() {
       stateProps={state ? { variables, additionalInfo } : null}
       infoTabs={infoTabs}
     />
+  );
+}
+
+function ConfigSection({ title, children, open = true }) {
+  const [isOpen, setIsOpen] = useState(open);
+
+  return (
+    <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 last:border-b-0">
+      <button
+        className="w-full flex justify-between items-center py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{title}</span>
+        <svg
+          className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {isOpen && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
   );
 }

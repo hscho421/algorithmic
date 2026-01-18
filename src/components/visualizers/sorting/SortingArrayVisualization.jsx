@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-const useContainerWidth = (ref) => {
-  const [width, setWidth] = useState(0);
+const useContainerSize = (ref) => {
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!ref.current || typeof ResizeObserver === 'undefined') {
@@ -11,7 +11,7 @@ const useContainerWidth = (ref) => {
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        setWidth(entry.contentRect.width);
+        setSize({ width: entry.contentRect.width, height: entry.contentRect.height });
       }
     });
 
@@ -19,7 +19,7 @@ const useContainerWidth = (ref) => {
     return () => observer.disconnect();
   }, [ref]);
 
-  return width;
+  return size;
 };
 
 const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
@@ -45,6 +45,16 @@ export default function SortingArrayVisualization({ state }) {
   // Handle both 'array' (sorting/binary search) and 'items' (sliding window)
   const arrayData = state.array || state.items || [];
   const { highlights = [], ranges = [], leftCopy, rightCopy, leftPointer, rightPointer, l, r, m } = state;
+
+  const mainRef = useRef(null);
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
+  const mainSize = useContainerSize(mainRef);
+  const leftSize = useContainerSize(leftRef);
+  const rightSize = useContainerSize(rightRef);
+  const mainWidth = mainSize.width;
+  const leftWidth = leftSize.width;
+  const rightWidth = rightSize.width;
 
   if (!arrayData || arrayData.length === 0) {
     return (
@@ -115,16 +125,9 @@ export default function SortingArrayVisualization({ state }) {
     return '';
   };
 
-  const mainRef = useRef(null);
-  const leftRef = useRef(null);
-  const rightRef = useRef(null);
-  const mainWidth = useContainerWidth(mainRef);
-  const leftWidth = useContainerWidth(leftRef);
-  const rightWidth = useContainerWidth(rightRef);
-
   const { cell: barWidth, gap: barGap } = getCellMetrics(mainWidth, array.length, {
     minCell: 8,
-    maxCell: 40,
+    maxCell: Infinity,
     baseGap: 4,
     minGap: 2,
   });
@@ -143,12 +146,14 @@ export default function SortingArrayVisualization({ state }) {
     minGap: 2,
   });
 
+  const maxBarHeight = mainSize.height ? Math.max(140, Math.floor(mainSize.height - 40)) : 200;
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-center pb-1">
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex justify-center pb-1 flex-1">
         {isPointerBased ? (
           // Flat array visualization for pointer-based algorithms
-          <div className="flex" style={{ gap: `${barGap}px` }} ref={mainRef}>
+          <div className="flex items-center justify-center h-full w-full" style={{ gap: `${barGap}px` }} ref={mainRef}>
             {array.map((value, idx) => {
               const barColor = getBarColor(idx);
               const isPointer = idx === l || idx === r || idx === m;
@@ -156,7 +161,7 @@ export default function SortingArrayVisualization({ state }) {
               return (
                 <div key={idx} className="flex flex-col items-center gap-1">
                   <div
-                    className={`flex items-center justify-center rounded transition-all duration-300 font-mono text-sm ${barColor} ${
+                    className={`flex items-center justify-center rounded transition-colors duration-200 font-mono text-sm ${barColor} ${
                       isPointer ? 'text-white font-semibold' : 'text-zinc-300'
                     }`}
                     style={{
@@ -175,10 +180,14 @@ export default function SortingArrayVisualization({ state }) {
           </div>
         ) : (
           // Bar graph visualization for sorting algorithms
-          <div className="flex items-end h-40 px-4 pt-3" style={{ gap: `${barGap}px` }} ref={mainRef}>
+          <div
+            className="flex items-end h-full min-h-[240px] px-4 pt-3 w-full"
+            style={{ gap: `${barGap}px` }}
+            ref={mainRef}
+          >
             {array.map((value, idx) => {
               const minHeight = 12;
-              const maxHeight = 130;
+              const maxHeight = maxBarHeight;
               const height = minHeight + (value / maxVal) * (maxHeight - minHeight);
               const barColor = getBarColor(idx);
               const borderStyle = getBorderStyle(idx);
@@ -186,7 +195,7 @@ export default function SortingArrayVisualization({ state }) {
               return (
                 <div key={idx} className="flex flex-col items-center">
                   <div
-                    className={`rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
+                    className={`rounded-t-sm transition-[background-color,box-shadow] duration-200 ${barColor} ${borderStyle}`}
                     style={{ width: `${barWidth}px`, height: `${height}px` }}
                   />
                   <div className="mt-0.5 text-xs font-mono text-zinc-400 leading-none">{value}</div>

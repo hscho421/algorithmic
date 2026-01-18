@@ -243,106 +243,112 @@ export default function UnionFindVisualizer() {
     <VisualizerLayout
       configurationContent={
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setMode('preset')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                mode === 'preset'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-              }`}
-            >
-              Preset
-            </button>
-            <button
-              onClick={() => setMode('custom')}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                mode === 'custom'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
-              }`}
-            >
-              Custom
-            </button>
-          </div>
+          <ConfigSection title="Scenario">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setMode('preset')}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  mode === 'preset'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                Preset
+              </button>
+              <button
+                onClick={() => setMode('custom')}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
+                  mode === 'custom'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700'
+                }`}
+              >
+                Custom
+              </button>
+            </div>
 
-          {mode === 'preset' ? (
-            <Select
-              label="Select Scenario"
-              value={selectedPreset}
-              onChange={(e) => setSelectedPreset(e.target.value)}
-              options={presetOptions}
-            />
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-1.5">
-                  Add Element
-                </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={newElement}
-                    onChange={(e) => setNewElement(e.target.value)}
-                    placeholder="e.g. A, B, 1, 2"
-                    className="flex-1"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAddElement()}
-                  />
-                  <Button onClick={handleAddElement} disabled={!newElement.trim()}>
-                    Add
-                  </Button>
-                </div>
-              </div>
-
-              {customElements.length > 0 && (
+            {mode === 'preset' ? (
+              <Select
+                label="Select Scenario"
+                value={selectedPreset}
+                onChange={(e) => setSelectedPreset(e.target.value)}
+                options={presetOptions}
+              />
+            ) : (
+              <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-1.5">
-                    Elements ({customElements.length})
+                    Add Element
                   </label>
-                  <div className="flex flex-wrap gap-2">
-                    {customElements.map((el) => (
-                      <div
-                        key={el}
-                        className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg px-2 py-1 border border-zinc-200 dark:border-zinc-700"
-                      >
-                        <span className="font-mono text-sm text-zinc-900 dark:text-white">{el}</span>
-                        <button
-                          onClick={() => handleRemoveElement(el)}
-                          className="text-zinc-400 hover:text-rose-500 transition-colors ml-1"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newElement}
+                      onChange={(e) => setNewElement(e.target.value)}
+                      placeholder="e.g. A, B, 1, 2"
+                      className="flex-1"
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddElement()}
+                    />
+                    <Button onClick={handleAddElement} disabled={!newElement.trim()}>
+                      Add
+                    </Button>
                   </div>
                 </div>
-              )}
 
-              {customElements.length >= 2 && (
-                <OperationBuilder
-                  elements={customElements}
-                  operations={customOperations}
-                  onOperationsChange={setCustomOperations}
-                />
-              )}
-            </div>
-          )}
+                {customElements.length > 0 && (
+                  <div>
+                    <label className="block text-sm text-zinc-600 dark:text-zinc-400 mb-1.5">
+                      Elements ({customElements.length})
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {customElements.map((el) => (
+                        <div
+                          key={el}
+                          className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 rounded-lg px-2 py-1 border border-zinc-200 dark:border-zinc-700"
+                        >
+                          <span className="font-mono text-sm text-zinc-900 dark:text-white">{el}</span>
+                          <button
+                            onClick={() => handleRemoveElement(el)}
+                            className="text-zinc-400 hover:text-rose-500 transition-colors ml-1"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18"></line>
+                              <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+                {customElements.length >= 2 && (
+                  <OperationBuilder
+                    elements={customElements}
+                    operations={customOperations}
+                    onOperationsChange={setCustomOperations}
+                  />
+                )}
+              </div>
+            )}
+          </ConfigSection>
+
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -384,5 +390,29 @@ export default function UnionFindVisualizer() {
       stateProps={state ? { variables, additionalInfo } : null}
       infoTabs={infoTabs}
     />
+  );
+}
+
+function ConfigSection({ title, children, open = true }) {
+  const [isOpen, setIsOpen] = useState(open);
+
+  return (
+    <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 last:border-b-0">
+      <button
+        className="w-full flex justify-between items-center py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{title}</span>
+        <svg
+          className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {isOpen && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
   );
 }

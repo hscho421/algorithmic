@@ -7,6 +7,7 @@ import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import useProgress from '../../../hooks/useProgress';
 import ProgressPanel from '../../shared/controls/ProgressPanel';
+import ConfigSection from '../../shared/layout/ConfigSection';
 import {
   template,
   complexity,
@@ -108,35 +109,44 @@ export default function HeapSortVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <>
-          <Input
-            label="Array (comma or space separated)"
-            value={arrayInput}
-            onChange={(e) => setArrayInput(e.target.value)}
-            placeholder="38, 27, 43, 3, 9, 82, 10"
-          />
+        <div className="space-y-4">
+          <ConfigSection title="Input">
+            <div className="flex gap-2 items-end">
+              <Input
+                label="Array"
+                value={arrayInput}
+                onChange={(e) => setArrayInput(e.target.value)}
+                placeholder="38, 27, 43, 3, 9, 82, 10"
+                className="flex-1"
+              />
+              <button
+                onClick={handleRandomize}
+                className="px-3 py-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+                title="Generate random array"
+              >
+                🎲
+              </button>
+            </div>
+          </ConfigSection>
 
-          <button
-            onClick={handleRandomize}
-            className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors"
-          >
-            Randomize Array
-          </button>
-
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
-        </>
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
+        </div>
       }
       controlProps={{
         onStep: step,
@@ -219,7 +229,7 @@ export default function HeapSortVisualizer() {
                         <div className={`text-sm mt-1 ${result.success ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                           {result.message}
                         </div>
-                        {result.details && (
+                        {Array.isArray(result.details) && (
                           <div className="text-xs mt-2 space-y-1 text-zinc-600 dark:text-zinc-400">
                             {result.details.map((detail, idx) => (
                               <div key={idx}>• {detail}</div>
@@ -237,3 +247,6 @@ export default function HeapSortVisualizer() {
     />
   );
 }
+
+
+// ... (the rest of the component code)

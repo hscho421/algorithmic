@@ -10,6 +10,8 @@ export const metadata = {
       name: 'Binary Heap',
       description: 'Min/max heap operations, heapify, and key updates',
       component: 'MinHeapVisualizer',
+      difficulty: 'Medium',
+      tags: ['Priority Queue', 'Tree'],
     },
   ],
 };

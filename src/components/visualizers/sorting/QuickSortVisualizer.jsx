@@ -7,6 +7,7 @@ import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import useProgress from '../../../hooks/useProgress';
 import ProgressPanel from '../../shared/controls/ProgressPanel';
+import ConfigSection from '../../shared/layout/ConfigSection';
 import {
   template,
   complexity,
@@ -16,8 +17,8 @@ import {
   getResult,
 } from '../../../lib/algorithms/sorting/quickSort';
 
-const useContainerWidth = (ref) => {
-  const [width, setWidth] = useState(0);
+const useContainerSize = (ref) => {
+  const [size, setSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
     if (!ref.current || typeof ResizeObserver === 'undefined') {
@@ -27,7 +28,7 @@ const useContainerWidth = (ref) => {
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
       if (entry) {
-        setWidth(entry.contentRect.width);
+        setSize({ width: entry.contentRect.width, height: entry.contentRect.height });
       }
     });
 
@@ -35,7 +36,7 @@ const useContainerWidth = (ref) => {
     return () => observer.disconnect();
   }, [ref]);
 
-  return width;
+  return size;
 };
 
 const getCellMetrics = (containerWidth, count, { minCell, maxCell, baseGap, minGap }) => {
@@ -148,35 +149,44 @@ export default function QuickSortVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <>
-          <Input
-            label="Array (comma or space separated)"
-            value={arrayInput}
-            onChange={(e) => setArrayInput(e.target.value)}
-            placeholder="38, 27, 43, 3, 9, 82, 10"
-          />
+        <div className="space-y-4">
+          <ConfigSection title="Input">
+            <div className="flex gap-2 items-end">
+              <Input
+                label="Array"
+                value={arrayInput}
+                onChange={(e) => setArrayInput(e.target.value)}
+                placeholder="38, 27, 43, 3, 9, 82, 10"
+                className="flex-1"
+              />
+              <button
+                onClick={handleRandomize}
+                className="px-3 py-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+                title="Generate random array"
+              >
+                🎲
+              </button>
+            </div>
+          </ConfigSection>
 
-          <button
-            onClick={handleRandomize}
-            className="w-full py-2 px-4 bg-zinc-800 hover:bg-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-white text-sm rounded-lg transition-colors"
-          >
-            Randomize Array
-          </button>
-
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
-        </>
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
+        </div>
       }
       controlProps={{
         onStep: step,
@@ -259,7 +269,7 @@ export default function QuickSortVisualizer() {
                         <div className={`text-sm mt-1 ${result.success ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
                           {result.message}
                         </div>
-                        {result.details && (
+                        {Array.isArray(result.details) && (
                           <div className="text-xs mt-2 space-y-1 text-zinc-600 dark:text-zinc-400">
                             {result.details.map((detail, idx) => (
                               <div key={idx}>• {detail}</div>
@@ -281,6 +291,10 @@ export default function QuickSortVisualizer() {
 function QuickSortVisualization({ state }) {
   const { array, highlights = [], pivotIndex, pointers = {} } = state;
 
+  const containerRef = useRef(null);
+  const containerSize = useContainerSize(containerRef);
+  const containerWidth = containerSize.width;
+
   if (!array || array.length === 0) {
     return (
       <div className="flex items-center justify-center h-48 text-zinc-500 italic">
@@ -290,14 +304,16 @@ function QuickSortVisualization({ state }) {
   }
 
   const maxVal = Math.max(...array, 1);
-  const containerRef = useRef(null);
-  const containerWidth = useContainerWidth(containerRef);
   const { cell: barWidth, gap: barGap } = getCellMetrics(containerWidth, array.length, {
     minCell: 8,
-    maxCell: 40,
+    maxCell: Infinity,
     baseGap: 4,
     minGap: 2,
   });
+
+  const maxBarHeight = containerSize.height
+    ? Math.max(160, Math.floor(containerSize.height - 64))
+    : 220;
 
   const getHighlightType = (idx) => {
     const highlight = highlights.find((h) => h.index === idx);
@@ -333,12 +349,16 @@ function QuickSortVisualization({ state }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-center pb-2">
-        <div className="flex items-end h-60 px-4 pt-3 w-full" style={{ gap: `${barGap}px` }} ref={containerRef}>
+    <div className="flex h-full flex-col gap-6">
+      <div className="flex justify-center pb-2 flex-1">
+        <div
+          className="flex items-end justify-center h-full min-h-[280px] px-4 pt-3 w-full"
+          style={{ gap: `${barGap}px` }}
+          ref={containerRef}
+        >
           {array.map((value, idx) => {
             const minHeight = 16;
-            const maxHeight = 140;
+            const maxHeight = maxBarHeight;
             const height = minHeight + (value / maxVal) * (maxHeight - minHeight);
             const barColor = getBarColor(idx);
             const borderStyle = getBorderStyle(idx);
@@ -359,7 +379,7 @@ function QuickSortVisualization({ state }) {
                   ))}
                 </div>
                 <div
-                  className={`rounded-t-sm transition-all duration-300 ${barColor} ${borderStyle}`}
+                  className={`rounded-t-sm transition-[background-color,box-shadow] duration-200 ${barColor} ${borderStyle}`}
                   style={{ width: `${barWidth}px`, height: `${height}px` }}
                 />
                 <div className={`mt-1 text-xs font-mono ${isPivot ? 'text-purple-400 font-bold' : 'text-zinc-400'}`}>

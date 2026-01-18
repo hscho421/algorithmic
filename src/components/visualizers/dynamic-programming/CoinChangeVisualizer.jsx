@@ -178,52 +178,60 @@ export default function CoinChangeVisualizer() {
     <VisualizerLayout
       configurationContent={
         <div className="space-y-4">
-          <Select
-            label="Problem"
-            value={mode}
-            onChange={(e) => setMode(e.target.value)}
-            options={modeOptions}
-          />
-
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
-            {TEMPLATES[mode].description}
-          </div>
-
-          <div className="flex gap-2">
-            <Input
-              label="Coins (comma-separated)"
-              value={coinsInput}
-              onChange={(e) => setCoinsInput(e.target.value)}
-              placeholder="1, 2, 5"
-              className="flex-1"
+          <ConfigSection title="Problem">
+            <Select
+              label="Problem"
+              value={mode}
+              onChange={(e) => setMode(e.target.value)}
+              options={modeOptions}
             />
-            <Button onClick={handleRandomize} className="self-end" title="Generate random coins">
-              🎲
-            </Button>
-          </div>
 
-          <Input
-            label="Target amount"
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            min="1"
-            max="100"
-          />
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
+              {TEMPLATES[mode].description}
+            </div>
+          </ConfigSection>
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+          <ConfigSection title="Input">
+            <div className="flex gap-2 items-end">
+              <Input
+                label="Coins (comma-separated)"
+                value={coinsInput}
+                onChange={(e) => setCoinsInput(e.target.value)}
+                placeholder="1, 2, 5"
+                className="flex-1"
+              />
+              <Button onClick={handleRandomize} className="px-3" title="Generate random coins">
+                🎲
+              </Button>
+            </div>
+
+            <Input
+              label="Target amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              min="1"
+              max="100"
+            />
+          </ConfigSection>
+
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -263,5 +271,29 @@ export default function CoinChangeVisualizer() {
       stateProps={state ? { variables, additionalInfo } : null}
       infoTabs={infoTabs}
     />
+  );
+}
+
+function ConfigSection({ title, children, open = true }) {
+  const [isOpen, setIsOpen] = useState(open);
+
+  return (
+    <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 last:border-b-0">
+      <button
+        className="w-full flex justify-between items-center py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{title}</span>
+        <svg
+          className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {isOpen && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
   );
 }

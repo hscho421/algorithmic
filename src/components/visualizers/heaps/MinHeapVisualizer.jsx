@@ -314,18 +314,15 @@ export default function MinHeapVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <div className="space-y-5">
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Build Heap
-            </div>
+        <div className="space-y-4">
+          <ConfigSection title="Build Heap">
             <Select
               label="Heap Type"
               value={heapType}
               onChange={(e) => setHeapType(e.target.value)}
               options={heapTypeOptions}
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-end">
               <Input
                 label="Initial values"
                 value={heapInput}
@@ -335,7 +332,7 @@ export default function MinHeapVisualizer() {
               />
               <Button
                 onClick={handleGenerateHeap}
-                className="self-end"
+                className="px-3"
                 title="Generate random heap input"
               >
                 🎲
@@ -344,12 +341,9 @@ export default function MinHeapVisualizer() {
             <Button onClick={handleBuildHeap} variant="primary" className="w-full">
               Build Heap
             </Button>
-          </div>
+          </ConfigSection>
 
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Operation
-            </div>
+          <ConfigSection title="Operation">
             <Select
               label="Operation"
               value={operation}
@@ -367,30 +361,35 @@ export default function MinHeapVisualizer() {
               />
             )}
 
-            <Input
-              label={operation === 'change-key' ? 'New value' : 'Value'}
-              type="number"
-              value={valueInput}
-              onChange={(e) => setValueInput(e.target.value)}
-              disabled={!requiresValue}
-            />
-          </div>
+            {requiresValue && (
+              <Input
+                label={operation === 'change-key' ? 'New value' : 'Value'}
+                type="number"
+                value={valueInput}
+                onChange={(e) => setValueInput(e.target.value)}
+              />
+            )}
+          </ConfigSection>
 
-        <SavedInputsPanel
-          items={savedInputs}
-          isLoading={savedLoading}
-          onSave={handleSaveInput}
-          onLoad={handleLoadInput}
-          onDelete={(item) => deleteInput(item.id)}
-        />
-        <ProgressPanel
-          progress={progress}
-          isLoading={progressLoading}
-          onResume={handleResume}
-          onClear={clearProgress}
-        />
-      </div>
-    }
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
+        </div>
+      }
       controlProps={{
         onStep: step,
         onBack: handleBack,
@@ -435,5 +434,29 @@ export default function MinHeapVisualizer() {
       stateProps={state ? { variables, additionalInfo } : null}
       infoTabs={infoTabs}
     />
+  );
+}
+
+function ConfigSection({ title, children, open = true }) {
+  const [isOpen, setIsOpen] = useState(open);
+
+  return (
+    <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 last:border-b-0">
+      <button
+        className="w-full flex justify-between items-center py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{title}</span>
+        <svg
+          className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {isOpen && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
   );
 }

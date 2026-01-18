@@ -8,6 +8,7 @@ import useSavedInputs from '../../../hooks/useSavedInputs';
 import SavedInputsPanel from '../../shared/controls/SavedInputsPanel';
 import useProgress from '../../../hooks/useProgress';
 import ProgressPanel from '../../shared/controls/ProgressPanel';
+import ConfigSection from '../../shared/layout/ConfigSection';
 import {
   template,
   complexity,
@@ -188,11 +189,8 @@ export default function TraversalVisualizer() {
   return (
     <VisualizerLayout
       configurationContent={
-        <div className="space-y-5">
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Build Tree
-            </div>
+        <div className="space-y-4">
+          <ConfigSection title="Build Tree">
             <Input
               label="Initial values (insertion order)"
               value={treeInput}
@@ -202,37 +200,38 @@ export default function TraversalVisualizer() {
             <Button onClick={handleBuildTree} variant="primary" className="w-full">
               Build Tree
             </Button>
-          </div>
+          </ConfigSection>
 
-          <div className="space-y-4">
-            <div className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-              Traversal Type
-            </div>
+          <ConfigSection title="Traversal Type">
             <Select
               label="Select traversal"
               value={traversalType}
               onChange={(e) => setTraversalType(e.target.value)}
               options={traversalOptions}
             />
-            <div className="bg-zinc-800/50 rounded-lg p-3 border border-zinc-700/50">
-              <div className="text-sm text-white font-medium">{currentInfo.name}</div>
-              <div className="text-xs text-zinc-400 mt-1">{currentInfo.description}</div>
+            <div className="bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-3 border border-zinc-200/80 dark:border-zinc-700/50">
+              <div className="text-sm text-zinc-900 dark:text-white font-medium">{currentInfo.name}</div>
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 mt-1">{currentInfo.description}</div>
             </div>
-          </div>
+          </ConfigSection>
 
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -274,3 +273,6 @@ export default function TraversalVisualizer() {
     />
   );
 }
+
+
+// ... (the rest of the component code)

@@ -154,47 +154,54 @@ export default function LCSVisualizer() {
     <VisualizerLayout
       configurationContent={
         <div className="space-y-4">
-          <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
-            Find the longest subsequence common to both strings
-          </div>
+          <ConfigSection title="Input">
+            <div className="text-xs text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800/50 rounded-lg p-2">
+              Find the longest subsequence common to both strings
+            </div>
 
-          <Input
-            label="Text 1"
-            value={text1Input}
-            onChange={(e) => setText1Input(e.target.value.toUpperCase())}
-            placeholder="ABCDGH"
-            maxLength={15}
-          />
+            <Input
+              label="Text 1"
+              value={text1Input}
+              onChange={(e) => setText1Input(e.target.value.toUpperCase())}
+              placeholder="ABCDGH"
+              maxLength={15}
+            />
 
-          <Input
-            label="Text 2"
-            value={text2Input}
-            onChange={(e) => setText2Input(e.target.value.toUpperCase())}
-            placeholder="AEDFHR"
-            maxLength={15}
-          />
+            <Input
+              label="Text 2"
+              value={text2Input}
+              onChange={(e) => setText2Input(e.target.value.toUpperCase())}
+              placeholder="AEDFHR"
+              maxLength={15}
+            />
+            <div className="flex justify-between items-center">
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Use uppercase letters (max 15).
+              </p>
+              <Button onClick={handleRandomize} className="px-3" title="Generate random strings">
+                🎲
+              </Button>
+            </div>
+          </ConfigSection>
 
-          <Button onClick={handleRandomize} className="w-full">
-            🎲 Generate Random Strings
-          </Button>
+          <ConfigSection title="History" open={false}>
+            <SavedInputsPanel
+              items={savedInputs}
+              isLoading={savedLoading}
+              onSave={handleSaveInput}
+              onLoad={handleLoadInput}
+              onDelete={(item) => deleteInput(item.id)}
+            />
+          </ConfigSection>
 
-          <div className="text-xs text-zinc-500 dark:text-zinc-400">
-            Use uppercase letters (max 15 characters each)
-          </div>
-
-          <SavedInputsPanel
-            items={savedInputs}
-            isLoading={savedLoading}
-            onSave={handleSaveInput}
-            onLoad={handleLoadInput}
-            onDelete={(item) => deleteInput(item.id)}
-          />
-          <ProgressPanel
-            progress={progress}
-            isLoading={progressLoading}
-            onResume={handleResume}
-            onClear={clearProgress}
-          />
+          <ConfigSection title="Session" open={false}>
+            <ProgressPanel
+              progress={progress}
+              isLoading={progressLoading}
+              onResume={handleResume}
+              onClear={clearProgress}
+            />
+          </ConfigSection>
         </div>
       }
       controlProps={{
@@ -278,5 +285,29 @@ export default function LCSVisualizer() {
       stateProps={state ? { variables, additionalInfo } : null}
       infoTabs={infoTabs}
     />
+  );
+}
+
+function ConfigSection({ title, children, open = true }) {
+  const [isOpen, setIsOpen] = useState(open);
+
+  return (
+    <div className="border-b border-zinc-200/80 dark:border-zinc-800/80 last:border-b-0">
+      <button
+        className="w-full flex justify-between items-center py-2 text-sm font-semibold text-zinc-600 dark:text-zinc-300"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span>{title}</span>
+        <svg
+          className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      {isOpen && <div className="pb-4 space-y-3">{children}</div>}
+    </div>
   );
 }
