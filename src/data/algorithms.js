@@ -5,6 +5,8 @@ import { metadata as heapsMetadata } from '../components/visualizers/heaps';
 import { metadata as stringsMetadata } from '../components/visualizers/strings';
 import { metadata as graphsMetadata } from '../components/visualizers/graphs';
 import { metadata as dpMetadata } from '../components/visualizers/dynamic-programming';
+import { metadata as dataStructuresMetadata } from '../components/visualizers/data-structures';
+import { metadata as backtrackingMetadata } from '../components/visualizers/backtracking';
 
 export const ALGORITHMS = {
   searching: searchingMetadata,
@@ -14,6 +16,8 @@ export const ALGORITHMS = {
   strings: stringsMetadata,
   graphs: graphsMetadata,
   'dynamic-programming': dpMetadata,
+  'data-structures': dataStructuresMetadata,
+  backtracking: backtrackingMetadata,
 };
 
 export const getAlgorithmsByCategory = (categoryId) => {

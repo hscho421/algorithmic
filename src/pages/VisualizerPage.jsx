@@ -1,42 +1,19 @@
 import { useParams, Link } from 'react-router-dom';
 import { getAlgorithmById } from '../data/algorithms';
-import { CATEGORIES, isProCategory } from '../constants';
-import { BinarySearchVisualizer, SlidingWindowVisualizer } from '../components/visualizers/searching';
-import { MergeSortVisualizer, QuickSortVisualizer, HeapSortVisualizer } from '../components/visualizers/sorting';
-import { BSTVisualizer, TraversalVisualizer } from '../components/visualizers/trees';
-import { MinHeapVisualizer } from '../components/visualizers/heaps';
-import { TrieVisualizer } from '../components/visualizers/strings';
-import { BFSVisualizer, DFSVisualizer, DijkstraVisualizer, TopologicalSortVisualizer, UnionFindVisualizer } from '../components/visualizers/graphs';
-import { FibonacciVisualizer, CoinChangeVisualizer, LCSVisualizer, KnapsackVisualizer } from '../components/visualizers/dynamic-programming';
+import { CATEGORIES, isProCategory, isProAlgorithm } from '../constants';
+import { VISUALIZER_COMPONENTS } from '../components/visualizers';
 import useUserPreferences from '../context/useUserPreferences';
-
-const VISUALIZER_COMPONENTS = {
-  'binary-search': BinarySearchVisualizer,
-  'sliding-window': SlidingWindowVisualizer,
-  'merge-sort': MergeSortVisualizer,
-  'quick-sort': QuickSortVisualizer,
-  'heap-sort': HeapSortVisualizer,
-  'bst': BSTVisualizer,
-  'tree-traversals': TraversalVisualizer,
-  'min-heap': MinHeapVisualizer,
-  'trie': TrieVisualizer,
-  'bfs': BFSVisualizer,
-  'dfs': DFSVisualizer,
-  'dijkstra': DijkstraVisualizer,
-  'topological-sort': TopologicalSortVisualizer,
-  'union-find': UnionFindVisualizer,
-  'fibonacci': FibonacciVisualizer,
-  'coin-change': CoinChangeVisualizer,
-  'lcs': LCSVisualizer,
-  'knapsack': KnapsackVisualizer,
-};
 
 export default function VisualizerPage() {
   const { algorithmId } = useParams();
   const { isPro } = useUserPreferences();
   const algorithm = getAlgorithmById(algorithmId);
   const category = algorithm ? CATEGORIES.find((c) => c.id === algorithm.categoryId) : null;
-  const isLocked = algorithm && isProCategory(algorithm.categoryId) && !isPro;
+
+  // Check if locked by category OR by individual algorithm
+  const isLocked = algorithm && !isPro && (
+    isProCategory(algorithm.categoryId) || isProAlgorithm(algorithmId)
+  );
 
   const VisualizerComponent = VISUALIZER_COMPONENTS[algorithmId];
 

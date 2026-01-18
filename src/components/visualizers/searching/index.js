@@ -1,5 +1,6 @@
 export { default as BinarySearchVisualizer } from './BinarySearchVisualizer';
 export { default as SlidingWindowVisualizer } from './SlidingWindowVisualizer';
+export { default as TwoPointersVisualizer } from './TwoPointersVisualizer';
 
 export const metadata = {
   id: 'searching',
@@ -21,6 +22,14 @@ export const metadata = {
       component: 'SlidingWindowVisualizer',
       difficulty: 'Medium',
       tags: ['Array', 'String', 'Subarray'],
+    },
+    {
+      id: 'two-pointers',
+      name: 'Two Pointers',
+      description: 'Find pairs with target sum using two pointers',
+      component: 'TwoPointersVisualizer',
+      difficulty: 'Easy',
+      tags: ['Sorted Array', 'Two Pointers'],
     },
   ],
 };

@@ -34,13 +34,30 @@ export const TIMING = {
 
 export const FREE_SAVED_INPUTS_LIMIT = 3;
 export const PRO_CHECKPOINT_LIMIT = 10;
+
+// Entire categories that are Pro-only
 export const PRO_CATEGORY_IDS = [
   'graphs',
   'dynamic-programming',
   'strings',
+  'data-structures',
+  'backtracking',
+];
+
+// Individual algorithms that are Pro even in free categories
+export const PRO_ALGORITHM_IDS = [
+  // Sorting - new algorithms are pro
+  'bubble-sort',
+  'insertion-sort',
+  'selection-sort',
+  'counting-sort',
+  'radix-sort',
+  // Searching - two pointers is pro
+  'two-pointers',
 ];
 
 export const isProCategory = (categoryId) => PRO_CATEGORY_IDS.includes(categoryId);
+export const isProAlgorithm = (algorithmId) => PRO_ALGORITHM_IDS.includes(algorithmId);
 
 export const CATEGORIES = [
   { id: 'searching', name: 'Searching', icon: 'Search', path: '/category/searching' },
