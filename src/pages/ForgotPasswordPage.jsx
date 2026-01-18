@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@dsavisualizer.com"
+          placeholder="support@algorithmicai.dev"
           required
         />
         {errorMessage && <div className="text-xs text-rose-500">{errorMessage}</div>}

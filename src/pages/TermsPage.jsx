@@ -77,7 +77,7 @@ const SECTIONS = [
   {
     title: 'Contact',
     items: [
-      'Questions about these terms? Email hello@dsavisualizer.com.',
+      'Questions about these terms? Email support@algorithmicai.dev.',
     ],
   },
 ];
@@ -122,7 +122,7 @@ export default function TermsPage() {
 
       <div className="rounded-3xl border border-dashed border-zinc-200/70 dark:border-zinc-800/70 bg-white/60 dark:bg-zinc-900/60 p-8 text-center">
         <p className="text-zinc-500 dark:text-zinc-400">
-          Questions about these terms? Email hello@dsavisualizer.com.
+          Questions about these terms? Email support@algorithmicai.dev.
         </p>
         <Link
           to="/"

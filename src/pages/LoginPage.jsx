@@ -72,7 +72,7 @@ export default function LoginPage() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@dsavisualizer.com"
+          placeholder="support@algorithmicai.dev"
           required
         />
         <Input

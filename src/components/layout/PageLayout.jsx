@@ -86,7 +86,7 @@ export default function PageLayout() {
             <div>
               <div className="text-sm font-semibold text-zinc-900 dark:text-white">Contact</div>
               <div className="mt-3 space-y-2 text-sm text-zinc-500 dark:text-zinc-400">
-                <span className="block">hello@dsavisualizer.com</span>
+                <span className="block">support@algorithmicai.dev</span>
                 <span className="block">Educators & teams</span>
                 <Link to="/privacy" className="block hover:text-zinc-900 dark:hover:text-white">Privacy</Link>
                 <Link to="/terms" className="block hover:text-zinc-900 dark:hover:text-white">Terms</Link>

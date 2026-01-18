@@ -104,7 +104,7 @@ export default function PrivacyPage() {
 
       <div className="rounded-3xl border border-dashed border-zinc-200/70 dark:border-zinc-800/70 bg-white/60 dark:bg-zinc-900/60 p-8 text-center">
         <p className="text-zinc-500 dark:text-zinc-400">
-          Questions about privacy? Email hello@dsavisualizer.com.
+          Questions about privacy? Email support@algorithmicai.dev.
         </p>
         <Link
           to="/"
