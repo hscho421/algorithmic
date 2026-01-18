@@ -1,4 +1,5 @@
 export { default as NQueensVisualizer } from './NQueensVisualizer';
+export { default as SudokuVisualizer } from './SudokuVisualizer';
 
 export const metadata = {
   id: 'backtracking',
@@ -12,6 +13,14 @@ export const metadata = {
       component: 'NQueensVisualizer',
       difficulty: 'Medium',
       tags: ['Recursion', 'Constraint Satisfaction'],
+    },
+    {
+      id: 'sudoku',
+      name: 'Sudoku Solver',
+      description: 'Solve a Sudoku puzzle with backtracking',
+      component: 'SudokuVisualizer',
+      difficulty: 'Hard',
+      tags: ['Backtracking', 'Constraint Satisfaction'],
     },
   ],
 };

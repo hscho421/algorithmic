@@ -1,6 +1,8 @@
 export { default as BFSVisualizer } from './BFSVisualizer';
 export { default as DFSVisualizer } from './DFSVisualizer';
 export { default as DijkstraVisualizer } from './DijkstraVisualizer';
+export { default as AStarVisualizer } from './AStarVisualizer';
+export { default as MSTVisualizer } from './MSTVisualizer';
 export { default as TopologicalSortVisualizer } from './TopologicalSortVisualizer';
 export { default as UnionFindVisualizer } from './UnionFindVisualizer';
 
@@ -32,6 +34,22 @@ export const metadata = {
       component: 'DijkstraVisualizer',
       difficulty: 'Medium',
       tags: ['Shortest Path', 'Weighted Graph'],
+    },
+    {
+      id: 'a-star',
+      name: 'A* Pathfinding',
+      description: 'Shortest path using heuristic search',
+      component: 'AStarVisualizer',
+      difficulty: 'Medium',
+      tags: ['Shortest Path', 'Heuristic'],
+    },
+    {
+      id: 'minimum-spanning-tree',
+      name: "Kruskal's MST",
+      description: 'Build a minimum spanning tree',
+      component: 'MSTVisualizer',
+      difficulty: 'Medium',
+      tags: ['MST', 'Union Find', 'Greedy'],
     },
     {
       id: 'topological-sort',

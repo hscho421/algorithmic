@@ -16,6 +16,8 @@ import {
   BFSVisualizer,
   DFSVisualizer,
   DijkstraVisualizer,
+  AStarVisualizer,
+  MSTVisualizer,
   TopologicalSortVisualizer,
   UnionFindVisualizer,
 } from './graphs';
@@ -29,7 +31,7 @@ import {
   LinkedListReversalVisualizer,
   CycleDetectionVisualizer,
 } from './data-structures';
-import { NQueensVisualizer } from './backtracking';
+import { NQueensVisualizer, SudokuVisualizer } from './backtracking';
 
 export const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
@@ -50,6 +52,8 @@ export const VISUALIZER_COMPONENTS = {
   bfs: BFSVisualizer,
   dfs: DFSVisualizer,
   dijkstra: DijkstraVisualizer,
+  'a-star': AStarVisualizer,
+  'minimum-spanning-tree': MSTVisualizer,
   'topological-sort': TopologicalSortVisualizer,
   'union-find': UnionFindVisualizer,
   fibonacci: FibonacciVisualizer,
@@ -59,4 +63,5 @@ export const VISUALIZER_COMPONENTS = {
   'linked-list-reversal': LinkedListReversalVisualizer,
   'cycle-detection': CycleDetectionVisualizer,
   'n-queens': NQueensVisualizer,
+  sudoku: SudokuVisualizer,
 };
