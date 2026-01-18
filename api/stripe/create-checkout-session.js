@@ -44,24 +44,29 @@ export default async function handler(req, res) {
   }
 
   const { priceId } = req.body || {};
-  const allowedPrices = [process.env.STRIPE_PRICE_MONTHLY, process.env.STRIPE_PRICE_ANNUAL].filter(Boolean);
+  const allowedPrices = [
+    process.env.STRIPE_PRICE_MONTHLY,
+    process.env.STRIPE_PRICE_ANNUAL,
+    process.env.STRIPE_PRICE_ONETIME,
+  ].filter(Boolean);
   if (!priceId || !allowedPrices.includes(priceId)) {
     res.status(400).json({ error: 'Invalid price' });
     return;
   }
 
   try {
+    const isOnetime = priceId === process.env.STRIPE_PRICE_ONETIME;
     const session = await stripe.checkout.sessions.create({
-      mode: 'subscription',
+      mode: isOnetime ? 'payment' : 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: `${getBaseUrl()}/account?checkout=success`,
       cancel_url: `${getBaseUrl()}/pricing?checkout=cancel`,
       customer_email: userData.user.email,
       client_reference_id: userData.user.id,
-      subscription_data: {
-        metadata: { supabase_user_id: userData.user.id },
-      },
+      ...(isOnetime
+        ? { metadata: { supabase_user_id: userData.user.id } }
+        : { subscription_data: { metadata: { supabase_user_id: userData.user.id } } }),
     });
 
     res.status(200).json({ url: session.url });

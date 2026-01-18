@@ -58,6 +58,7 @@ export default function PricingPage() {
   const checkoutStatus = new URLSearchParams(location.search).get('checkout');
   const priceMonthly = import.meta.env.VITE_STRIPE_PRICE_MONTHLY;
   const priceAnnual = import.meta.env.VITE_STRIPE_PRICE_ANNUAL;
+  const priceOnetime = import.meta.env.VITE_STRIPE_PRICE_ONETIME;
 
   const startCheckout = async (priceId) => {
     setErrorMessage('');
@@ -169,6 +170,14 @@ export default function PricingPage() {
                   className="w-full rounded-full px-4 py-2 text-sm font-semibold border border-emerald-300/70 text-emerald-700 hover:border-emerald-400 disabled:opacity-60"
                 >
                   {isLoading ? 'Starting checkout…' : 'Go Pro (Annual)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startCheckout(priceOnetime)}
+                  disabled={isLoading}
+                  className="w-full rounded-full px-4 py-2 text-sm font-semibold border border-zinc-200/70 text-zinc-700 hover:border-zinc-300 disabled:opacity-60"
+                >
+                  {isLoading ? 'Starting checkout…' : 'Go Pro (One-time)'}
                 </button>
               </div>
             ) : (
