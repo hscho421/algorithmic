@@ -127,29 +127,29 @@ function TierCard({ tier, isAnnual, isLoading, onCheckout }) {
 
   return (
     <div
-      className={`flex flex-col rounded-2xl border p-6 shadow-lg transition-all duration-300 bg-white/50 dark:bg-zinc-900/50 ${
+      className={`flex flex-col rounded-[2rem] border p-8 shadow-xl transition-all duration-300 bg-white dark:bg-zinc-900 ${
         tier.highlighted
-          ? 'border-emerald-400/70 dark:border-emerald-500/60 ring-2 ring-emerald-400/40 dark:ring-emerald-500/30'
-          : 'border-zinc-200/70 dark:border-zinc-800/70 hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-xl'
+          ? 'border-emerald-500 ring-4 ring-emerald-500/10 dark:ring-emerald-500/20 scale-105 z-10'
+          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
       }`}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold font-display text-zinc-900 dark:text-white">{tier.name}</h2>
+        <h2 className="text-2xl font-bold font-display text-zinc-900 dark:text-white">{tier.name}</h2>
         {tier.highlighted && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/50 px-3 py-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-            <Star size={12} />
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            <Star size={12} className="fill-current" />
             Popular
           </span>
         )}
       </div>
       <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">{tier.description}</p>
-      <div className="mt-6 flex items-baseline gap-2">
+      <div className="mt-8 flex items-baseline gap-2">
         {tier.originalPrice && (
             <span className="text-lg font-medium text-zinc-400 dark:text-zinc-500 line-through">
               {tier.originalPrice}
             </span>
           )}
-        <span className="text-4xl font-extrabold font-display text-zinc-900 dark:text-white tracking-tight">{tier.price}</span>
+        <span className="text-5xl font-bold font-display text-zinc-900 dark:text-white tracking-tight">{tier.price}</span>
         {tier.cadence && <span className="text-sm text-zinc-400 dark:text-zinc-500">{tier.cadence}</span>}
       </div>
       
@@ -157,23 +157,27 @@ function TierCard({ tier, isAnnual, isLoading, onCheckout }) {
         type="button"
         onClick={handleCTAClick}
         disabled={isLoading && tier.priceId}
-        className={`mt-6 w-full group inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed ${
+        className={`mt-8 w-full group inline-flex items-center justify-center rounded-xl px-4 py-3.5 text-sm font-bold transition-all disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed ${
           tier.highlighted
-            ? 'bg-emerald-500 text-white hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700'
-            : 'text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700'
+            ? 'bg-emerald-500 text-white hover:bg-emerald-600 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 hover:scale-[1.02]'
+            : 'text-zinc-900 dark:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700'
         }`}
       >
         <span>{isLoading && tier.priceId ? 'Processing...' : tier.cta}</span>
         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
       </button>
 
-      <ul className="mt-8 space-y-3 text-sm text-zinc-600 dark:text-zinc-300 flex-grow">
+      <ul className="mt-8 space-y-4 text-sm font-medium text-zinc-600 dark:text-zinc-300 flex-grow">
         {tier.features.map((feature) => (
           <li key={feature.name} className="flex items-start gap-3">
             {feature.included ? (
-              <CheckCircle className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+              <div className="rounded-full bg-emerald-100 dark:bg-emerald-500/20 p-0.5 mt-0.5">
+                <CheckCircle className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+              </div>
             ) : (
-              <XCircle className="h-5 w-5 text-zinc-400 dark:text-zinc-600 flex-shrink-0 mt-0.5" />
+              <div className="rounded-full bg-zinc-100 dark:bg-zinc-800 p-0.5 mt-0.5">
+                <XCircle className="h-3.5 w-3.5 text-zinc-400 dark:text-zinc-600 flex-shrink-0" />
+              </div>
             )}
             <span>{feature.name}</span>
           </li>
