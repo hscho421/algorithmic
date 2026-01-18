@@ -26,7 +26,10 @@ export default function SavedInputsPanel({
     }
     const { error } = await onSave(name.trim());
     if (error) {
-      setErrorMessage(error.message);
+      const message = error.message === 'free_plan_limit_reached'
+        ? `Free plan limit reached (${FREE_SAVED_INPUTS_LIMIT} saved inputs per algorithm).`
+        : error.message;
+      setErrorMessage(message);
       return;
     }
     setName('');
@@ -62,9 +65,9 @@ export default function SavedInputsPanel({
       </div>
       {isAuthenticated && limitReached && (
         <div className="text-xs text-amber-500">
-          Free plan limit: {FREE_SAVED_INPUTS_LIMIT} saved inputs per algorithm.{' '}
+          Free plan: {FREE_SAVED_INPUTS_LIMIT} saved inputs per algorithm.{' '}
           <Link to="/pricing" className="underline hover:text-amber-400">
-            Upgrade to Pro
+            Go Pro for unlimited
           </Link>
           .
         </div>

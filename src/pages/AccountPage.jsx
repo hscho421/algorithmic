@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import useAuthContext from '../context/useAuthContext';
 import useUserPreferences from '../context/useUserPreferences';
 import { supabase } from '../lib/supabaseClient';
@@ -6,9 +7,11 @@ import { supabase } from '../lib/supabaseClient';
 export default function AccountPage() {
   const { user, signOut } = useAuthContext();
   const { isPro, refreshPreferences } = useUserPreferences();
+  const location = useLocation();
   const [targetUserId, setTargetUserId] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
+  const checkoutStatus = new URLSearchParams(location.search).get('checkout');
 
   useEffect(() => {
     setTargetUserId(user?.id ?? '');
@@ -57,6 +60,11 @@ export default function AccountPage() {
             <span className={`inline-flex h-2 w-2 rounded-full ${isPro ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
             Plan: {isPro ? 'Pro' : 'Free'}
           </div>
+          {checkoutStatus === 'success' && (
+            <div className="mt-4 rounded-2xl border border-emerald-200/70 dark:border-emerald-500/40 bg-emerald-50/70 dark:bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+              Payment received. Your Pro access will unlock shortly.
+            </div>
+          )}
         </div>
       </section>
 

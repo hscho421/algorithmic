@@ -58,17 +58,17 @@ export default function VisualizerPage() {
           <div className="rounded-3xl border border-amber-200/80 dark:border-amber-500/40 bg-amber-50/70 dark:bg-amber-500/10 p-8">
             <div className="text-xs uppercase tracking-[0.2em] text-amber-500">Pro Visualizer</div>
             <h1 className="text-3xl font-display text-zinc-900 dark:text-white mt-3">
-              {algorithm.name} is part of Pro
+              {algorithm.name} is Pro-only
             </h1>
             <p className="text-zinc-600 dark:text-zinc-300 mt-2">
-              Upgrade to unlock advanced visualizers, checkpoint history, and unlimited saved inputs.
+              Go Pro to unlock advanced visualizers, checkpoint history, and unlimited saved inputs.
             </p>
             <div className="mt-6 flex items-center gap-3">
               <Link
                 to="/pricing"
                 className="inline-flex items-center gap-2 rounded-full bg-amber-500 px-5 py-2 text-sm font-semibold text-white hover:bg-amber-600 transition-colors"
               >
-                View Pro plans →
+                See Pro plans →
               </Link>
               <Link
                 to={`/category/${algorithm.categoryId}`}

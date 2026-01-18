@@ -40,22 +40,26 @@ export function UserPreferencesProvider({ children }) {
 
   const refreshPreferences = useCallback(async () => {
     if (!user || !supabase) return;
-    const { data, error } = await supabase
-      .from('user_preferences')
-      .select('playback_speed, layout_prefs, is_pro')
-      .eq('user_id', user.id)
-      .maybeSingle();
-    if (error || !data) return;
+    const [{ data: prefs, error: prefsError }, { data: proRow, error: proError }] = await Promise.all([
+      supabase
+        .from('user_preferences')
+        .select('playback_speed, layout_prefs')
+        .eq('user_id', user.id)
+        .maybeSingle(),
+      supabase.rpc('get_pro_status'),
+    ]);
+    if (prefsError || proError || (!prefs && !proRow)) return;
+    const proFlag = Array.isArray(proRow) ? proRow[0]?.is_pro : proRow?.is_pro;
 
     suppressRemoteSyncRef.current = true;
     setPreferences((prev) => {
       const merged = {
         ...prev,
-        playbackSpeed: data.playback_speed ?? prev.playbackSpeed,
-        isPro: data.is_pro ?? prev.isPro,
+        playbackSpeed: prefs?.playback_speed ?? prev.playbackSpeed,
+        isPro: proFlag ?? prev.isPro,
         layout: {
           ...prev.layout,
-          ...(data.layout_prefs || {}),
+          ...(prefs?.layout_prefs || {}),
         },
       };
       try {

@@ -66,9 +66,9 @@ export default function ProgressPanel({
       )}
       {isAuthenticated && !isPro && (
         <div className="rounded-lg border border-dashed border-amber-200/70 dark:border-amber-500/40 bg-amber-50/60 dark:bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-300">
-          Checkpoint history is a Pro feature.{' '}
+          Checkpoints are Pro-only.{' '}
           <Link to="/pricing" className="underline hover:text-amber-500">
-            Upgrade to Pro
+            Go Pro to save checkpoints
           </Link>
           .
         </div>
