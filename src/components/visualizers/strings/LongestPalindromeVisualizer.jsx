@@ -17,28 +17,48 @@ import {
   getResult,
 } from '../../../lib/algorithms/strings/longestPalindrome';
 
-function PalindromeVisualization({ s, left, right, bestStart, bestEnd, center, phase }) {
-  const bestLength = bestEnd - bestStart + 1;
+function PalindromeVisualization({ s, left, right, bestStart, bestEnd, center, phase, isOdd, match }) {
+  if (!s) return null;
+  const bestLength = bestEnd != null && bestStart != null ? bestEnd - bestStart + 1 : 0;
 
   return (
     <div className="space-y-6">
+      {/* Phase indicator */}
+      <div className="flex justify-center gap-4 text-xs">
+        <div className={`px-3 py-1 rounded-full ${phase === 'center' ? 'bg-purple-500/30 text-purple-300' : 'bg-zinc-800 text-zinc-500'}`}>
+          Select Center
+        </div>
+        <div className={`px-3 py-1 rounded-full ${phase === 'expand' ? 'bg-amber-500/30 text-amber-300' : 'bg-zinc-800 text-zinc-500'}`}>
+          Expand
+        </div>
+        <div className={`px-3 py-1 rounded-full ${phase === 'update' ? 'bg-emerald-500/30 text-emerald-300' : 'bg-zinc-800 text-zinc-500'}`}>
+          Update Best
+        </div>
+      </div>
+
       {/* String visualization */}
       <div className="space-y-2">
-        <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">String</div>
+        <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 text-center">
+          {isOdd !== undefined && (phase === 'center' || phase === 'expand' || phase === 'update') && (
+            <span className="ml-2 text-zinc-400">
+              ({isOdd ? 'Odd-length' : 'Even-length'} palindrome)
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap gap-1 justify-center">
           {s.split('').map((char, idx) => {
             const isCenter = idx === center;
             const isExpanding = idx === left || idx === right;
-            const isCurrentPalindrome = left != null && right != null && idx >= left && idx <= right;
-            const isBestPalindrome = idx >= bestStart && idx <= bestEnd;
+            const isCurrentPalindrome = left != null && right != null && idx >= left && idx <= right && (phase === 'expand' || phase === 'update');
+            const isBestPalindrome = bestStart != null && bestEnd != null && idx >= bestStart && idx <= bestEnd;
 
             return (
               <div
                 key={idx}
-                className={`w-10 h-10 flex items-center justify-center rounded-lg font-mono text-lg border-2 transition-all
+                className={`w-10 h-10 flex items-center justify-center rounded-lg font-mono text-lg border-2 transition-all duration-200
                   ${isCenter && phase === 'center' ? 'bg-purple-500/30 border-purple-500 text-purple-300 scale-110' :
-                    isExpanding ? 'bg-amber-500/30 border-amber-500 text-amber-300' :
-                    isCurrentPalindrome && phase === 'expand' ? 'bg-blue-500/20 border-blue-500 text-blue-300' :
+                    isExpanding && (phase === 'expand' || phase === 'update') ? (match === false ? 'bg-rose-500/30 border-rose-500 text-rose-300' : 'bg-amber-500/30 border-amber-500 text-amber-300 scale-105') :
+                    isCurrentPalindrome ? 'bg-blue-500/20 border-blue-500 text-blue-300' :
                     isBestPalindrome ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300' :
                     'bg-zinc-800 border-zinc-700 text-zinc-300'}`}
               >
@@ -56,25 +76,27 @@ function PalindromeVisualization({ s, left, right, bestStart, bestEnd, center, p
         </div>
       </div>
 
-      {/* Expansion arrows */}
-      {phase === 'expand' && left != null && right != null && left >= 0 && right < s.length && (
+      {/* Expansion pointers */}
+      {(phase === 'expand' || phase === 'update') && left != null && right != null && (
         <div className="flex justify-center items-center gap-4 text-zinc-400">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400">←</span>
-            <span className="text-xs">left = {left}</span>
+            <span className={match === false ? 'text-rose-400' : 'text-amber-400'}>←</span>
+            <span className="text-xs font-mono">left = {left}</span>
           </div>
-          <div className="text-xs">expanding</div>
+          <div className={`text-xs px-2 py-1 rounded ${match === false ? 'bg-rose-500/20 text-rose-300' : match === true ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-700 text-zinc-400'}`}>
+            {match === false ? 'mismatch!' : match === true ? 'match!' : 'comparing'}
+          </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs">right = {right}</span>
-            <span className="text-amber-400">→</span>
+            <span className="text-xs font-mono">right = {right}</span>
+            <span className={match === false ? 'text-rose-400' : 'text-amber-400'}>→</span>
           </div>
         </div>
       )}
 
       {/* Current best palindrome */}
-      <div className="p-4 rounded-lg bg-zinc-800/50 border border-zinc-700 text-center">
+      <div className={`p-4 rounded-lg border text-center transition-all ${phase === 'update' ? 'bg-emerald-500/10 border-emerald-500' : 'bg-zinc-800/50 border-zinc-700'}`}>
         <div className="text-xs font-medium text-zinc-500 mb-2">Best Palindrome Found</div>
-        <div className="text-2xl font-mono text-emerald-400">
+        <div className={`text-2xl font-mono ${phase === 'update' ? 'text-emerald-300 scale-105' : 'text-emerald-400'} transition-all`}>
           "{s.slice(bestStart, bestEnd + 1)}"
         </div>
         <div className="text-xs text-zinc-500 mt-1">
@@ -82,15 +104,25 @@ function PalindromeVisualization({ s, left, right, bestStart, bestEnd, center, p
         </div>
       </div>
 
-      {/* Current comparison */}
-      {phase === 'expand' && left >= 0 && right < s.length && (
-        <div className="text-center text-sm">
-          <span className="text-zinc-400">Comparing: </span>
-          <span className={`font-mono ${s[left] === s[right] ? 'text-emerald-400' : 'text-rose-400'}`}>
-            s[{left}]='{s[left]}' {s[left] === s[right] ? '==' : '!='} s[{right}]='{s[right]}'
-          </span>
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-xs flex-wrap justify-center">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-purple-500/30 border border-purple-500"></div>
+          <span className="text-zinc-400">Center</span>
         </div>
-      )}
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-amber-500/30 border border-amber-500"></div>
+          <span className="text-zinc-400">Expanding</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-blue-500/20 border border-blue-500"></div>
+          <span className="text-zinc-400">Current Palindrome</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded bg-emerald-500/20 border border-emerald-500/50"></div>
+          <span className="text-zinc-400">Best Palindrome</span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -148,7 +180,7 @@ export default function LongestPalindromeVisualizer() {
         </div>
       }
       controlProps={{ onStep: step, onBack: handleBack, onRun: toggle, onReset: handleReset, isRunning, canStep, canBack, speed, onSpeedChange: setSpeed }}
-      visualizationContent={state && <PalindromeVisualization s={state.s} left={state.left} right={state.right} bestStart={state.bestStart} bestEnd={state.bestEnd} center={state.center} phase={state.phase} />}
+      visualizationContent={state && <PalindromeVisualization s={state.s} left={state.left} right={state.right} bestStart={state.bestStart} bestEnd={state.bestEnd} center={state.center} phase={state.phase} isOdd={state.isOdd} match={state.match} />}
       codeProps={state ? { code: template.code, currentLine: state.currentLine, done: state.done, title: template.name, description: template.description } : null}
       stateProps={state ? { variables, additionalInfo: [{ label: 'Phase', value: state.phase || '—' }, { label: 'Best Length', value: (state.bestEnd - state.bestStart + 1) || 0 }] } : null}
       infoTabs={[

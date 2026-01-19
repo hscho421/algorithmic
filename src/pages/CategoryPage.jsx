@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { CATEGORIES, isProCategory } from '../constants';
+import { CATEGORIES, isProCategory, isProAlgorithm } from '../constants';
 import { getAlgorithmsByCategory, getCategoryById } from '../data/algorithms';
 import DifficultyBadge from '../components/shared/ui/DifficultyBadge';
 import useUserPreferences from '../context/useUserPreferences';
@@ -241,7 +241,14 @@ export default function CategoryPage() {
                     <span className="text-xs uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
                       Visualizer
                     </span>
-                    {algorithm.difficulty && <DifficultyBadge difficulty={algorithm.difficulty} />}
+                    <div className="flex items-center gap-2">
+                      {(isProCategory(categoryId) || isProAlgorithm(algorithm.id)) && (
+                        <span className="text-[10px] uppercase tracking-[0.2em] bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-full font-semibold">
+                          Pro
+                        </span>
+                      )}
+                      {algorithm.difficulty && <DifficultyBadge difficulty={algorithm.difficulty} />}
+                    </div>
                   </div>
                   <h2 className="mt-3 text-xl font-semibold text-zinc-900 transition-colors group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">
                     {algorithm.name}

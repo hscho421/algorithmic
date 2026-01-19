@@ -30,113 +30,234 @@ export const complexity = {
   note: "Manacher's algorithm can achieve O(n)",
 };
 
-function expandAroundCenter(s, left, right) {
-  while (left >= 0 && right < s.length && s[left] === s[right]) {
-    left--;
-    right++;
+const generateSteps = (s) => {
+  const steps = [];
+  const n = s.length;
+
+  if (n === 0) {
+    steps.push({
+      s,
+      phase: 'done',
+      center: null,
+      left: null,
+      right: null,
+      bestStart: 0,
+      bestEnd: -1,
+      currentLine: 13,
+      explanation: 'Empty string - no palindrome',
+      done: true,
+    });
+    return steps;
   }
-  return { start: left + 1, end: right - 1 };
-}
+
+  let bestStart = 0;
+  let bestEnd = 0;
+
+  // Initial step
+  steps.push({
+    s,
+    phase: 'init',
+    center: null,
+    left: null,
+    right: null,
+    bestStart: 0,
+    bestEnd: 0,
+    currentLine: 1,
+    explanation: `Starting search for longest palindrome in "${s}"`,
+  });
+
+  for (let i = 0; i < n; i++) {
+    // Step: Selecting center for odd-length palindrome
+    steps.push({
+      s,
+      phase: 'center',
+      center: i,
+      left: i,
+      right: i,
+      bestStart,
+      bestEnd,
+      currentLine: 3,
+      explanation: `Center ${i}: Trying position '${s[i]}' as center for odd-length palindrome`,
+      isOdd: true,
+    });
+
+    // Expand for odd-length palindrome
+    let left = i;
+    let right = i;
+
+    while (left >= 0 && right < n && s[left] === s[right]) {
+      // Show expansion step
+      steps.push({
+        s,
+        phase: 'expand',
+        center: i,
+        left,
+        right,
+        bestStart,
+        bestEnd,
+        currentLine: 5,
+        explanation: `Expanding: s[${left}]='${s[left]}' == s[${right}]='${s[right]}' ✓`,
+        isOdd: true,
+        match: true,
+      });
+
+      // Check if this is better
+      const currentLen = right - left + 1;
+      const bestLen = bestEnd - bestStart + 1;
+      if (currentLen > bestLen) {
+        bestStart = left;
+        bestEnd = right;
+        steps.push({
+          s,
+          phase: 'update',
+          center: i,
+          left,
+          right,
+          bestStart,
+          bestEnd,
+          currentLine: 11,
+          explanation: `New best! "${s.slice(left, right + 1)}" (length ${currentLen})`,
+          isOdd: true,
+        });
+      }
+
+      left--;
+      right++;
+    }
+
+    // Show mismatch if expansion stopped due to character mismatch
+    if (left >= 0 && right < n && s[left] !== s[right]) {
+      steps.push({
+        s,
+        phase: 'expand',
+        center: i,
+        left,
+        right,
+        bestStart,
+        bestEnd,
+        currentLine: 5,
+        explanation: `Mismatch: s[${left}]='${s[left]}' != s[${right}]='${s[right]}' ✗`,
+        isOdd: true,
+        match: false,
+      });
+    }
+
+    // Step: Selecting center for even-length palindrome
+    if (i < n - 1) {
+      steps.push({
+        s,
+        phase: 'center',
+        center: i,
+        left: i,
+        right: i + 1,
+        bestStart,
+        bestEnd,
+        currentLine: 7,
+        explanation: `Center ${i}: Trying between '${s[i]}' and '${s[i + 1]}' for even-length palindrome`,
+        isOdd: false,
+      });
+
+      // Expand for even-length palindrome
+      left = i;
+      right = i + 1;
+
+      while (left >= 0 && right < n && s[left] === s[right]) {
+        steps.push({
+          s,
+          phase: 'expand',
+          center: i,
+          left,
+          right,
+          bestStart,
+          bestEnd,
+          currentLine: 7,
+          explanation: `Expanding: s[${left}]='${s[left]}' == s[${right}]='${s[right]}' ✓`,
+          isOdd: false,
+          match: true,
+        });
+
+        const currentLen = right - left + 1;
+        const bestLen = bestEnd - bestStart + 1;
+        if (currentLen > bestLen) {
+          bestStart = left;
+          bestEnd = right;
+          steps.push({
+            s,
+            phase: 'update',
+            center: i,
+            left,
+            right,
+            bestStart,
+            bestEnd,
+            currentLine: 11,
+            explanation: `New best! "${s.slice(left, right + 1)}" (length ${currentLen})`,
+            isOdd: false,
+          });
+        }
+
+        left--;
+        right++;
+      }
+
+      // Show mismatch if expansion stopped due to character mismatch
+      if (left >= 0 && right < n && s[left] !== s[right]) {
+        steps.push({
+          s,
+          phase: 'expand',
+          center: i,
+          left,
+          right,
+          bestStart,
+          bestEnd,
+          currentLine: 7,
+          explanation: `Mismatch: s[${left}]='${s[left]}' != s[${right}]='${s[right]}' ✗`,
+          isOdd: false,
+          match: false,
+        });
+      }
+    }
+  }
+
+  // Final step
+  steps.push({
+    s,
+    phase: 'done',
+    center: null,
+    left: null,
+    right: null,
+    bestStart,
+    bestEnd,
+    currentLine: 13,
+    explanation: `Done! Longest palindrome: "${s.slice(bestStart, bestEnd + 1)}" (length ${bestEnd - bestStart + 1})`,
+    done: true,
+  });
+
+  return steps;
+};
 
 export function initialState({ s = 'babad' } = {}) {
+  const steps = generateSteps(s);
+
   return {
-    s,
-    n: s.length,
-    i: 0,
-    result: { start: 0, end: 0, str: s[0] || '' },
+    ...steps[0],
+    steps,
     stepIndex: 0,
-    done: false,
-    currentLine: 3,
-    explanation: `Starting search for longest palindrome in "${s}"`,
-    phase: 'init',
-    expandingOdd: false,
-    expandingEven: false,
-    currentCenter: null,
-    currentPalindrome: null,
   };
 }
 
 export function executeStep(state) {
   if (state.done) return state;
 
-  const { s, n, i, result, phase } = state;
-
-  // Check if we've finished
-  if (i >= n) {
-    return {
-      ...state,
-      done: true,
-      currentLine: 13,
-      explanation: `Done! Longest palindrome: "${result.str}" (length ${result.str.length})`,
-      phase: 'done',
-    };
+  const nextIndex = state.stepIndex + 1;
+  if (nextIndex >= state.steps.length) {
+    return { ...state, done: true };
   }
 
-  if (phase === 'init' || phase === 'next-center') {
-    // Start expanding from center i (odd length)
-    return {
-      ...state,
-      stepIndex: state.stepIndex + 1,
-      currentLine: 5,
-      explanation: `Center ${i}: expanding for odd-length palindrome around '${s[i]}'`,
-      phase: 'expand-odd',
-      currentCenter: i,
-      expandingOdd: true,
-      expandingEven: false,
-    };
-  }
-
-  if (phase === 'expand-odd') {
-    const { start, end } = expandAroundCenter(s, i, i);
-    const oddPalindrome = s.slice(start, end + 1);
-
-    return {
-      ...state,
-      stepIndex: state.stepIndex + 1,
-      currentLine: 7,
-      explanation: `Odd palindrome: "${oddPalindrome}" (${start}-${end}). Now trying even...`,
-      phase: 'expand-even',
-      oddResult: { start, end, str: oddPalindrome },
-      expandingOdd: false,
-      expandingEven: true,
-      highlightRange: { start, end },
-    };
-  }
-
-  if (phase === 'expand-even') {
-    const { start, end } = expandAroundCenter(s, i, i + 1);
-    const evenPalindrome = start <= end ? s.slice(start, end + 1) : '';
-    const oddResult = state.oddResult;
-
-    // Determine which is longer
-    const longer = oddResult.str.length >= evenPalindrome.length ? oddResult : { start, end, str: evenPalindrome };
-
-    let newResult = result;
-    let updated = false;
-    if (longer.str.length > result.str.length) {
-      newResult = longer;
-      updated = true;
-    }
-
-    return {
-      ...state,
-      i: i + 1,
-      result: newResult,
-      stepIndex: state.stepIndex + 1,
-      currentLine: updated ? 11 : 10,
-      explanation: updated
-        ? `Found longer palindrome: "${longer.str}"! Updated result.`
-        : `Best from center ${i}: "${longer.str}" (not longer than current "${result.str}")`,
-      phase: 'next-center',
-      expandingOdd: false,
-      expandingEven: false,
-      evenResult: { start, end, str: evenPalindrome },
-      highlightRange: updated ? { start: newResult.start, end: newResult.end } : state.highlightRange,
-      updated,
-    };
-  }
-
-  return state;
+  return {
+    ...state,
+    ...state.steps[nextIndex],
+    stepIndex: nextIndex,
+  };
 }
 
 export function getExplanation(state) {
@@ -146,14 +267,15 @@ export function getExplanation(state) {
 export function getResult(state) {
   if (!state.done) return null;
 
-  const { s, result } = state;
+  const { s, bestStart, bestEnd } = state;
+  const palindrome = s.slice(bestStart, bestEnd + 1);
 
   return {
     success: true,
     title: 'Longest Palindrome Found',
-    message: `"${result.str}" (length ${result.str.length})`,
+    message: `"${palindrome}" (length ${palindrome.length})`,
     details: [
-      `Position: ${result.start} to ${result.end}`,
+      `Position: ${bestStart} to ${bestEnd}`,
       `Original string: "${s}"`,
     ],
   };
