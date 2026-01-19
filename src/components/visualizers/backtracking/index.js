@@ -1,5 +1,6 @@
 export { default as NQueensVisualizer } from './NQueensVisualizer';
 export { default as SudokuVisualizer } from './SudokuVisualizer';
+export { default as PermutationsVisualizer } from './PermutationsVisualizer';
 
 export const metadata = {
   id: 'backtracking',
@@ -21,6 +22,14 @@ export const metadata = {
       component: 'SudokuVisualizer',
       difficulty: 'Hard',
       tags: ['Backtracking', 'Constraint Satisfaction'],
+    },
+    {
+      id: 'permutations',
+      name: 'Permutations',
+      description: 'Generate all permutations using backtracking',
+      component: 'PermutationsVisualizer',
+      difficulty: 'Medium',
+      tags: ['Recursion', 'Combinatorics'],
     },
   ],
 };

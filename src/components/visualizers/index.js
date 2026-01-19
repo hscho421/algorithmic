@@ -1,4 +1,9 @@
-import { BinarySearchVisualizer, SlidingWindowVisualizer, TwoPointersVisualizer } from './searching';
+import {
+  BinarySearchVisualizer,
+  SlidingWindowVisualizer,
+  TwoPointersVisualizer,
+  KadaneVisualizer,
+} from './searching';
 import {
   MergeSortVisualizer,
   QuickSortVisualizer,
@@ -47,12 +52,13 @@ import {
   QueueVisualizer,
   LRUCacheVisualizer,
 } from './data-structures';
-import { NQueensVisualizer, SudokuVisualizer } from './backtracking';
+import { NQueensVisualizer, SudokuVisualizer, PermutationsVisualizer } from './backtracking';
 
 export const VISUALIZER_COMPONENTS = {
   'binary-search': BinarySearchVisualizer,
   'sliding-window': SlidingWindowVisualizer,
   'two-pointers': TwoPointersVisualizer,
+  kadane: KadaneVisualizer,
   'bubble-sort': BubbleSortVisualizer,
   'insertion-sort': InsertionSortVisualizer,
   'selection-sort': SelectionSortVisualizer,
@@ -96,4 +102,5 @@ export const VISUALIZER_COMPONENTS = {
   'lru-cache': LRUCacheVisualizer,
   'n-queens': NQueensVisualizer,
   sudoku: SudokuVisualizer,
+  permutations: PermutationsVisualizer,
 };
