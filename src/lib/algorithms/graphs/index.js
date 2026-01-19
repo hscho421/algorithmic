@@ -5,3 +5,6 @@ export * as aStar from './aStar';
 export * as mstKruskal from './mstKruskal';
 export * as topologicalSort from './topologicalSort';
 export * as unionFind from './unionFind';
+export * as bellmanFord from './bellmanFord';
+export * as primMST from './primMST';
+export * as floydWarshall from './floydWarshall';

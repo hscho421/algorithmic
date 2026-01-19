@@ -8,16 +8,25 @@ import {
   SelectionSortVisualizer,
   CountingSortVisualizer,
   RadixSortVisualizer,
+  BucketSortVisualizer,
 } from './sorting';
-import { BSTVisualizer, TraversalVisualizer } from './trees';
+import { BSTVisualizer, TraversalVisualizer, SegmentTreeVisualizer, LCAVisualizer } from './trees';
 import { MinHeapVisualizer } from './heaps';
-import { TrieVisualizer } from './strings';
+import {
+  TrieVisualizer,
+  KMPVisualizer,
+  RabinKarpVisualizer,
+  LongestPalindromeVisualizer,
+} from './strings';
 import {
   BFSVisualizer,
   DFSVisualizer,
   DijkstraVisualizer,
   AStarVisualizer,
   MSTVisualizer,
+  BellmanFordVisualizer,
+  PrimMSTVisualizer,
+  FloydWarshallVisualizer,
   TopologicalSortVisualizer,
   UnionFindVisualizer,
 } from './graphs';
@@ -26,10 +35,17 @@ import {
   CoinChangeVisualizer,
   LCSVisualizer,
   KnapsackVisualizer,
+  LISVisualizer,
+  EditDistanceVisualizer,
+  SubsetSumVisualizer,
+  MatrixChainVisualizer,
 } from './dynamic-programming';
 import {
   LinkedListReversalVisualizer,
   CycleDetectionVisualizer,
+  StackVisualizer,
+  QueueVisualizer,
+  LRUCacheVisualizer,
 } from './data-structures';
 import { NQueensVisualizer, SudokuVisualizer } from './backtracking';
 
@@ -45,23 +61,39 @@ export const VISUALIZER_COMPONENTS = {
   'heap-sort': HeapSortVisualizer,
   'counting-sort': CountingSortVisualizer,
   'radix-sort': RadixSortVisualizer,
+  'bucket-sort': BucketSortVisualizer,
   bst: BSTVisualizer,
   'tree-traversals': TraversalVisualizer,
+  'segment-tree': SegmentTreeVisualizer,
+  lca: LCAVisualizer,
   'min-heap': MinHeapVisualizer,
   trie: TrieVisualizer,
+  kmp: KMPVisualizer,
+  'rabin-karp': RabinKarpVisualizer,
+  'longest-palindrome': LongestPalindromeVisualizer,
   bfs: BFSVisualizer,
   dfs: DFSVisualizer,
   dijkstra: DijkstraVisualizer,
+  'bellman-ford': BellmanFordVisualizer,
+  'floyd-warshall': FloydWarshallVisualizer,
   'a-star': AStarVisualizer,
   'minimum-spanning-tree': MSTVisualizer,
+  'prim-mst': PrimMSTVisualizer,
   'topological-sort': TopologicalSortVisualizer,
   'union-find': UnionFindVisualizer,
   fibonacci: FibonacciVisualizer,
   'coin-change': CoinChangeVisualizer,
+  lis: LISVisualizer,
+  'edit-distance': EditDistanceVisualizer,
+  'subset-sum': SubsetSumVisualizer,
+  'matrix-chain': MatrixChainVisualizer,
   lcs: LCSVisualizer,
   knapsack: KnapsackVisualizer,
   'linked-list-reversal': LinkedListReversalVisualizer,
   'cycle-detection': CycleDetectionVisualizer,
+  stack: StackVisualizer,
+  queue: QueueVisualizer,
+  'lru-cache': LRUCacheVisualizer,
   'n-queens': NQueensVisualizer,
   sudoku: SudokuVisualizer,
 };

@@ -27,16 +27,25 @@ export default function GraphDisplay({
       case 'current':
         return 'fill-amber-500 stroke-amber-300';
       case 'visited':
+      case 'complete':
         return 'fill-emerald-500 stroke-emerald-300';
       case 'queued':
       case 'stacked':
         return 'fill-purple-500 stroke-purple-300';
       case 'checking':
+      case 'neighbor':
         return 'fill-blue-500 stroke-blue-300';
       case 'updated':
         return 'fill-cyan-500 stroke-cyan-300';
       case 'cycle':
+      case 'error':
         return 'fill-rose-500 stroke-rose-300';
+      case 'source':
+        return 'fill-amber-500 stroke-amber-300';
+      case 'destination':
+        return 'fill-cyan-500 stroke-cyan-300';
+      case 'intermediate':
+        return 'fill-purple-500 stroke-purple-300';
       default:
         return 'fill-zinc-300 dark:fill-zinc-700 stroke-zinc-400 dark:stroke-zinc-500';
     }

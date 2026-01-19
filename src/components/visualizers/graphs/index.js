@@ -5,6 +5,9 @@ export { default as AStarVisualizer } from './AStarVisualizer';
 export { default as MSTVisualizer } from './MSTVisualizer';
 export { default as TopologicalSortVisualizer } from './TopologicalSortVisualizer';
 export { default as UnionFindVisualizer } from './UnionFindVisualizer';
+export { default as BellmanFordVisualizer } from './BellmanFordVisualizer';
+export { default as PrimMSTVisualizer } from './PrimMSTVisualizer';
+export { default as FloydWarshallVisualizer } from './FloydWarshallVisualizer';
 
 export const metadata = {
   id: 'graphs',
@@ -36,6 +39,22 @@ export const metadata = {
       tags: ['Shortest Path', 'Weighted Graph'],
     },
     {
+      id: 'bellman-ford',
+      name: 'Bellman-Ford',
+      description: 'Shortest path with negative weights',
+      component: 'BellmanFordVisualizer',
+      difficulty: 'Medium',
+      tags: ['Shortest Path', 'Negative Weights'],
+    },
+    {
+      id: 'floyd-warshall',
+      name: 'Floyd-Warshall',
+      description: 'All-pairs shortest paths',
+      component: 'FloydWarshallVisualizer',
+      difficulty: 'Medium',
+      tags: ['Shortest Path', 'All Pairs'],
+    },
+    {
       id: 'a-star',
       name: 'A* Pathfinding',
       description: 'Shortest path using heuristic search',
@@ -46,10 +65,18 @@ export const metadata = {
     {
       id: 'minimum-spanning-tree',
       name: "Kruskal's MST",
-      description: 'Build a minimum spanning tree',
+      description: 'Build MST using union-find',
       component: 'MSTVisualizer',
       difficulty: 'Medium',
       tags: ['MST', 'Union Find', 'Greedy'],
+    },
+    {
+      id: 'prim-mst',
+      name: "Prim's MST",
+      description: 'Build MST by growing from vertex',
+      component: 'PrimMSTVisualizer',
+      difficulty: 'Medium',
+      tags: ['MST', 'Greedy', 'Priority Queue'],
     },
     {
       id: 'topological-sort',

@@ -1,2 +1,9 @@
 export * as mergeSort from './mergeSort';
 export * as quickSort from './quickSort';
+export * as heapSort from './heapSort';
+export * as bubbleSort from './bubbleSort';
+export * as insertionSort from './insertionSort';
+export * as selectionSort from './selectionSort';
+export * as countingSort from './countingSort';
+export * as radixSort from './radixSort';
+export * as bucketSort from './bucketSort';

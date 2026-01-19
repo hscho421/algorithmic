@@ -52,8 +52,12 @@ export const PRO_ALGORITHM_IDS = [
   'selection-sort',
   'counting-sort',
   'radix-sort',
+  'bucket-sort',
   // Searching - two pointers is pro
   'two-pointers',
+  // Trees - advanced structures
+  'segment-tree',
+  'lca',
 ];
 
 export const isProCategory = (categoryId) => PRO_CATEGORY_IDS.includes(categoryId);

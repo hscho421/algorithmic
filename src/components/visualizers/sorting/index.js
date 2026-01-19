@@ -6,6 +6,7 @@ export { default as InsertionSortVisualizer } from './InsertionSortVisualizer';
 export { default as SelectionSortVisualizer } from './SelectionSortVisualizer';
 export { default as CountingSortVisualizer } from './CountingSortVisualizer';
 export { default as RadixSortVisualizer } from './RadixSortVisualizer';
+export { default as BucketSortVisualizer } from './BucketSortVisualizer';
 export { default as SortingArrayVisualization } from './SortingArrayVisualization';
 
 export const metadata = {
@@ -76,6 +77,14 @@ export const metadata = {
       component: 'RadixSortVisualizer',
       difficulty: 'Medium',
       tags: ['Non-comparison', 'Linear Time'],
+    },
+    {
+      id: 'bucket-sort',
+      name: 'Bucket Sort',
+      description: 'Distribute elements into buckets and sort',
+      component: 'BucketSortVisualizer',
+      difficulty: 'Medium',
+      tags: ['Distribution', 'Non-comparison'],
     },
   ],
 };
