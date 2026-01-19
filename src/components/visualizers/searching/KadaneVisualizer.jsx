@@ -45,17 +45,21 @@ function KadaneVisualization({ arr, currentIndex, maxSum, currentSum, bestRange,
       </div>
 
       {/* Comparison indicator */}
-      {comparing && phase === 'compare' && (
-        <div className="flex justify-center items-center gap-4 text-sm">
-          <div className={`px-3 py-1 rounded ${comparing.fresh > comparing.extend ? 'bg-amber-500/20 text-amber-300' : 'bg-zinc-700 text-zinc-400'}`}>
-            Start Fresh: {comparing.fresh}
-          </div>
-          <span className="text-zinc-500">vs</span>
-          <div className={`px-3 py-1 rounded ${comparing.extend >= comparing.fresh ? 'bg-blue-500/20 text-blue-300' : 'bg-zinc-700 text-zinc-400'}`}>
-            Extend: {comparing.extend}
-          </div>
-        </div>
-      )}
+      <div className="min-h-[32px] flex justify-center items-center gap-4 text-sm">
+        {comparing && phase === 'compare' ? (
+          <>
+            <div className={`px-3 py-1 rounded ${comparing.fresh > comparing.extend ? 'bg-amber-500/20 text-amber-300' : 'bg-zinc-700 text-zinc-400'}`}>
+              Start Fresh: {comparing.fresh}
+            </div>
+            <span className="text-zinc-500">vs</span>
+            <div className={`px-3 py-1 rounded ${comparing.extend >= comparing.fresh ? 'bg-blue-500/20 text-blue-300' : 'bg-zinc-700 text-zinc-400'}`}>
+              Extend: {comparing.extend}
+            </div>
+          </>
+        ) : (
+          <span className="text-zinc-600">Comparing choices…</span>
+        )}
+      </div>
 
       {/* Array visualization */}
       <div className="space-y-2">

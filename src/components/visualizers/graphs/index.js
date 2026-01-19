@@ -8,6 +8,7 @@ export { default as UnionFindVisualizer } from './UnionFindVisualizer';
 export { default as BellmanFordVisualizer } from './BellmanFordVisualizer';
 export { default as PrimMSTVisualizer } from './PrimMSTVisualizer';
 export { default as FloydWarshallVisualizer } from './FloydWarshallVisualizer';
+export { default as SCCVisualizer } from './SCCVisualizer';
 
 export const metadata = {
   id: 'graphs',
@@ -93,6 +94,14 @@ export const metadata = {
       component: 'UnionFindVisualizer',
       difficulty: 'Medium',
       tags: ['Disjoint Set', 'Connectivity'],
+    },
+    {
+      id: 'scc',
+      name: 'Strongly Connected Components',
+      description: "Kosaraju's algorithm for SCCs",
+      component: 'SCCVisualizer',
+      difficulty: 'Hard',
+      tags: ['Directed Graph', 'DFS'],
     },
   ],
 };

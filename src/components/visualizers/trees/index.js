@@ -2,6 +2,8 @@ export { default as BSTVisualizer } from './BSTVisualizer';
 export { default as TraversalVisualizer } from './TraversalVisualizer';
 export { default as SegmentTreeVisualizer } from './SegmentTreeVisualizer';
 export { default as LCAVisualizer } from './LCAVisualizer';
+export { default as AVLVisualizer } from './AVLVisualizer';
+export { default as FenwickVisualizer } from './FenwickVisualizer';
 
 export const metadata = {
   id: 'trees',
@@ -39,6 +41,22 @@ export const metadata = {
       component: 'LCAVisualizer',
       difficulty: 'Hard',
       tags: ['Tree', 'Binary Lifting'],
+    },
+    {
+      id: 'avl-tree',
+      name: 'AVL Tree',
+      description: 'Self-balancing BST with rotations',
+      component: 'AVLVisualizer',
+      difficulty: 'Hard',
+      tags: ['BST', 'Rotation', 'Balanced Tree'],
+    },
+    {
+      id: 'fenwick-tree',
+      name: 'Fenwick Tree',
+      description: 'Binary Indexed Tree for prefix sums',
+      component: 'FenwickVisualizer',
+      difficulty: 'Medium',
+      tags: ['Binary Indexed Tree', 'Prefix Sum'],
     },
   ],
 };

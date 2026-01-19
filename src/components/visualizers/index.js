@@ -15,7 +15,14 @@ import {
   RadixSortVisualizer,
   BucketSortVisualizer,
 } from './sorting';
-import { BSTVisualizer, TraversalVisualizer, SegmentTreeVisualizer, LCAVisualizer } from './trees';
+import {
+  BSTVisualizer,
+  TraversalVisualizer,
+  SegmentTreeVisualizer,
+  LCAVisualizer,
+  AVLVisualizer,
+  FenwickVisualizer,
+} from './trees';
 import { MinHeapVisualizer } from './heaps';
 import {
   TrieVisualizer,
@@ -34,6 +41,7 @@ import {
   FloydWarshallVisualizer,
   TopologicalSortVisualizer,
   UnionFindVisualizer,
+  SCCVisualizer,
 } from './graphs';
 import {
   FibonacciVisualizer,
@@ -72,6 +80,8 @@ export const VISUALIZER_COMPONENTS = {
   'tree-traversals': TraversalVisualizer,
   'segment-tree': SegmentTreeVisualizer,
   lca: LCAVisualizer,
+  'avl-tree': AVLVisualizer,
+  'fenwick-tree': FenwickVisualizer,
   'min-heap': MinHeapVisualizer,
   trie: TrieVisualizer,
   kmp: KMPVisualizer,
@@ -87,6 +97,7 @@ export const VISUALIZER_COMPONENTS = {
   'prim-mst': PrimMSTVisualizer,
   'topological-sort': TopologicalSortVisualizer,
   'union-find': UnionFindVisualizer,
+  scc: SCCVisualizer,
   fibonacci: FibonacciVisualizer,
   'coin-change': CoinChangeVisualizer,
   lis: LISVisualizer,

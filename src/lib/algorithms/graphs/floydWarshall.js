@@ -60,6 +60,7 @@ const generateSteps = (graph, positions) => {
       : [edge.from, edge.to, edge.weight];
     const i = vertexIndex[from];
     const j = vertexIndex[to];
+    if (i === undefined || j === undefined) return;
     dist[i][j] = weight;
     next[i][j] = j;
   });

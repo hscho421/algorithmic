@@ -57,16 +57,30 @@ export default function GraphDisplay({
     return 'fill-zinc-700 dark:fill-zinc-200';
   };
 
+  const normalizeEdge = (edge) => {
+    if (Array.isArray(edge)) {
+      return edge;
+    }
+    if (edge && typeof edge === 'object') {
+      return [edge.from ?? edge.u ?? edge.source, edge.to ?? edge.v ?? edge.target];
+    }
+    return [];
+  };
+
   const isEdgeHighlighted = (from, to) => {
-    return highlightedEdges.some(
-      ([a, b]) => (a === from && b === to) || (!directed && a === to && b === from)
-    );
+    return highlightedEdges.some((edge) => {
+      const [a, b] = normalizeEdge(edge);
+      if (a === undefined || b === undefined) return false;
+      return (a === from && b === to) || (!directed && a === to && b === from);
+    });
   };
 
   const isPathEdge = (from, to) => {
-    return pathEdges.some(
-      ([a, b]) => (a === from && b === to) || (!directed && a === to && b === from)
-    );
+    return pathEdges.some((edge) => {
+      const [a, b] = normalizeEdge(edge);
+      if (a === undefined || b === undefined) return false;
+      return (a === from && b === to) || (!directed && a === to && b === from);
+    });
   };
 
   // Calculate arrow position for directed edges

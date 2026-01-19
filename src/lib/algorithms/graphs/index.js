@@ -8,3 +8,4 @@ export * as unionFind from './unionFind';
 export * as bellmanFord from './bellmanFord';
 export * as primMST from './primMST';
 export * as floydWarshall from './floydWarshall';
+export * as scc from './scc';
