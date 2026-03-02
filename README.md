@@ -2,6 +2,8 @@
 
 An interactive web application for visualizing data structures and algorithms step-by-step. Learn by watching, not just reading.
 
+**Live site:** [https://algorithmicai.dev](https://algorithmicai.dev)
+
 ![DSA Visualizer](https://img.shields.io/badge/React-19.2.0-blue) ![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.18-38B2AC)
 
 ## ✨ Features
